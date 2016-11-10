@@ -36,6 +36,7 @@ class GcodeListCtrl(wx.ListCtrl):
 		self.attrOdd.SetBackgroundColour(wx.Colour(220, 220, 220))
 		
 		self.il = wx.ImageList(16, 16)
+		self.il.Add(images.pngEmpty)
 		self.il.Add(images.pngSelected)
 		self.il.Add(images.pngBrstart)
 		self.il.Add(images.pngBrstartsel)
@@ -128,6 +129,17 @@ class GcodeListCtrl(wx.ListCtrl):
 		if item == self.selectedItem:
 			if item == self.bracketStart:
 				if item == self.bracketEnd:
+					return 5
+				else:
+					return 3
+			else:
+				if item == self.bracketEnd:
+					return 7
+				else:
+					return 1
+		else:
+			if item == self.bracketStart:
+				if item == self.bracketEnd:
 					return 4
 				else:
 					return 2
@@ -136,17 +148,6 @@ class GcodeListCtrl(wx.ListCtrl):
 					return 6
 				else:
 					return 0
-		else:
-			if item == self.bracketStart:
-				if item == self.bracketEnd:
-					return 3
-				else:
-					return 1
-			else:
-				if item == self.bracketEnd:
-					return 5
-				else:
-					return -1
 	
 	def OnGetItemAttr(self, item):
 		if item % 2 == 0:
