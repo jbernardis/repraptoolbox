@@ -46,6 +46,7 @@ class Heaters(wx.Window):
 		
 		
 		
+		szHeaters.AddSpacer((5, 5))
 		self.SetSizer(szHeaters)
 		self.Layout()
 		self.Fit()
@@ -65,6 +66,7 @@ class Heater(wx.Window):
 		self.highpreset = hi.highpreset
 		self.mintemp = hi.mintemp
 		self.maxtemp = hi.maxtemp
+		self.heaterOn = False
 		wx.Window.__init__(self, parent, wx.ID_ANY, size=(-1, -1), style=wx.NO_BORDER)		
 		
 		szHeater = wx.BoxSizer(wx.HORIZONTAL)
@@ -81,14 +83,12 @@ class Heater(wx.Window):
 		self.sbIndicator = wx.StaticBitmap(self, wx.ID_ANY, self.images.pngLedoff)
 		szHeater.Add(self.sbIndicator, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 		
-		self.bPower = wx.ToggleButton(self, wx.ID_ANY, "", size=BUTTONDIM, style = wx.NO_BORDER)
-		self.bPower.SetBitmap(self.images.pngHeatoff)
-		self.bPower.SetBitmapPressed(self.images.pngHeaton)
+		self.bPower = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHeatoff, size=BUTTONDIM, style = wx.NO_BORDER)
 		self.bPower.SetToolTipString("Turn heater on/off")
-		self.Bind(wx.EVT_TOGGLEBUTTON, self.onBPower, self.bPower)
+		self.Bind(wx.EVT_BUTTON, self.onBPower, self.bPower)
 		szHeater.Add(self.bPower)
 		
-		self.tcActual = wx.TextCtrl(self, wx.ID_ANY, "999", size=(40, -1), style=wx.TE_READONLY | wx.TE_RIGHT)
+		self.tcActual = wx.TextCtrl(self, wx.ID_ANY, "999", size=(50, -1), style=wx.TE_READONLY | wx.TE_RIGHT)
 		self.tcActual.SetFont(self.font12bold)
 		szHeater.Add(self.tcActual, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 
@@ -96,7 +96,7 @@ class Heater(wx.Window):
 		t.SetFont(self.font20bold)
 		szHeater.Add(t, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 
-		self.tcSetting = wx.TextCtrl(self, wx.ID_ANY, "", size=(40, -1), style=wx.TE_READONLY | wx.TE_RIGHT)
+		self.tcSetting = wx.TextCtrl(self, wx.ID_ANY, "", size=(50, -1), style=wx.TE_READONLY | wx.TE_RIGHT)
 		self.tcSetting.SetFont(self.font12bold)
 		szHeater.Add(self.tcSetting, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 		
@@ -109,10 +109,10 @@ class Heater(wx.Window):
 		
 		szHeater.AddSpacer((10, 10))
 		
-		self.bLowPreset = wx.Button(self, wx.ID_ANY, "%d" % self.lowpreset, size=(30, 20))
+		self.bLowPreset = wx.Button(self, wx.ID_ANY, "%d" % self.lowpreset, size=(40, 22))
 		self.bLowPreset.SetToolTipString("Set heater to low preset value")
 		self.Bind(wx.EVT_BUTTON, self.doLowPreset, self.bLowPreset)
-		self.bHighPreset = wx.Button(self, wx.ID_ANY, "%d" % self.highpreset, size=(30, 20))
+		self.bHighPreset = wx.Button(self, wx.ID_ANY, "%d" % self.highpreset, size=(40, 22))
 		self.bHighPreset.SetToolTipString("Set heater to high preset value")
 		self.Bind(wx.EVT_BUTTON, self.doHighPreset, self.bHighPreset)
 		
@@ -130,14 +130,18 @@ class Heater(wx.Window):
 		self.Fit()
 		
 	def onBPower(self, evt):
-		if self.bPower.GetValue():
-			self.updateSetting(self.slThermostat.GetValue())
-			cmd = self.htrInfo.setcmd + " S%d" % self.setting
-			self.sbIndicator.SetBitmap(self.images.pngLedon)
-		else:
+		if self.heaterOn:
+			self.heaterOn = False
 			self.updateSetting(0)
 			cmd = self.htrInfo.setcmd + " S0"
 			self.sbIndicator.SetBitmap(self.images.pngLedoff)
+			self.bPower.SetBitmap(self.images.pngHeatoff)
+		else:
+			self.heaterOn = True
+			self.updateSetting(self.slThermostat.GetValue())
+			cmd = self.htrInfo.setcmd + " S%d" % self.setting
+			self.sbIndicator.SetBitmap(self.images.pngLedon)
+			self.bPower.SetBitmap(self.images.pngHeaton)
 			
 		if self.htrInfo.tool is not None:
 			cmd += " T%d" % self.htrInfo.tool

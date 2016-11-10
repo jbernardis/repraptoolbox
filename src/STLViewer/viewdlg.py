@@ -259,8 +259,6 @@ class StlCanvas(glcanvas.GLCanvas):
 		self.drawGrid = True
 		
 		if self.drawGrid:
-			glEnable(GL_LINE_SMOOTH)
-			glLineWidth(1)
 			glBegin(GL_LINES)
 			for i in range(len(self.gridVertices)):
 				glColor(self.gridColors[i])
@@ -268,7 +266,6 @@ class StlCanvas(glcanvas.GLCanvas):
 				glVertex3f(p[0], p[1], p[2])
 				glVertex3f(p[3], p[4], p[5])
 			glEnd()
-			glDisable(GL_LINE_SMOOTH)
 
 			
 			

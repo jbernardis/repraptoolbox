@@ -115,14 +115,14 @@ class GcodeListCtrl(wx.ListCtrl):
 			
 		count = self.endLine-self.startLine+1
 		self.SetItemCount(count)
-		self.RefreshItems(0, count)
+		self.RefreshItems(0, count-1)
 
 	def OnGetItemText(self, item, col):
 		if self.useLineNumbers:
 			txt = "%6d: " % (self.startLine+item+1)
 		else:
 			txt = ""
-		return txt + self.gcode[self.startLine+item]
+		return txt + self.gcode[self.startLine+item].rstrip()
 
 	def OnGetItemImage(self, item):
 		if item == self.selectedItem:
