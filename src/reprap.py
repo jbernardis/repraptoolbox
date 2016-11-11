@@ -713,9 +713,9 @@ class RepRap:
 		self.sender.reportConnection(self.online, self.prtport)
 		self.ready = True
 		
-	def registerTemphandler(self, handler):
+	def registerTempHandler(self, handler):
 		self.tempHandler = handler
-		self.parser.setTemphandler(handler)
+		self.parser.setTempHandler(handler)
 
 	def terminate(self):
 		try:

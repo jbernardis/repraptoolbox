@@ -47,6 +47,9 @@ class RepRap:
 	
 	def sendNow(self, cmd):
 		print "Send Now (%s)" % cmd
+		
+	def registerTempHandler(self, handler):
+		pass
 
 class App(wx.App):
 	def OnInit(self):

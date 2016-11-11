@@ -49,7 +49,7 @@ class Heaters(wx.Window):
 		self.Layout()
 		self.Fit()
 		
-		self.reprap.registerTemphandler(self.tempHandler)
+		self.reprap.registerTempHandler(self.tempHandler)
 		
 	def tempHandler(self, actualOrTarget, hName, tool, value):
 		if hName == "Bed":
