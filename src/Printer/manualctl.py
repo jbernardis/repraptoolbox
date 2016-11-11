@@ -66,7 +66,7 @@ class ManualCtl(wx.Window):
 		
 		if self.settings.nextruders > 1:
 			sz.AddSpacer((10, 10))
-			self.chTool = wx.Choice(self, wx.ID_ANY, choices=["Tool %d" % i for i in range(1, self.settings.nextruders+1)])
+			self.chTool = wx.Choice(self, wx.ID_ANY, choices=["Tool %d" % i for i in range(self.settings.nextruders)])
 			self.Bind(wx.EVT_CHOICE, self.onToolChoice, self.chTool)
 			sz.Add(self.chTool)
 			self.chTool.SetSelection(0)

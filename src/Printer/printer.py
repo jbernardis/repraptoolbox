@@ -18,7 +18,7 @@ from manualctl import ManualCtl
 BUTTONDIM = (48, 48)
 
 class PrinterDlg(wx.Dialog):
-	def __init__(self, parent, printerName, prtr):
+	def __init__(self, parent, printerName, reprap):
 		wx.Dialog.__init__(self, None, title=printerName, size=(100, 100))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
@@ -27,7 +27,7 @@ class PrinterDlg(wx.Dialog):
 		self.settings = Settings(cmdFolder, printerName)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
-		self.moveAxis = ManualCtl(self, prtr)				
+		self.moveAxis = ManualCtl(self, reprap)				
 		self.sizerMove = wx.BoxSizer(wx.VERTICAL)
 		self.sizerMove.Add(self.moveAxis)
 		

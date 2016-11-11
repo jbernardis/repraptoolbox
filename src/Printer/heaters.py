@@ -24,32 +24,46 @@ class Heaters(wx.Window):
 		
 		szHeaters = wx.BoxSizer(wx.VERTICAL)
 		
-		bedInfo = HeaterInfo("Bed", None, self.settings.bedinfo)
-		hBed = Heater(self, bedInfo, self.reprap)
-		szHeaters.Add(hBed)
+		self.bedInfo = HeaterInfo("Bed", None, self.settings.bedinfo)
+		self.hBed = Heater(self, self.bedInfo, self.reprap)
+		szHeaters.Add(self.hBed)
 
-		hHEs = []
-		hHEInfo = []		
+		self.hHEs = []
+		self.hHEInfo = []		
 		for i in range(self.settings.nextruders):
 			if self.settings.nextruders == 1:
 				tool = None
 				title = "HE"
 			else:
-				tool = i+1
+				tool = i
 				title = "HE%d" % tool
 
 			hi = HeaterInfo(title, tool, self.settings.heinfo)	
 			h = Heater(self, hi, self.reprap)
 			szHeaters.Add(h)
-			hHEs.append(h)
-			hHEInfo.append(hi)
-		
-		
+			self.hHEs.append(h)
+			self.hHEInfo.append(hi)
 		
 		szHeaters.AddSpacer((5, 5))
 		self.SetSizer(szHeaters)
 		self.Layout()
 		self.Fit()
+		
+		self.reprap.registerTemphandler(self.tempHandler)
+		
+	def tempHandler(self, actualOrTarget, hName, tool, value):
+		if hName == "Bed":
+			self.hBed.setTemperature(actualOrTarget, value)
+		elif hName == "HE":
+			if tool is None:
+				ix = 0
+			else:
+				ix = tool
+			self.hHEs[ix].setTemperature(actualOrTarget, value)
+		else:
+			print "unknown heater type (%s)" % hName
+			
+		pass
 		
 
 class Heater(wx.Window):
@@ -159,3 +173,6 @@ class Heater(wx.Window):
 				
 	def doThermostat(self, evt):
 		pass
+	
+	def setTemperature(self, actualOrTarget, value):
+		print "Heater %s set %s to %f" % (self.htrInfo.name, actualOrTarget, value)

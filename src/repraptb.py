@@ -6,6 +6,8 @@ from STLViewer.viewdlg import StlViewDlg
 from Plater.plater import PlaterDlg
 from GEdit.gedit import GEditDlg
 from Slic3r.Slic3r import Slic3rDlg
+from Printer.printer import PrinterDlg
+from reprap import RepRap
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 if cmdFolder not in sys.path:
@@ -43,17 +45,25 @@ class MyFrame(wx.Frame):
 		self.bGEdit.SetToolTipString("Analyze/edit a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doGEdit, self.bGEdit)
 		
+		self.bPrism = wx.Button(self, wx.ID_ANY, "PRISM", size=BUTTONDIM)
+		self.bPrism.SetToolTipString("prism printer")
+		self.Bind(wx.EVT_BUTTON, self.doPrism, self.bPrism)
+		
 		szFrame = wx.BoxSizer(wx.HORIZONTAL)
 		szFrame.Add(self.bStlView)
 		szFrame.Add(self.bPlater)
 		szFrame.Add(self.bSlic3r)
 		szFrame.Add(self.bGEdit)
+		szFrame.Add(self.bPrism)
 		
 		self.SetSizer(szFrame)
 		self.Layout()
 		self.Fit()
+
+		self.prism = RepRap(self, "prism", "/dev/tty-prism", 115200, "MARLIN")
 		
 	def onClose(self, evt):
+		self.prism.terminate()
 		self.Destroy()
 		
 
@@ -85,6 +95,13 @@ class MyFrame(wx.Frame):
 		
 	def Slic3rClosed(self):
 		self.bSlic3r.Enable(True);
+
+	def doPrism(self, evt):
+		dlg = PrinterDlg(self, "prism", self.prism)
+		self.bPrism.Enable(False)
+
+	def PrinterClosed(self):
+		self.bPrism.Enable(True)
 		
 	def exportStlFile(self, fn):
 		print "STL export: (%s)" % fn
