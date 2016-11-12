@@ -889,27 +889,27 @@ class RepRap:
 		self.timer = None
 
 	def OnTimer(self, evt):
-                self.cycle += 1
+		self.cycle += 1
 		print "tick", self.cycle, self.cycle % TEMPINTERVAL
 
-                if self.cycle % TEMPINTERVAL == 0:
+		if self.cycle % TEMPINTERVAL == 0:
 			print "interval check"
-                        if self.suspendM105:
+			if self.suspendM105:
 				print "suspend is true"
-                                self.M105pending = False
-                        elif not self.M105pending:
+				self.M105pending = False
+			elif not self.M105pending:
 				print "pending is false"
-                                self.M105pending = True
-                                self.sendNow("M105", True)
+				self.M105pending = True
+				self.sendNow("M105", True)
 
-                #if self.cycle % POSITIONINTERVAL == 0:
-                        #n = self.reprap.getPrintPosition()
-                        #if n is not None:
-                                #self.printPosition = n
-                                #self.updatePrintPosition(n)
+		#if self.cycle % POSITIONINTERVAL == 0:
+				#n = self.reprap.getPrintPosition()
+				#if n is not None:
+					#self.printPosition = n
+					#self.updatePrintPosition(n)
 
-        def suspendTempProbe(self, flag):
-                self.suspendM105 = flag
+		def suspendTempProbe(self, flag):
+				self.suspendM105 = flag
 		
 	def printStopped(self):
 		self.printing = False

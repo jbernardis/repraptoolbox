@@ -264,6 +264,9 @@ class GEditDlg(wx.Dialog):
 		self.modifyGcSuffix(self.gObj.getTemps())
 		l = self.gcFrame.getCurrentLayer()
 		self.gcFrame.loadModel(self.gObj, l, self.gcFrame.getZoom())
+		lmax = self.gObj.layerCount()-1
+		self.slLayers.SetRange(0, lmax)
+		self.slLayers.SetPageSize(int(lmax/10))
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(l))
 		self.bBracketDel.Enable(False)
