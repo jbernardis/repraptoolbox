@@ -73,7 +73,7 @@ class TempDlg(wx.Dialog):
 		szdlg.Add(szh)
 		szdlg.AddSpacer((20, 20))
 		
-		self.heaters = []
+		self.heaters = {}
 		szKeys = wx.BoxSizer(wx.VERTICAL)
 		
 		for i in range(self.nextr):
@@ -82,15 +82,14 @@ class TempDlg(wx.Dialog):
 				name += "%d" % i
 				
 			h = GraphData(name, heColor[i])
-			self.heaters.append(h)
+			self.heaters[name] = h
 			self.graph.addHeater(h)
 			szKeys.Add(self.textFields(h))
 
 		h = GraphData("Bed", blue)
-		self.heaters.append(h)
+		self.heaters["Bed"] = h
 		self.graph.addHeater(h)
 		szKeys.Add(self.textFields(h))
-		
 		
 		szdlg.Add(szKeys)
 		szdlg.AddSpacer((20, 20))
@@ -121,16 +120,16 @@ class TempDlg(wx.Dialog):
 		if tool is not None:
 			name += "%d" % tool
 			
-		for h in self.heaters:
-			if h.getName() == name:
-				if actualOrTarget == "actual":
-					h.setValue(value)
-					self.updateLabel(h)
-					return
-				elif actualOrTarget == "target":
-					h.setSetting(value)
-					self.updateLabel(h)
-					return
+		if name in self.heaters.keys():
+			h = self.heaters[name]
+			if actualOrTarget == "actual":
+				h.setValue(value)
+				self.updateLabel(h)
+				return
+			elif actualOrTarget == "target":
+				h.setSetting(value)
+				self.updateLabel(h)
+				return
 				
 		print "Unable to process temperature update: "
 		print "(%s) (%s), " %(actualOrTarget, hName), tool, value
