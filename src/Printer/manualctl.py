@@ -1,6 +1,5 @@
 import wx
 from imagemap import ImageMap
-from heaters import Heaters
 	
 BUTTONDIM = (48,48)
 
@@ -29,12 +28,13 @@ dispatch = { "XH": "G28 X0", "YH": "G28 Y0", "ZH": "G28 Z0", "AH": "G28",
 	"STOP": "M84"}
 
 class ManualCtl(wx.Window): 
-	def __init__(self, parent, reprap):
+	def __init__(self, parent, reprap, prtName):
 		self.model = None
 		self.parent = parent
 		self.images = parent.images
 		self.settings = self.parent.settings
 		self.reprap = reprap
+		self.prtName = prtName
 		
 		self.currentTool = 1
 
@@ -190,13 +190,6 @@ class ManualCtl(wx.Window):
 
 		szWindow.AddSpacer((10, 10))
 		szWindow.Add(szSpeed, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		
-		szHeaters = wx.BoxSizer(wx.VERTICAL)
-		szHeaters.Add(Heaters(self, self.reprap))
-		szWindow.AddSpacer((10, 10))
-		
-		szWindow.Add(szHeaters, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		szWindow.AddSpacer((20, 20))
 		
 		self.SetSizer(szWindow)
 		self.Layout()

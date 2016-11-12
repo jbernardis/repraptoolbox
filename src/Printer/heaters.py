@@ -14,11 +14,12 @@ class HeaterInfo:
 		self.setwaitcmd = info[5]
 
 class Heaters(wx.Window): 
-	def __init__(self, parent, reprap):
+	def __init__(self, parent, reprap, prtName):
 		self.parent = parent
 		self.images = parent.images
 		self.settings = self.parent.settings
 		self.reprap = reprap
+		self.prtName = prtName
 
 		wx.Window.__init__(self, parent, wx.ID_ANY, size=(-1, -1), style=wx.SIMPLE_BORDER)		
 		
@@ -48,8 +49,6 @@ class Heaters(wx.Window):
 		self.SetSizer(szHeaters)
 		self.Layout()
 		self.Fit()
-		
-		self.reprap.registerTempHandler(self.tempHandler)
 		
 	def tempHandler(self, actualOrTarget, hName, tool, value):
 		if hName == "Bed":

@@ -21,9 +21,11 @@ xLeft = 0
 xRight = xsize-1
 
 class TempDlg(wx.Dialog):
-	def __init__(self, app, nextr):
+	def __init__(self, parent, nextr, prtName):
 		self.nextr = nextr
-		wx.Dialog.__init__(self, None, title="temperatures")
+		self.parent = parent
+		title = "%s temperatures" % prtName
+		wx.Dialog.__init__(self, None, title=title)
 		self.Show()
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.font12bold = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -115,7 +117,7 @@ class TempDlg(wx.Dialog):
 
 		return sz
 	
-	def updateTemps(self, actualOrTarget, hName, tool, value):
+	def tempHandler(self, actualOrTarget, hName, tool, value):
 		name = hName
 		if tool is not None:
 			name += "%d" % tool
@@ -149,6 +151,7 @@ class TempDlg(wx.Dialog):
 		
 	def onClose(self, evt):
 		self.graph.stop()
+		self.parent.closeGraph()
 		self.Destroy()
 		
 class GraphData:
