@@ -24,6 +24,7 @@ class PrinterDlg(wx.Dialog):
 
 		self.parent = parent
 		self.printerName = printerName
+		self.reprap = reprap
 		self.settings = Settings(cmdFolder, printerName)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
@@ -37,6 +38,7 @@ class PrinterDlg(wx.Dialog):
 		self.Fit()
 		
 	def onClose(self, evt):
+		self.reprap.registerTempHandler(None)
 		self.settings.save()
 		self.parent.PrinterClosed()
 		self.Destroy()

@@ -665,7 +665,7 @@ class RepRapParser:
 	def setBedTemp(self, val):
 		print "set Bed temp to %f" % val
 		if self.tempHandler is not None:
-			self.tempHandler("target", "Bed", None, val)
+			self.tempHandler("actual", "Bed", None, val)
 	
 	def parseG(self, s, v):
 		l = s.split()

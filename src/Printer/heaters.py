@@ -102,7 +102,7 @@ class Heater(wx.Window):
 		self.Bind(wx.EVT_BUTTON, self.onBPower, self.bPower)
 		szHeater.Add(self.bPower)
 		
-		self.tcActual = wx.TextCtrl(self, wx.ID_ANY, "999", size=(50, -1), style=wx.TE_READONLY | wx.TE_RIGHT)
+		self.tcActual = wx.TextCtrl(self, wx.ID_ANY, "", size=(70, -1), style=wx.TE_READONLY | wx.TE_RIGHT)
 		self.tcActual.SetFont(self.font12bold)
 		szHeater.Add(self.tcActual, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 
@@ -148,13 +148,11 @@ class Heater(wx.Window):
 			self.heaterOn = False
 			self.updateSetting(0)
 			cmd = self.htrInfo.setcmd + " S0"
-			self.sbIndicator.SetBitmap(self.images.pngLedoff)
 			self.bPower.SetBitmap(self.images.pngHeatoff)
 		else:
 			self.heaterOn = True
 			self.updateSetting(self.slThermostat.GetValue())
 			cmd = self.htrInfo.setcmd + " S%d" % self.setting
-			self.sbIndicator.SetBitmap(self.images.pngLedon)
 			self.bPower.SetBitmap(self.images.pngHeaton)
 			
 		if self.htrInfo.tool is not None:
@@ -163,7 +161,36 @@ class Heater(wx.Window):
 
 	def updateSetting(self, newSetting):
 		self.setting = newSetting
-		self.tcSetting.SetValue("%d" % self.setting)
+		if self.setting is None:
+			self.tcSetting.SetValue("")
+		else:
+			self.tcSetting.SetValue("%d" % self.setting)
+
+		if self.setting is None:
+			self.sbIndicator.SetBitmap(self.images.pngLedoff)
+		elif self.actual is None:
+			self.sbIndicator.SetBitmap(self.images.pngLedon)
+		elif self.setting > self.actual:
+			self.sbIndicator.SetBitmap(self.images.pngLedon)
+		else:
+			self.sbIndicator.SetBitmap(self.images.pngLedoff)
+		
+	def updateActual(self, newActual):
+		self.actual = newActual
+		print "in update actual with value ", newActual, self.htrInfo.name
+		if self.actual == None:
+			self.tcActual.SetValue("")
+		else:
+			self.tcActual.SetValue("%.1f" % self.actual)
+
+		if self.setting is None:
+			self.sbIndicator.SetBitmap(self.images.pngLedoff)
+		elif self.actual is None:
+			self.sbIndicator.SetBitmap(self.images.pngLedon)
+		elif self.setting > self.actual:
+			self.sbIndicator.SetBitmap(self.images.pngLedon)
+		else:
+			self.sbIndicator.SetBitmap(self.images.pngLedoff)
 		
 	def doLowPreset(self, evt):
 		self.slThermostat.SetValue(self.lowpreset)	
@@ -175,4 +202,12 @@ class Heater(wx.Window):
 		pass
 	
 	def setTemperature(self, actualOrTarget, value):
-		print "Heater %s set %s to %f" % (self.htrInfo.name, actualOrTarget, value)
+		#self.bPower.SetBitmap(self.images.pngHeatoff)
+		print "==> Heater %s set %s to %f" % (self.htrInfo.name, actualOrTarget, value)
+		print value
+		if actualOrTarget == "target":
+			self.updateSetting(value)
+		elif actualOrTarget == "actual":
+			self.updateActual(value)
+		else:
+			print "Invalid heater type (%s)" % actualOrTarget
