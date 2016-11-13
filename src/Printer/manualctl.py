@@ -95,25 +95,26 @@ class ManualCtl(wx.Window):
 		htc = self.tXYSpeed.GetSize()[1]
 		
 		sizerT = wx.BoxSizer(wx.VERTICAL)
-		t = wx.StaticText(self, wx.ID_ANY, "XY Speed:", style=wx.ALIGN_RIGHT, size=(80, -1))
+		t = wx.StaticText(self, wx.ID_ANY, "XY Speed:")
 		t.SetFont(self.font12bold)
 		htt = t.GetSize()[1]
 
 		sizerT.AddSpacer((20, 20+htt+4))
-		sizerT.Add(t)
+		sizerT.Add(t, 1, wx.ALIGN_RIGHT, 0)
 		sizerT.AddSpacer((10, htc+10-htt+4))
-		t = wx.StaticText(self, wx.ID_ANY, "Z Speed:", style=wx.ALIGN_RIGHT, size=(80, -1))
+		#t = wx.StaticText(self, wx.ID_ANY, "Z Speed:", style=wx.ALIGN_RIGHT, size=(110, -1))
+		t = wx.StaticText(self, wx.ID_ANY, "Z Speed:")
 		t.SetFont(self.font12bold)
-		sizerT.Add(t)
+		sizerT.Add(t, 0, wx.ALIGN_RIGHT, 0)
 		sizerT.AddSpacer((10, htc+10-htt+4))
-		t = wx.StaticText(self, wx.ID_ANY, "E Speed:", style=wx.ALIGN_RIGHT, size=(80, -1))
+		t = wx.StaticText(self, wx.ID_ANY, "E Speed:")
 		t.SetFont(self.font12bold)
-		sizerT.Add(t)
+		sizerT.Add(t, 1, wx.ALIGN_RIGHT, 1)
 		
 		sizerT.AddSpacer((10, htc+20+4))
-		t = wx.StaticText(self, wx.ID_ANY, "E Length:", style=wx.ALIGN_RIGHT, size=(80, -1))
+		t = wx.StaticText(self, wx.ID_ANY, "E Length:")
 		t.SetFont(self.font12bold)
-		sizerT.Add(t)
+		sizerT.Add(t, 1, wx.ALIGN_RIGHT, 1)
 		
 		szManualCtl.Add(sizerT)
 		szManualCtl.AddSizer((10, 10))

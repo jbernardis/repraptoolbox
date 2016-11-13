@@ -716,19 +716,24 @@ class RepRap:
 		except:
 			pass
 
+		senderKilled = False
 		try:
 			self.sender.kill()
-			while not self.sender.isKilled():
-				time.sleep(1)
 		except:
-			pass
+			senderKilled = True
 
+		listenerKilled = False
 		try:
 			self.listener.kill()
-			while not self.listener.isKilled():
-				time.sleep(1)
 		except:
-			pass
+			listenerKilled = True
+
+		while not (senderKilled and listenerKilled):
+			if not senderKilled:
+				senderKilled = self.sender.isKilled()
+			if not listenerKilled:
+				listenerKilled = self.listener.isKilled()
+			time.sleep(0.1)
 		
 	def getPrinterName(self):
 		return self.printerName
