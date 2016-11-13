@@ -110,7 +110,7 @@ class TempDlg(wx.Dialog):
 		t.SetForegroundColour(gd.getColor())
 		sz.Add(t)
 		
-		t = wx.StaticText(self, wx.ID_ANY, "", size=(130, -1))
+		t = wx.StaticText(self, wx.ID_ANY, "", size=(162, -1))
 		t.SetFont(self.font20bold)
 		sz.Add(t)
 		gd.setValueHandle(t)
@@ -138,10 +138,6 @@ class TempDlg(wx.Dialog):
 				self.updateLabel(h)
 				return
 				
-		print "Unable to process temperature update: "
-		print "(%s) (%s), " %(actualOrTarget, name), tool, value
-		print self.heaters.keys()
-		
 	def updateLabel(self, h):
 		v = h.getValue()
 		if v is None:
@@ -245,18 +241,15 @@ class TempGraph(wx.Window):
 		self.heaters.append(gi)
 		
 	def startTimer(self):
-		print "starting timer"
 		self.timer = wx.Timer(self)
 		self.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 		self.timer.Start(1000)
 
 	def stopTimer(self):
-		print "stopping timer"
 		self.timer.Stop()
 		self.timer = None
 
 	def OnTimer(self, evt):
-		print "tick"
 		if len(self.heaters) > 0:
 			for h in self.heaters:
 				h.nextPoint()

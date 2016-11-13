@@ -289,8 +289,6 @@ class ListenThread:
 		self.eatOK = 0
 		self.resendRequests = 0
 
-		print "listener initializing"
-		
 		if firmware == "MARLIN":
 			self.resend = "resend:"
 			self.resendre = re.compile("resend: *([0-9]+)")
@@ -321,7 +319,6 @@ class ListenThread:
 		
 	def Run(self):
 		self.isRunning = True
-		print "entering listen loop"
 		while self.isRunning:
 			if not self.connected:
 				self.connected = self.connect()
@@ -380,7 +377,6 @@ class ListenThread:
 		try:
 			self.printerPort = Serial(self.port, self.baud, timeout=2)
 			self.connected = True
-			print "posting connected event"
 			evt = RepRapEvent(event=CONNECTED, prtport=self.printerPort)
 			wx.PostEvent(self.win, evt)
 			return True
@@ -391,7 +387,6 @@ class ListenThread:
 	def disconnect(self):
 		self.connected = False
 		evt = RepRapEvent(event=DISCONNECTED)
-		print "posting disconnected event"
 		wx.PostEvent(self.win, evt)
 
 class RepRapParser:
@@ -536,7 +531,6 @@ class RepRapParser:
 
 		m = self.trpt1re.search(msg)
 		if m:
-			print "temp report 1"
 			gotHE = [False for i in range(MAX_EXTRUDERS)]
 			HEtemp = [0 for i in range(MAX_EXTRUDERS)]
 			HEtarget = [0 for i in range(MAX_EXTRUDERS)]
@@ -573,7 +567,6 @@ class RepRapParser:
 
 		m = self.trpt2re.search(msg)
 		if m:
-			print "temp report 2"
 			t = m.groups()
 			tool = None
 			gotHeTemp = False
@@ -591,7 +584,6 @@ class RepRapParser:
 		
 		m = self.trpt3re.search(msg)
 		if m:
-			print "temp report 3"
 			t = m.groups()
 			tool = None
 			gotHeTemp = False
@@ -607,7 +599,6 @@ class RepRapParser:
 		
 		m = self.trpt4re.search(msg)
 		if m:
-			print "temp report 4"
 			t = m.groups()
 			tool = None
 			if len(t) >= 1:
@@ -652,22 +643,18 @@ class RepRapParser:
 		return False
 
 	def setHETarget(self, tool, val):
-		print "set HE %d target to %f" % (tool, val)
 		if self.tempHandler is not None:
 			self.tempHandler("target", "HE", tool, val)
 	
 	def setHETemp(self, tool, val):
-		print "set HE %d temp to %f" % (tool, val)
 		if self.tempHandler is not None:
 			self.tempHandler("actual", "HE", tool, val)
 	
 	def setBedTarget(self, val):
-		print "set Bed target to %f" % val
 		if self.tempHandler is not None:
 			self.tempHandler("target", "Bed", None, val)
 	
 	def setBedTemp(self, val):
-		print "set Bed temp to %f" % val
 		if self.tempHandler is not None:
 			self.tempHandler("actual", "Bed", None, val)
 	
@@ -690,6 +677,8 @@ class RepRap:
 		self.allowWhilePrinting = allow_while_printing_base[:]
 		self.setFirmware(firmware)
 
+		self.proxyWin = wx.Window(win, wx.ID_ANY)
+
 		self.parser = RepRapParser(self)
 		
 		self.online = False
@@ -708,11 +697,11 @@ class RepRap:
 		self.prtport = None
 		self.tempHandler = None
 		
-		self.listener = ListenThread(win, self, port, baud, firmware)
+		self.listener = ListenThread(self.proxyWin, self, port, baud, firmware)
 
-		win.Bind(EVT_REPRAP_UPDATE, self.reprapEvent)
+		self.proxyWin.Bind(EVT_REPRAP_UPDATE, self.reprapEvent)
 		
-		self.sender = SendThread(win, self, firmware, self.priQ, self.mainQ)
+		self.sender = SendThread(self.proxyWin, self, firmware, self.priQ, self.mainQ)
 		self.sender.setCheckSum(True)
 		self.sender.reportConnection(self.online, self.prtport)
 		self.ready = True
@@ -857,7 +846,6 @@ class RepRap:
 				self.printing = False
 				self.paused = False
 		elif evt.event == CONNECTED:
-			print "connected"
 			self.online = True
 			self.prtport = evt.prtport
 			if self.ready:
@@ -866,7 +854,6 @@ class RepRap:
 			self.win.reportConnection(True, self.printerName)
 
 		elif evt.event == DISCONNECTED:
-			print "disconnected"
 			self.online = False
 			self.prtport = None
 			if self.ready:
@@ -881,30 +868,24 @@ class RepRap:
 			print "received event ", evt.event
 
 	def startTimer(self):
-		print "starting timer"
 		self.cycle = 0
 		self.M105pending = False
 		self.suspendM105 = False
-		self.timer = wx.Timer(self.win)
-		self.win.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
+		self.timer = wx.Timer(self.proxyWin)
+		self.proxyWin.Bind(wx.EVT_TIMER, self.OnTimer, self.timer)
 		self.timer.Start(1000)
 
 	def stopTimer(self):
-		print "stopping timer"
 		self.timer.Stop()
 		self.timer = None
 
 	def OnTimer(self, evt):
 		self.cycle += 1
-		print "tick", self.cycle, self.cycle % TEMPINTERVAL
 
 		if self.cycle % TEMPINTERVAL == 0:
-			print "interval check"
 			if self.suspendM105:
-				print "suspend is true"
 				self.M105pending = False
 			elif not self.M105pending:
-				print "pending is false"
 				self.M105pending = True
 				self.sendNow("M105", True)
 

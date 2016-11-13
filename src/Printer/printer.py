@@ -54,7 +54,6 @@ class PrinterDlg(wx.Dialog):
 		self.reprap.registerTempHandler(self.tempHandler)
 		
 	def tempHandler(self, actualOrTarget, hName, tool, value):
-		print "in printerdlg th: ", actualOrTarget, hName, tool, value
 		self.heaters.tempHandler(actualOrTarget, hName, tool, value)
 		try:
 			self.graphDlg.tempHandler(actualOrTarget, hName, tool, value)

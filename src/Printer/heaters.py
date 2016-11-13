@@ -59,11 +59,6 @@ class Heaters(wx.Window):
 			else:
 				ix = tool
 			self.hHEs[ix].setTemperature(actualOrTarget, value)
-		else:
-			print "unknown heater type (%s)" % hName
-			
-		pass
-		
 
 class Heater(wx.Window):
 	def __init__(self, parent, hi, reprap):
@@ -176,7 +171,6 @@ class Heater(wx.Window):
 		
 	def updateActual(self, newActual):
 		self.actual = newActual
-		print "in update actual with value ", newActual, self.htrInfo.name
 		if self.actual == None:
 			self.tcActual.SetValue("")
 		else:
@@ -201,12 +195,7 @@ class Heater(wx.Window):
 		pass
 	
 	def setTemperature(self, actualOrTarget, value):
-		#self.bPower.SetBitmap(self.images.pngHeatoff)
-		print "==> Heater %s set %s to %f" % (self.htrInfo.name, actualOrTarget, value)
-		print value
 		if actualOrTarget == "target":
 			self.updateSetting(value)
 		elif actualOrTarget == "actual":
 			self.updateActual(value)
-		else:
-			print "Invalid heater type (%s)" % actualOrTarget

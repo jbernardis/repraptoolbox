@@ -65,6 +65,7 @@ class MyFrame(wx.Frame):
 		self.bPrinter["prism"] = b
 		self.wPrinter["prism"] = None
 		self.reprap["prism"] = RepRap(self, "prism", "/dev/tty-prism", 115200, "MARLIN")
+		szFrame.Add(b)
 		
 		b = wx.Button(self, wx.ID_ANY, "CUBOID", size=BUTTONDIM)
 		self.bId["cuboid"] = b.GetId()
@@ -74,23 +75,22 @@ class MyFrame(wx.Frame):
 		self.bPrinter["cuboid"] = b
 		self.wPrinter["cuboid"] = None
 		self.reprap["cuboid"] = RepRap(self, "cuboid", "/dev/tty-cuboid", 115200, "MARLIN")
-		
-		szFrame.Add(self.bPrism)
-		
+		szFrame.Add(b)
+
 		self.SetSizer(szFrame)
 		self.Layout()
 		self.Fit()
 		
 	def reportConnection(self, flag, pName):
-		self.bPrinters[pName].Enable(flag)
+		self.bPrinter[pName].Enable(flag)
 		if not flag:
-			if self.wPrinters[pName] is not None:
-				self.wPrinters[pName].terminate()
-				self.wPrinters[pName] = None
+			if self.wPrinter[pName] is not None:
+				self.wPrinter[pName].terminate()
+				self.wPrinter[pName] = None
 		
 	def onClose(self, evt):
-		for p in self.printers:
-			p.terminate()
+		for p in self.reprap.keys():
+			self.reprap[p].terminate()
 		self.Destroy()
 
 	def doViewStl(self, evt):
@@ -142,19 +142,15 @@ class MyFrame(wx.Frame):
 		self.wPrinter[pName] = None
 		
 	def exportStlFile(self, fn):
-		print "STL export: (%s)" % fn
 		self.exportedStlFile = fn
 		
 	def exportGcFile(self, fn):
-		print "GC export: (%s)" % fn
 		self.exportedGcFile = fn
 		
 	def importStlFile(self):
-		print "STL import: (%s)" % self.exportedStlFile
 		return self.exportedStlFile
 	
 	def importGcFile(self):
-		print "GC import: (%s)" % self.exportedGcFile
 		return self.exportedGcFile
 
 			

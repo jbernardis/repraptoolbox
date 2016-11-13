@@ -289,13 +289,11 @@ class Slic3rDlg(wx.Dialog):
 		
 		self.SetSizer(sizer)
 		self.Fit()
-		print self.GetSize()
 		
 	def getExtruderCount(self, cfgfn):
 		try:
 			cfg = list(open(cfgfn))
 		except:
-			print "Error opening file %s" % cfgfn
 			return 1
 		
 		for l in cfg:
@@ -379,10 +377,6 @@ class Slic3rDlg(wx.Dialog):
 		else:
 			self.gcFn = os.path.join(self.gcDir, gcbn)
 			
-		print self.settings.usestldir
-		print self.gcFn
-		print self.gcDir
-
 		self.slicing = True
 		self.sliceComplete = False
 		thr = SlicerThread(self, self.settings.executable, self.stlFn, self.gcFn, self.cfgTempFn)
