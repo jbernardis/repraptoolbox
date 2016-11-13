@@ -43,7 +43,7 @@ class PrinterDlg(wx.Dialog):
 		szWindow.AddSpacer((20, 20))
 		
 		self.bGraph = wx.Button(self, wx.ID_ANY, "Graph")
-		self.bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
+		self.Bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
 		szWindow.Add(self.bGraph)
 		
 		self.SetSizer(szWindow)
@@ -54,6 +54,7 @@ class PrinterDlg(wx.Dialog):
 		self.reprap.registerTempHandler(self.tempHandler)
 		
 	def tempHandler(self, actualOrTarget, hName, tool, value):
+		print "in printerdlg th: ", actualOrTarget, hName, tool, value
 		self.heaters.tempHandler(actualOrTarget, hName, tool, value)
 		try:
 			self.graphDlg.tempHandler(actualOrTarget, hName, tool, value)
@@ -67,7 +68,7 @@ class PrinterDlg(wx.Dialog):
 		self.Destroy()
 		
 	def onGraph(self, evt):
-		self.graphDlg = TempDlg(self, self.settings.nextruders, self.prtName)
+		self.graphDlg = TempDlg(self, self.settings.nextruders, self.printerName)
 		
 	def closeGraph(self):
 		self.graphDlg = None

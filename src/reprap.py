@@ -536,6 +536,7 @@ class RepRapParser:
 
 		m = self.trpt1re.search(msg)
 		if m:
+			print "temp report 1"
 			gotHE = [False for i in range(MAX_EXTRUDERS)]
 			HEtemp = [0 for i in range(MAX_EXTRUDERS)]
 			HEtarget = [0 for i in range(MAX_EXTRUDERS)]
@@ -572,6 +573,7 @@ class RepRapParser:
 
 		m = self.trpt2re.search(msg)
 		if m:
+			print "temp report 2"
 			t = m.groups()
 			tool = None
 			gotHeTemp = False
@@ -589,6 +591,7 @@ class RepRapParser:
 		
 		m = self.trpt3re.search(msg)
 		if m:
+			print "temp report 3"
 			t = m.groups()
 			tool = None
 			gotHeTemp = False
@@ -604,8 +607,9 @@ class RepRapParser:
 		
 		m = self.trpt4re.search(msg)
 		if m:
+			print "temp report 4"
 			t = m.groups()
-			tool = 0
+			tool = None
 			if len(t) >= 1:
 				self.setHETemp(tool, float(t[0]))
 			if len(t) >= 2:

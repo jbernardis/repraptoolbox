@@ -122,7 +122,12 @@ class TempDlg(wx.Dialog):
 		if tool is not None:
 			name += "%d" % tool
 			
-		if name in self.heaters.keys():
+		found = name in self.heaters.keys()
+		if not found and hName == "HE" and tool == 0:
+			name = "HE"
+			found = name in self.heaters.keys()
+
+		if found:
 			h = self.heaters[name]
 			if actualOrTarget == "actual":
 				h.setValue(value)
@@ -134,7 +139,8 @@ class TempDlg(wx.Dialog):
 				return
 				
 		print "Unable to process temperature update: "
-		print "(%s) (%s), " %(actualOrTarget, hName), tool, value
+		print "(%s) (%s), " %(actualOrTarget, name), tool, value
+		print self.heaters.keys()
 		
 	def updateLabel(self, h):
 		v = h.getValue()
