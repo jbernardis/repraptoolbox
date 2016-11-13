@@ -42,7 +42,7 @@ class PrinterDlg(wx.Dialog):
 		szWindow.Add(szHeaters, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		szWindow.AddSpacer((20, 20))
 		
-		self.bGraph = wx.Button(self, wx.ID_ANY, "Graph")
+		self.bGraph = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGraph, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
 		szWindow.Add(self.bGraph)
 		
@@ -64,7 +64,7 @@ class PrinterDlg(wx.Dialog):
 	def onClose(self, evt):
 		self.reprap.registerTempHandler(None)
 		self.settings.save()
-		self.parent.PrinterClosed()
+		self.parent.PrinterClosed(self.printerName)
 		self.Destroy()
 		
 	def onGraph(self, evt):

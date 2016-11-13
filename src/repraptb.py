@@ -45,27 +45,53 @@ class MyFrame(wx.Frame):
 		self.bGEdit.SetToolTipString("Analyze/edit a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doGEdit, self.bGEdit)
 		
-		self.bPrism = wx.Button(self, wx.ID_ANY, "PRISM", size=BUTTONDIM)
-		self.bPrism.SetToolTipString("prism printer")
-		self.Bind(wx.EVT_BUTTON, self.doPrism, self.bPrism)
 		
 		szFrame = wx.BoxSizer(wx.HORIZONTAL)
 		szFrame.Add(self.bStlView)
 		szFrame.Add(self.bPlater)
 		szFrame.Add(self.bSlic3r)
 		szFrame.Add(self.bGEdit)
+		
+		self.reprap = {}
+		self.bPrinter = {}
+		self.wPrinter = {}
+		self.bId = {}
+
+		b = wx.Button(self, wx.ID_ANY, "PRISM", size=BUTTONDIM)
+		self.bId["prism"] = b.GetId()
+		b.SetToolTipString("prism printer")
+		self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
+		b.Enable(False)
+		self.bPrinter["prism"] = b
+		self.wPrinter["prism"] = None
+		self.reprap["prism"] = RepRap(self, "prism", "/dev/tty-prism", 115200, "MARLIN")
+		
+		b = wx.Button(self, wx.ID_ANY, "CUBOID", size=BUTTONDIM)
+		self.bId["cuboid"] = b.GetId()
+		b.SetToolTipString("cuboid printer")
+		self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
+		b.Enable(False)
+		self.bPrinter["cuboid"] = b
+		self.wPrinter["cuboid"] = None
+		self.reprap["cuboid"] = RepRap(self, "cuboid", "/dev/tty-cuboid", 115200, "MARLIN")
+		
 		szFrame.Add(self.bPrism)
 		
 		self.SetSizer(szFrame)
 		self.Layout()
 		self.Fit()
-
-		self.prism = RepRap(self, "prism", "/dev/tty-prism", 115200, "MARLIN")
+		
+	def reportConnection(self, flag, pName):
+		self.bPrinters[pName].Enable(flag)
+		if not flag:
+			if self.wPrinters[pName] is not None:
+				self.wPrinters[pName].terminate()
+				self.wPrinters[pName] = None
 		
 	def onClose(self, evt):
-		self.prism.terminate()
+		for p in self.printers:
+			p.terminate()
 		self.Destroy()
-		
 
 	def doViewStl(self, evt):
 		dlg = StlViewDlg(self)
@@ -95,13 +121,25 @@ class MyFrame(wx.Frame):
 		
 	def Slic3rClosed(self):
 		self.bSlic3r.Enable(True);
+		
+	def doPrinter(self, evt):
+		bid = evt.GetId()
+		pName = None
+		for p in self.bId.keys():
+			if self.bId[p] == bid:
+				pName = p
+				break
+			
+		if pName is None:
+			print "cant determine which button was pressed"
+			return
+		
+		self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
+		self.bPrinter[pName].Enable(False)
 
-	def doPrism(self, evt):
-		dlg = PrinterDlg(self, "prism", self.prism)
-		self.bPrism.Enable(False)
-
-	def PrinterClosed(self):
-		self.bPrism.Enable(True)
+	def PrinterClosed(self, pName):
+		self.bPrinter[pName].Enable()
+		self.wPrinter[pName] = None
 		
 	def exportStlFile(self, fn):
 		print "STL export: (%s)" % fn

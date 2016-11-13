@@ -25,7 +25,7 @@ class TempDlg(wx.Dialog):
 		self.nextr = nextr
 		self.parent = parent
 		title = "%s temperatures" % prtName
-		wx.Dialog.__init__(self, None, title=title)
+		wx.Dialog.__init__(self, parent, title=title)
 		self.Show()
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.font12bold = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)

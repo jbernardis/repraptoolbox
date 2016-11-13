@@ -863,6 +863,7 @@ class RepRap:
 			if self.ready:
 				self.sender.reportConnection(True, self.prtport)
 			self.startTimer()
+			self.win.reportConnection(True, self.printerName)
 
 		elif evt.event == DISCONNECTED:
 			print "disconnected"
@@ -871,6 +872,7 @@ class RepRap:
 			if self.ready:
 				self.sender.reportConnection(False, None)
 			self.stopTimer()
+			self.win.reportConnection(False, self.printerName)
 
 		elif evt.event == RECEIVED_MSG:
 			print "received message (%s)" % evt.msg
