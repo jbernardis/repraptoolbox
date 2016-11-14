@@ -6,12 +6,10 @@ Created on Oct 28, 2016
 import os, sys, inspect
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
-if cmdFolder not in sys.path:
-	sys.path.insert(0, cmdFolder)
 
 import wx
 
-from settings import Settings 
+from psettings import PrtSettings 
 from images import Images
 from manualctl import ManualCtl
 from heaters import Heaters
@@ -27,7 +25,7 @@ class PrinterDlg(wx.Dialog):
 		self.parent = parent
 		self.printerName = printerName
 		self.reprap = reprap
-		self.settings = Settings(cmdFolder, printerName)
+		self.settings = PrtSettings(cmdFolder, printerName)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
 		self.moveAxis = ManualCtl(self, reprap, printerName)				

@@ -13,7 +13,7 @@ def parseBoolean(val, defaultVal):
 	
 	return defaultVal
 
-class Settings:
+class PrtSettings:
 	def __init__(self, folder, printerName):
 		self.section = printerName	
 		

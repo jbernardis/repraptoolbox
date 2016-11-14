@@ -6,8 +6,6 @@ Created on Oct 28, 2016
 import os, sys, inspect
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
-if cmdFolder not in sys.path:
-	sys.path.insert(0, cmdFolder)
 
 import wx.lib.newevent
 import re

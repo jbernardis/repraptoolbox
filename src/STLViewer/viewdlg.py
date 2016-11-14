@@ -2,8 +2,6 @@ import os
 import sys, inspect
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
-if cmdFolder not in sys.path:
-	sys.path.insert(0, cmdFolder)
 
 from wx import glcanvas
 import wx

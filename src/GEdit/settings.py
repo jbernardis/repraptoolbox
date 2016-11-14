@@ -1,7 +1,7 @@
 import ConfigParser
 import os
 
-INIFILE = "GEdit.ini"
+INIFILE = "gedit.ini"
 
 
 def parseBoolean(val, defaultVal):
@@ -19,7 +19,7 @@ class Settings:
 	def __init__(self, folder):
 		self.cmdfolder = folder
 		self.inifile = os.path.join(folder, INIFILE)
-		self.section = "GEdit"	
+		self.section = "gedit"	
 		
 		self.buildarea = [200, 200]
 		self.scale = 3
