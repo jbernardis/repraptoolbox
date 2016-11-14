@@ -68,9 +68,11 @@ class PrinterDlg(wx.Dialog):
 		
 	def onGraph(self, evt):
 		self.graphDlg = TempDlg(self, self.settings.nextruders, self.printerName)
+		self.bGraph.Enable(False)
 		
 	def closeGraph(self):
 		self.graphDlg = None
+		self.bGraph.Enable(True)
 		
 class RepRap:
 	def __init__(self):

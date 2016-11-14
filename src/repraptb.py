@@ -24,7 +24,7 @@ class MyFrame(wx.Frame):
 		self.exportedStlFile = None
 		self.exportedGcFile = None
 		self.modified = False
-		wx.Frame.__init__(self, None, -1, "STL View", size=(300, 300))
+		wx.Frame.__init__(self, None, -1, "RepRap Toolbox", size=(300, 300))
 		self.Show()
 		
 		self.Bind(wx.EVT_CLOSE, self.onClose)
