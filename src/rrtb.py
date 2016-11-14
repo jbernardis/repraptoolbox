@@ -52,8 +52,7 @@ class MyFrame(wx.Frame):
 		self.bGEdit = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGedit, size=BUTTONDIM)
 		self.bGEdit.SetToolTipString("Analyze/edit a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doGEdit, self.bGEdit)
-		
-		
+
 		(self.tDesignButtons,
 			self.tDesignIds,
 			self.tDesignCommands,
@@ -151,32 +150,29 @@ class MyFrame(wx.Frame):
 		self.bPrinter = {}
 		self.wPrinter = {}
 		self.bId = {}
-
-		b = wx.Button(self, wx.ID_ANY, "PRISM", size=PBUTTONDIM)
-		self.bId["prism"] = b.GetId()
-		b.SetToolTipString("prism printer")
-		self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
-		b.Enable(False)
-		self.bPrinter["prism"] = b
-		self.wPrinter["prism"] = None
-		self.reprap["prism"] = RepRap(self, "prism", "/dev/tty-prism", 115200, "MARLIN")
 		
-		b = wx.Button(self, wx.ID_ANY, "CUBOID", size=PBUTTONDIM)
-		self.bId["cuboid"] = b.GetId()
-		b.SetToolTipString("cuboid printer")
-		self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
-		b.Enable(False)
-		self.bPrinter["cuboid"] = b
-		self.wPrinter["cuboid"] = None
-		self.reprap["cuboid"] = RepRap(self, "cuboid", "/dev/tty-cuboid", 115200, "MARLIN")
+		for p in self.settings.printers:
+			pinfo = self.settings.getSection(p)
+			if not ("port" in pinfo.keys() and "baud" in pinfo.keys() and "firmware" in pinfo.keys()):
+				print "Invalid configuration for printer %s" % p
+				continue
+			
+			b = wx.Button(self, wx.ID_ANY, p, size=PBUTTONDIM)
+			self.bId[p] = b.GetId()
+			b.SetToolTipString("control panel for %d printer" % p)
+			self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
+			b.Enable(False)
+			self.bPrinter[p] = b
+			self.wPrinter[p] = None
+			self.reprap[p] = RepRap(self, p, pinfo["port"], pinfo["baud"], pinfo["firmware"])
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " Printers ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
 		bhsizer.AddSpacer((10, 10))
 		
-		for b in sorted(self.bPrinter.keys()):
-			bhsizer.Add(self.bPrinter[b])
+		for p in sorted(self.settings.printers):
+			bhsizer.Add(self.bPrinter[p])
 			bhsizer.AddSpacer((10, 10))
 		
 		bvsizer.AddSpacer((10, 10))
@@ -196,15 +192,19 @@ class MyFrame(wx.Frame):
 	def createSectionButtons(self, section, handler):
 		buttons = {}
 		bids = {}
-		cmds = self.settings.getSection(section)
+		sectionInfo = self.settings.getSection(section)
+		cmds = {}
 		order = []
-		if cmds is not None:
-			for n in cmds.keys():
+		if sectionInfo is not None:
+			for n in sectionInfo.keys():
 				print "processing (%s)" % n
 				if n == "order":
-					order = cmds[n].split(",")
+					order = sectionInfo[n].split(",")
 				else:
+					cmd, helptext = sectionInfo[n].splir(",")
+					cmds[n] = cmd
 					b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
+					b.SetToolTipString(helptext)
 					buttons[n] = b
 					bids[n] = b.GetId()
 					self.Bind(wx.EVT_BUTTON, handler, b)

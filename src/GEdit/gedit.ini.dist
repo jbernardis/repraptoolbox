@@ -1,0 +1,9 @@
+[gedit]
+buildarea = [200, 200]
+scale = 3
+showprevious = True
+showmoves = True
+uselinenbrs = False
+lastdirectory = O:\stl files
+platemps = [60, 185]
+abstemps = [110, 225]

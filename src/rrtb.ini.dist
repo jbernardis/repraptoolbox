@@ -1,0 +1,34 @@
+[toolbox]
+printers=["prism", "cuboid"]
+
+[prism]
+port=/dev/tty-prism
+baud=115200
+firmware=MARLIN
+
+[cuboid]
+port=/dev/tty-cuboid
+baud=115200
+firmware=MARLIN
+
+[design]
+order=openscad,freecad,inkscape,blender,gimp
+openscad=command,help text
+freecad=command,help text
+inkscape=command,help text
+gimp=command,help text
+blender=command,help text
+
+[mesh]
+order=meshlab,cloudcompare,netfabb
+meshlab=ml command,help text
+cloudcompare=cc command,help text
+netfabb=nf command,help text
+
+[slicer]
+order=cura,craftware,skeinforge
+cura=command,help text
+skeinforge=command,help text
+craftware=command,help text
+
+[gcode]
