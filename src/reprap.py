@@ -157,8 +157,8 @@ class SendThread:
 				elif not self.okWait:
 					if not self.mainQ.empty():
 						try:
-							(cmd, string, index) = self.mainQ.get(True, 0.01)
-							self.processCmd(cmd, string, True, True, False, index=index)
+							(cmd, string) = self.mainQ.get(True, 0.01)
+							self.processCmd(cmd, string, True, True, False)
 
 						except Queue.Empty:
 							pass
@@ -176,11 +176,11 @@ class SendThread:
 		self.endOfLife = True
 		self.printer = None
 				
-	def processCmd(self, cmd, string, calcCS, setOK, PriQ, index=None):
+	def processCmd(self, cmd, string, calcCS, setOK, PriQ):
 		if cmd == CMD_GCODE:
 			if calcCS:
-				if index is not None:
-					self.printIndex = index
+				self.printIndex += 1
+				
 				try:
 					verb = string.split()[0]
 				except:
@@ -796,20 +796,9 @@ class RepRap:
 		self.sender.resetCounters()
 		self.listener.resetCounters()
 		self._sendCmd(CMD_STARTPRINT)
-		idx = -1
-		layerIdx = -1
-		endline = -1
-		self._send("@layerchange layer=0")
 		for l in data:
-			idx += 1
-			if idx > endline:
-				layerIdx += 1
-				linfo = data.getLayerInfo(layerIdx)
-				endline = linfo[4][1]
-				self._send("@layerchange layer=%d" % (layerIdx+1))
-				
-			if l.raw.rstrip() != "":
-				self._send(l.raw, index=idx)
+			if l.rstrip() != "":
+				self._send(l)
 
 		self._sendCmd(CMD_ENDOFPRINT, priority=False)			
 		self.printing = True
@@ -937,14 +926,14 @@ class RepRap:
 	def send(self, cmd):
 		return self._send(cmd)
 
-	def _send(self, command, priority=False, index=None):
+	def _send(self, command, priority=False):
 		if not self.prtport:
 			return False
 		
 		if priority:		
 			self.priQ.put((CMD_GCODE, command))
 		else:
-			self.mainQ.put((CMD_GCODE, command, index))
+			self.mainQ.put((CMD_GCODE, command))
 			
 		return True
 	

@@ -14,6 +14,7 @@ from images import Images
 from manualctl import ManualCtl
 from heaters import Heaters
 from tempgraph import TempDlg
+from printmon import PrintMonitorDlg
 
 BUTTONDIM = (48, 48)
 
@@ -27,6 +28,9 @@ class PrinterDlg(wx.Dialog):
 		self.reprap = reprap
 		self.settings = PrtSettings(cmdFolder, printerName)
 		self.images = Images(os.path.join(cmdFolder, "images"))
+		
+		self.graphDlg = None
+		self.pmonDlg = None
 		
 		self.moveAxis = ManualCtl(self, reprap, printerName)				
 		szWindow = wx.BoxSizer(wx.VERTICAL)
@@ -44,6 +48,10 @@ class PrinterDlg(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
 		szWindow.Add(self.bGraph)
 		
+		self.bPrintMon = wx.Button(self, wx.ID_ANY, "PM", size=BUTTONDIM)
+		self.Bind(wx.EVT_BUTTON, self.onPrintMon, self.bPrintMon)
+		szWindow.Add(self.bPrintMon)
+		
 		self.SetSizer(szWindow)
 		
 		self.Show()
@@ -59,6 +67,11 @@ class PrinterDlg(wx.Dialog):
 			pass
 		
 	def onClose(self, evt):
+		if self.pmonDlg:
+			self.pmonDlg.Destroy()
+		if self.graphDlg:
+			self.graphDlg.Destroy()
+			
 		self.reprap.registerTempHandler(None)
 		self.settings.save()
 		self.parent.PrinterClosed(self.printerName)
@@ -71,6 +84,14 @@ class PrinterDlg(wx.Dialog):
 	def closeGraph(self):
 		self.graphDlg = None
 		self.bGraph.Enable(True)
+		
+	def onPrintMon(self, evt):
+		self.pmonDlg = PrintMonitorDlg(self, self.printerName)
+		self.bPrintMon.Enable(False)
+		
+	def closePrintMon(self):
+		self.pmonDlg = None
+		self.bPrintMon.Enable(True)
 		
 class RepRap:
 	def __init__(self):
