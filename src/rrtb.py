@@ -6,6 +6,8 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 if cmdFolder not in sys.path:
 	sys.path.insert(0, cmdFolder)
 
+import subprocess, shlex
+
 from images import Images
 from settings import Settings
 from STLViewer.viewdlg import StlViewDlg
@@ -159,7 +161,7 @@ class MyFrame(wx.Frame):
 			
 			b = wx.Button(self, wx.ID_ANY, p, size=PBUTTONDIM)
 			self.bId[p] = b.GetId()
-			b.SetToolTipString("control panel for %d printer" % p)
+			b.SetToolTipString("control panel for %s printer" % p)
 			self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
 			b.Enable(False)
 			self.bPrinter[p] = b
@@ -197,17 +199,26 @@ class MyFrame(wx.Frame):
 		order = []
 		if sectionInfo is not None:
 			for n in sectionInfo.keys():
-				print "processing (%s)" % n
 				if n == "order":
 					order = sectionInfo[n].split(",")
 				else:
-					cmd, helptext = sectionInfo[n].splir(",")
-					cmds[n] = cmd
-					b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
-					b.SetToolTipString(helptext)
-					buttons[n] = b
-					bids[n] = b.GetId()
-					self.Bind(wx.EVT_BUTTON, handler, b)
+					v = sectionInfo[n].split(",")
+					if len(v) >= 2:
+						cmd = v[0]
+						helptext = v[1]
+					elif len(v) == 1:
+						cmd = v[0]
+						helptext = ""
+					else:
+						print "invalid entry for (%s)" % n
+						cmd == None
+					if cmd id not None:
+						cmds[n] = cmd
+						b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
+						b.SetToolTipString(helptext)
+						buttons[n] = b
+						bids[n] = b.GetId()
+						self.Bind(wx.EVT_BUTTON, handler, b)
 					
 		if len(order) != len(buttons.keys()):
 			print "number of items in %s order list (%d) != number of tools (%d).  Using alpha order" % (section, len(order), len(buttons.keys()))
@@ -217,11 +228,11 @@ class MyFrame(wx.Frame):
 
 		
 	def reportConnection(self, flag, pName):
-		self.bPrinter[pName].Enable(flag)
 		if not flag:
 			if self.wPrinter[pName] is not None:
 				self.wPrinter[pName].terminate()
 				self.wPrinter[pName] = None
+		self.bPrinter[pName].Enable(flag)
 		
 	def onClose(self, evt):
 		for p in self.reprap.keys():
@@ -280,6 +291,11 @@ class MyFrame(wx.Frame):
 		for n in self.tDesignIds.keys():
 			if bid == self.tDesignIds[n]:
 				print "Pressed button for (%s) invoking command (%s)" % (n, self.tDesignCommands[n])
+                                args = shlex.split(str(self.tDesignCommands[n]))
+                                try:
+                                        subprocess.Popen(args, shell=False, stdin=None, stdout=None, stderr=None, close_fds=True)
+                                except:
+                                        print "Exception occurred trying to spawn tool process"
 				return
 		
 	def doMeshButton(self, evt):

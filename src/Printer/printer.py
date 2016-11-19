@@ -67,6 +67,9 @@ class PrinterDlg(wx.Dialog):
 			pass
 		
 	def onClose(self, evt):
+		self.terminate()
+
+	def terminate(self):
 		if self.pmonDlg:
 			self.pmonDlg.Destroy()
 		if self.graphDlg:
