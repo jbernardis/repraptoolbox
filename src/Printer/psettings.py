@@ -32,6 +32,7 @@ class PrtSettings:
 		self.bedinfo = defaultBedinfo
 		defaultHeinfo = [0, 250, 185, 225, 'M104', 'M109']
 		self.heinfo = defaultHeinfo
+		self.lastdirectory = "."
 		
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -41,7 +42,10 @@ class PrtSettings:
 
 		if self.cfg.has_section(self.section):
 			for opt, value in self.cfg.items(self.section):
-				if opt == 'nextruders':
+				if opt == "lastdirectory":
+					self.lastdirectory = value
+					
+				elif opt == 'nextruders':
 					try:
 						self.nextruders = int(value)
 					except:
@@ -110,6 +114,7 @@ class PrtSettings:
 		except ConfigParser.DuplicateSectionError:
 			pass
 		
+		self.cfg.set(self.section, "lastdirectory", str(self.lastdirectory))
 		self.cfg.set(self.section, "nextruders", str(self.nextruders))
 		self.cfg.set(self.section, "xyspeed", str(self.xyspeed))
 		self.cfg.set(self.section, "zspeed", str(self.zspeed))

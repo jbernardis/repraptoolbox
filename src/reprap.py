@@ -44,6 +44,7 @@ CMD_RESUMEPRINT = 6
 CACHE_SIZE = 50
 
 TEMPINTERVAL = 1
+POSITIONINTERVAL = 1
 
 # printer commands that are permissible while actively printing
 allow_while_printing_base = [ "M0", "M1", "M20", "M21", "M22", "M23", "M25", "M27", "M29", "M30", "M31", "M42", "M82", "M83", "M85", "M92",
@@ -696,6 +697,8 @@ class RepRap:
 		self.mainQ = Queue.Queue(0)
 		self.prtport = None
 		self.tempHandler = None
+		self.positionHandler = None
+		self.eventHandler = None
 		
 		self.listener = ListenThread(self.proxyWin, self, port, baud, firmware)
 
@@ -709,6 +712,12 @@ class RepRap:
 	def registerTempHandler(self, handler):
 		self.tempHandler = handler
 		self.parser.setTempHandler(handler)
+		
+	def registerPositionHandler(self, handler):
+		self.positionHandler = handler
+		
+	def registerEventHandler(self, handler):
+		self.eventHandler = handler
 
 	def terminate(self):
 		try:
@@ -859,7 +868,8 @@ class RepRap:
 			print "received message (%s)" % evt.msg
 			self.parser.parseMsg(evt.msg)
 		else:
-			print "received event ", evt.event
+			if self.eventHandler is not None:
+				self.eventHandler(evt)
 
 	def startTimer(self):
 		self.cycle = 0
@@ -883,11 +893,10 @@ class RepRap:
 				self.M105pending = True
 				self.sendNow("M105", True)
 
-		#if self.cycle % POSITIONINTERVAL == 0:
-				#n = self.reprap.getPrintPosition()
-				#if n is not None:
-					#self.printPosition = n
-					#self.updatePrintPosition(n)
+		if self.cycle % POSITIONINTERVAL == 0:
+				n = self.getPrintPosition()
+				if n is not None and self.positionHandler is not None:
+					self.positionHandler(n)
 
 		def suspendTempProbe(self, flag):
 				self.suspendM105 = flag

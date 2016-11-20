@@ -19,7 +19,7 @@ class Settings:
 	def __init__(self, folder):
 		self.section = "plater"	
 		
-		self.lastdirectory = "C:\\"
+		self.lastdirectory = "."
 		self.scale = 2
 		self.buildarea = [200, 200]
 		self.preview = True
