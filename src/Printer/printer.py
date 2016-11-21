@@ -89,7 +89,7 @@ class PrinterDlg(wx.Dialog):
 		self.bGraph.Enable(True)
 		
 	def onPrintMon(self, evt):
-		self.pmonDlg = PrintMonitorDlg(self, self.printerName)
+		self.pmonDlg = PrintMonitorDlg(self, self.reprap, self.printerName)
 		self.bPrintMon.Enable(False)
 		
 	def closePrintMon(self):

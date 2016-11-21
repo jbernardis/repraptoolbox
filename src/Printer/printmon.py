@@ -70,11 +70,11 @@ class PrintMonitorDlg(wx.Dialog):
 		
 		self.bPrint = PrintButton(self, self.images)
 		self.bPrint.Enable(False)
-		self.Bind(wx.EVT_BUTTON, self.doPrint, self.bPrint)
+		self.Bind(wx.EVT_BUTTON, self.onPrint, self.bPrint)
 		
 		self.bPause = PauseButton(self, self.images)
 		self.bPause.Enable(False)
-		self.Bind(wx.EVT_BUTTON, self.doPause, self.bPause)
+		self.Bind(wx.EVT_BUTTON, self.onPause, self.bPause)
 		
 		szBtn = wx.BoxSizer(wx.HORIZONTAL)
 		szBtn.AddSpacer((10, 10))
@@ -113,7 +113,7 @@ class PrintMonitorDlg(wx.Dialog):
 		
 		self.loadGFile(fn)
 		
-	def onOpen(self, evt):
+	def onOpenFile(self, evt):
 		wildcard = "GCode (*.gcode)|*.gcode|"	 \
 			"All files (*.*)|*.*"
 			

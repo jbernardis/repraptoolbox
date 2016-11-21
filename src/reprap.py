@@ -198,8 +198,8 @@ class SendThread:
 			if TRACE:
 				print "==>", self.okWait, string
 				
-			evt = RepRapEvent(event = PRINT_MESSAGE, msg = string, primary=PriQ, immediate=False)
-			wx.PostEvent(self.win, evt)
+			#evt = RepRapEvent(event = PRINT_MESSAGE, msg = string, primary=PriQ, immediate=False)
+			#wx.PostEvent(self.win, evt)
 				
 			try:
 				self.prtport.write(str(string+"\n"))
@@ -806,8 +806,12 @@ class RepRap:
 		self.listener.resetCounters()
 		self._sendCmd(CMD_STARTPRINT)
 		for l in data:
-			if l.rstrip() != "":
-				self._send(l)
+			if ";" in l:
+				ls = l.split(";")[0].rstrip()
+			else:
+				ls = l.rstrip()
+			if ls != "":
+				self._send(ls)
 
 		self._sendCmd(CMD_ENDOFPRINT, priority=False)			
 		self.printing = True
@@ -865,11 +869,25 @@ class RepRap:
 			self.win.reportConnection(False, self.printerName)
 
 		elif evt.event == RECEIVED_MSG:
-			print "received message (%s)" % evt.msg
+			if TRACE:
+				print "==> received message (%s)" % evt.msg
 			self.parser.parseMsg(evt.msg)
 		else:
 			if self.eventHandler is not None:
+				if TRACE:
+					print "passing event to handler ", evt.event
+					try:
+						print evt.msg
+					except:
+						pass
 				self.eventHandler(evt)
+			else:
+				if TRACE:
+					print "no handler yet for ", evt.event
+					try:
+						print evt.msg
+					except:
+						pass
 
 	def startTimer(self):
 		self.cycle = 0
@@ -950,7 +968,7 @@ class RepRap:
 		if priority:
 			self.priQ.put((cmd, ""))
 		else:
-			self.mainQ.put((cmd, "", None))
+			self.mainQ.put((cmd, ""))
 			
 	def log(self, msg):
 		print msg

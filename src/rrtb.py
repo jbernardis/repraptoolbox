@@ -212,7 +212,7 @@ class MyFrame(wx.Frame):
 					else:
 						print "invalid entry for (%s)" % n
 						cmd == None
-					if cmd id not None:
+					if cmd is not None:
 						cmds[n] = cmd
 						b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
 						b.SetToolTipString(helptext)
