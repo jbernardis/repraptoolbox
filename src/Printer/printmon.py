@@ -6,6 +6,8 @@ import time
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
+from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_AUTOSTOPPED, PRINT_STARTED, PRINT_RESUMED
+
 
 BUTTONDIM = (48, 48)
 
@@ -156,7 +158,20 @@ class PrintMonitorDlg(wx.Dialog):
 		print "print position: ", position
 		
 	def reprapEvent(self, evt):
-		print "reprap event: ", evt.event
+		if evt.event == PRINT_COMPLETE:
+			print "Print complete event"
+			self.state = PrintState.idle
+			self.enableButtonsByState()
+		elif evt.event == PRINT_STOPPED:
+			print "print stopped"
+		elif evt.event == PRINT_AUTOSTOPPED:
+			print "print auto-stopped"
+		elif evt.event == PRINT_STARTED:
+			print "print started"
+		elif evt.event == PRINT_RESUMED:
+			print "print resumed"
+		else:
+			print "unknown reprap event: ", evt.event
 		
 	def buildModel(self):
 		rgcode = [s.rstrip() for s in self.gcode]
