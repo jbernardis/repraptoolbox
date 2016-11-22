@@ -7,6 +7,7 @@ gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
 from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_AUTOSTOPPED, PRINT_STARTED, PRINT_RESUMED
+from gcframe import GcFrame
 
 
 BUTTONDIM = (48, 48)
@@ -58,6 +59,8 @@ class PrintMonitorDlg(wx.Dialog):
 		wx.Dialog.__init__(self, parent, title=title)
 		self.Show()
 		
+		self.gcf = GcFrame(self, self.gObj, self.settings)
+		
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
 		self.bImport.SetToolTipString("Import G Code file from toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
@@ -76,6 +79,11 @@ class PrintMonitorDlg(wx.Dialog):
 		self.bPause.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onPause, self.bPause)
 		
+		szGcf = wx.BoxSizer(wx.HORIZONTAL)
+		szGcf.AddSpacer((10, 10))
+		szGcf.Add(self.gcf)
+		szGcf.AddSpacer((10, 10))
+		
 		szBtn = wx.BoxSizer(wx.HORIZONTAL)
 		szBtn.AddSpacer((10, 10))
 		szBtn.Add(self.bImport)
@@ -87,12 +95,14 @@ class PrintMonitorDlg(wx.Dialog):
 		szBtn.Add(self.bPause)
 		szBtn.AddSpacer((10, 10))
 		
-		vszr = wx.BoxSizer(wx.VERTICAL)
-		vszr.AddSpacer((10, 10))
-		vszr.Add(szBtn)
-		vszr.AddSpacer((10, 10))
+		szDlg = wx.BoxSizer(wx.VERTICAL)
+		szDlg.AddSpacer((10, 10))
+		szDlg.Add(szGcf)
+		szDlg.AddSpacer((10, 10))
+		szDlg.Add(szBtn)
+		szDlg.AddSpacer((10, 10))
 		
-		self.SetSizer(vszr)
+		self.SetSizer(szDlg)
 		self.Fit()
 		self.Layout()	
 		
@@ -136,23 +146,36 @@ class PrintMonitorDlg(wx.Dialog):
 	def loadGFile(self, path):
 		self.settings.lastdirectory = os.path.dirname(path)
 		
-		self.gObj = self.loadGCode(path)
-		self.gcodeLoaded = self.gObj is not None
+		self.loadGCode(path)
 		self.state = PrintState.idle
 		self.enableButtonsByState()
 		
 	def loadGCode(self, fn):
+		def gnormal(s):
+			if ";" in s:
+				return s.split(";")[0].rstrip()
+			else:
+				return s.rstrip()
+			
+		self.gcodeLoaded = False
+		self.gcode = []
+		self.gObj = None
 		if fn is None:
-			self.gcode = []
-			return None
+			return
 		
 		try:
-			self.gcode = list(open(fn))
+			gc = list(open(fn))
 		except:
 			print "Error opening file %s" % fn
-			return None
-		
-		return self.buildModel()
+			self.gcode = []
+			self.gObj = None
+			self.gcodeLoaded = False
+			return
+
+		self.gcode = map(gnormal, gc)		
+		self.gObj = self.buildModel()
+		self.gcodeLoaded = True
+		self.gcf.loadModel(self.gObj)
 	
 	def updatePrintPosition(self, position):
 		print "print position: ", position
@@ -174,17 +197,11 @@ class PrintMonitorDlg(wx.Dialog):
 			print "unknown reprap event: ", evt.event
 		
 	def buildModel(self):
-		rgcode = [s.rstrip() for s in self.gcode]
-		
 		cnc = CNC()
 		
 		ln = -1
-		for gl in rgcode:
+		for gl in self.gcode:
 			ln += 1
-			if ";" in gl:
-				gl = gl.split(";")[0]
-			if gl.strip() == "":
-				continue
 			
 			p = re.split("\\s+", gl, 1)
 			

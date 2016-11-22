@@ -33,6 +33,10 @@ class PrtSettings:
 		defaultHeinfo = [0, 250, 185, 225, 'M104', 'M109']
 		self.heinfo = defaultHeinfo
 		self.lastdirectory = "."
+		self.scale = 2
+		self.buildarea = [200, 200]
+		self.showmoves = False
+		self.showprevious = False
 		
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -42,7 +46,16 @@ class PrtSettings:
 
 		if self.cfg.has_section(self.section):
 			for opt, value in self.cfg.items(self.section):
-				if opt == "lastdirectory":
+				if opt == 'buildarea':
+					try:
+						s = (200, 200)
+						exec("s=%s" % value)
+						self.buildarea = s
+					except:
+						print "invalid value in ini file for buildarea"
+						self.buildarea = (200, 200)
+						
+				elif opt == "lastdirectory":
 					self.lastdirectory = value
 					
 				elif opt == 'nextruders':
@@ -56,18 +69,27 @@ class PrtSettings:
 						print "Out of range value in ini file for nextruders"
 						self.nextruders = 1
 						
+				elif opt == 'scale':
+					try:
+						self.scale = int(value)
+					except:
+						print "Non-integer value in ini file for scale"
+						self.scale = 2
+						
 				elif opt == 'xyspeed':
 					try:
 						self.xyspeed = int(value)
 					except:
 						print "Non-integer value in ini file for xyspeed"
 						self.xyspeed = 2000
+						
 				elif opt == 'zspeed':
 					try:
 						self.zspeed = int(value)
 					except:
 						print "Non-integer value in ini file for zspeed"
 						self.zspeed = 300
+						
 				elif opt == 'espeed':
 					try:
 						self.espeed = int(value)
@@ -107,6 +129,11 @@ class PrtSettings:
 					except:
 						print "invalid value in ini file for heinfo"
 						self.heinfo = defaultHeinfo
+				elif opt == 'showmoves':
+					self.showmoves = parseBoolean(value, False)
+				elif opt == 'showprevious':
+					self.showprevious = parseBoolean(value, False)
+
 			
 	def save(self):
 		try:
@@ -126,6 +153,10 @@ class PrtSettings:
 		self.cfg.set(self.section, "speedquery", str(self.speedquery))
 		self.cfg.set(self.section, "bedinfo", str(self.bedinfo))
 		self.cfg.set(self.section, "heinfo", str(self.heinfo))
+		self.cfg.set(self.section, "scale", str(self.scale))
+		self.cfg.set(self.section, "buildarea", str(self.buildarea))
+		self.cfg.set(self.section, "showmoves", str(self.showmoves))
+		self.cfg.set(self.section, "showprevious", str(self.showpreviouos))
 
 		try:		
 			cfp = open(self.inifile, 'wb')
