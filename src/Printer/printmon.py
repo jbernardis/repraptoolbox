@@ -179,6 +179,7 @@ class PrintMonitorDlg(wx.Dialog):
 	
 	def updatePrintPosition(self, position):
 		print "print position: ", position
+		self.gcf.setPrintPosition(position)
 		
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:

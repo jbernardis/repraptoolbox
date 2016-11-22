@@ -156,7 +156,7 @@ class PrtSettings:
 		self.cfg.set(self.section, "scale", str(self.scale))
 		self.cfg.set(self.section, "buildarea", str(self.buildarea))
 		self.cfg.set(self.section, "showmoves", str(self.showmoves))
-		self.cfg.set(self.section, "showprevious", str(self.showpreviouos))
+		self.cfg.set(self.section, "showprevious", str(self.showprevious))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

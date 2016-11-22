@@ -1,7 +1,5 @@
 import wx, math
 from gobject import ST_MOVE, ST_PRINT, ST_RETRACTION, ST_REV_RETRACTION
-from __builtin__ import None
-from pip._vendor.html5lib.treewalkers import lxmletree
 
 MAXZOOM = 10
 ZOOMDELTA = 0.1
@@ -87,10 +85,14 @@ class GcFrame (wx.Window):
 		if posLayer is None:
 			print "Unable to determine layer for print position ", position
 			return
+
+		print "we want to show layer ", posLayer
 		
 		if posLayer == self.currentlx:
+			print "it's the current layer = just redraw"
 			self.redrawCurrentLayer()
 		else:
+			print "it's a new layer"
 			self.setLayer(posLayer)
 		
 	def onPaint(self, evt):
