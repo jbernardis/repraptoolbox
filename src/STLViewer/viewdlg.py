@@ -29,6 +29,7 @@ class StlCanvas(glcanvas.GLCanvas):
 					  glcanvas.WX_GL_DEPTH_SIZE, 24)  # 24 bit
 
 		glcanvas.GLCanvas.__init__(self, parent, wid, size=size, style=style, pos=pos, attribList=attribList)
+		self.log = self.parent.log
 		self.init = False
 		self.context = glcanvas.GLContext(self)
 
@@ -336,9 +337,6 @@ class StlViewDlg(wx.Dialog):
 		self.SetSizer(sizer)
 		self.Fit()
 		
-		#self.Show()
-		#wx.CallAfter(self.stlFileDialog)
-		
 	def onClose(self, evt):
 		self.settings.save()
 		self.gl.Destroy()
@@ -578,22 +576,3 @@ class stl:
 		s.facetloc=0
 		s.name=self.name
 		return s
-		
-class App(wx.App):
-	def OnInit(self):
-		self.dlg = StlViewDlg(self)
-		return True
-
-	def exportStlFile(self, fn):
-		pass
-	def exportGcFile(self, fn):
-		pass
-	def importStlFile(self):
-		return None
-	def importGcFile(self):
-		return None
-
-			
-if __name__ == '__main__':
-	app = App(False)
-	app.MainLoop()

@@ -36,6 +36,8 @@ class GEditDlg(wx.Dialog):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)
 		
+		self.log = self.parent.log
+		
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
 		self.shiftX = 0
@@ -818,28 +820,3 @@ class GEditDlg(wx.Dialog):
 			return ln
 		
 		return ln
-
-
-class App(wx.App):
-	def OnInit(self):
-		self.dlg = GEditDlg(self)
-		#self.dlg.Show()
-		return True
-	
-	def GEditClosed(self):
-		pass
-	def exportStlFile(self, fn):
-		pass
-	def exportGcFile(self, fn):
-		pass
-	def importStlFile(self):
-		return None
-	def importGcFile(self):
-		return None
-
-
-			
-if __name__ == '__main__':
-	app = App(False)
-	app.MainLoop()
-

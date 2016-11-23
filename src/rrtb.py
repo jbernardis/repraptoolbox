@@ -235,6 +235,18 @@ class MyFrame(wx.Frame):
 		self.bPrinter[pName].Enable(flag)
 		
 	def onClose(self, evt):
+		for p in self.wPrinter.keys():
+			if self.wPrinter[p] is not None:
+				if self.wPrinter[p].isPrinting():
+					dlg = wx.MessageDialog(self, 'Cannot exit with printing active',
+							   "Printer %s is active" % p,
+							   wx.OK | wx.ICON_INFORMATION)
+					dlg.ShowModal()
+					dlg.Destroy()
+					return
+			else:
+				self.wPrinter[p].terminate()
+				
 		for p in self.reprap.keys():
 			self.reprap[p].terminate()
 		self.Destroy()
@@ -291,11 +303,11 @@ class MyFrame(wx.Frame):
 		for n in self.tDesignIds.keys():
 			if bid == self.tDesignIds[n]:
 				print "Pressed button for (%s) invoking command (%s)" % (n, self.tDesignCommands[n])
-                                args = shlex.split(str(self.tDesignCommands[n]))
-                                try:
-                                        subprocess.Popen(args, shell=False, stdin=None, stdout=None, stderr=None, close_fds=True)
-                                except:
-                                        print "Exception occurred trying to spawn tool process"
+				args = shlex.split(str(self.tDesignCommands[n]))
+				try:
+					subprocess.Popen(args, shell=False, stdin=None, stdout=None, stderr=None, close_fds=True)
+				except:
+					print "Exception occurred trying to spawn tool process"
 				return
 		
 	def doMeshButton(self, evt):
@@ -330,6 +342,9 @@ class MyFrame(wx.Frame):
 	
 	def importGcFile(self):
 		return self.exportedGcFile
+	
+	def log(self, msg):
+		print "LOG: %s" % msg
 
 			
 class App(wx.App):

@@ -31,6 +31,7 @@ class ManualCtl(wx.Window):
 	def __init__(self, parent, reprap, prtName):
 		self.model = None
 		self.parent = parent
+		self.log = self.parent.log
 		self.images = parent.images
 		self.settings = self.parent.settings
 		self.reprap = reprap
@@ -227,14 +228,14 @@ class ManualCtl(wx.Window):
 					try:
 						v = float(self.tXYSpeed.GetValue())
 					except:
-						print "Invalid value for XY Speed: %s" % self.tXYSpeed.GetValue()
+						self.log("Invalid value for XY Speed: %s" % self.tXYSpeed.GetValue())
 						v = 0.0
 					speed = " F%.3f" % v
 				elif "Z" in label:
 					try:
 						v = float(self.tZSpeed.GetValue())
 					except:
-						print "Invalid value for Z Speed: %s" % self.tZSpeed.GetValue()
+						self.log("Invalid value for Z Speed: %s" % self.tZSpeed.GetValue())
 						v = 0.0
 					speed = " F%.3f" % v
 				else:
@@ -249,13 +250,13 @@ class ManualCtl(wx.Window):
 				try:
 					v = float(self.tESpeed.GetValue())
 				except:
-					print "Invalid value for E Speed: %s" % self.tESpeed.GetValue()
+					self.log("Invalid value for E Speed: %s" % self.tESpeed.GetValue())
 					v = 0.0
 				speed = " F%.3f" % v
 				try:
 					d = float(self.tEDist.GetValue())
 				except:
-					print "Invalid value for E Distance: %s" % self.tEDist.GetValue()
+					self.log("Invalid value for E Distance: %s" % self.tEDist.GetValue())
 					d = 0.0
 				if cmd == "Retract":
 					d = -d
@@ -280,10 +281,10 @@ class ManualCtl(wx.Window):
 		try:
 			float(self.tXYSpeed.GetValue())
 		except:
-			print "Invalid value for XY Speed: %s" % self.tXYSpeed.GetValue()
+			self.log("Invalid value for XY Speed: %s" % self.tXYSpeed.GetValue())
 			
 	def evtZSpeedKillFocus(self, evt):
 		try:
 			float(self.tZSpeed.GetValue())
 		except:
-			print "Invalid value for Z Speed: %s" % self.tZSpeed.GetValue()
+			self.log("Invalid value for Z Speed: %s" % self.tZSpeed.GetValue())

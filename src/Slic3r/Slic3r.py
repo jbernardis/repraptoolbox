@@ -28,14 +28,14 @@ BUTTONDIM = (48, 48)
 filamentMergeKeys = ['extrusion_multiplier', 'filament_diameter', 'first_layer_temperature', 'temperature']
 
 
-def loadProfiles(fnames, mergeKeys):
+def loadProfiles(fnames, mergeKeys, log):
 	kdict = {}
 
 	for fn in fnames:	
 		try:
 			l = list(open(fn))
 		except:
-			print "Unable to open Slic3r settings file: %s" % fn
+			log("Unable to open Slic3r settings file: %s" % fn)
 			return kdict
 		
 		for ln in l:
@@ -120,6 +120,7 @@ class Slic3rDlg(wx.Dialog):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
 		self.parent = parent
+		self.log = self.parent.log
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
@@ -491,36 +492,15 @@ class Slic3rDlg(wx.Dialog):
 	def mergeConfigFiles(self):		
 		dProfile = {}
 		k = self.chPrint.GetString(self.chPrint.GetSelection())
-		dProfile.update(loadProfiles([self.lCfgPrint[k]], []))
+		dProfile.update(loadProfiles([self.lCfgPrint[k]], [], self.log))
 		
 		k = self.chPrinter.GetString(self.chPrinter.GetSelection())
-		dProfile.update(loadProfiles([self.lCfgPrinter[k]], []))
+		dProfile.update(loadProfiles([self.lCfgPrinter[k]], [], self.log))
 
 		filamentFns = []		
 		for ex in range(self.nExtruders):
 			k = self.chFilament[ex].GetString(self.chFilament[ex].GetSelection())
 			filamentFns.append(self.lCfgFilament[k])
-		dProfile.update(loadProfiles(filamentFns, filamentMergeKeys))
+		dProfile.update(loadProfiles(filamentFns, filamentMergeKeys, self.log))
 		
 		return dProfile
-
-class App(wx.App):
-	def OnInit(self):
-		self.dlg = Slic3rDlg(self)
-		return True
-		
-	def Slic3rClosed(self):
-		pass
-	def exportStlFile(self, fn):
-		pass
-	def exportGcFile(self, fn):
-		pass
-	def importStlFile(self):
-		return None
-	def importGcFile(self):
-		return None
-
-			
-if __name__ == '__main__':
-	app = App(False)
-	app.MainLoop()

@@ -72,6 +72,7 @@ class PlaterDlg(wx.Dialog):
 	def __init__(self, parent):
 		wx.Dialog.__init__(self, None, title='Plater', size=(600, 600))
 		self.parent = parent
+		self.log = self.parent.log
 		self.t = 0
 		self.seq = 0
 		self.modified = False
@@ -627,27 +628,4 @@ class PlaterDlg(wx.Dialog):
 		else:
 			self.parent.platerClosed()
 			self.Destroy()
-
-class App(wx.App):
-	def OnInit(self):
-		self.dlg = PlaterDlg(self)
-		#self.dlg.Show()
-		return True
-	
-	def platerClosed(self):
-		pass
-	def exportStlFile(self, fn):
-		pass
-	def exportGcFile(self, fn):
-		pass
-	def importStlFile(self):
-		return None
-	def importGcFile(self):
-		return None
-
-			
-if __name__ == '__main__':
-	app = App(False)
-	app.MainLoop()
-
 

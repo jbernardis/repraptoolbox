@@ -47,19 +47,44 @@ class PauseButton(wx.BitmapButton):
 class PrintMonitorDlg(wx.Dialog):
 	def __init__(self, parent, reprap, prtName):
 		self.parent = parent
+		self.log = self.parent.log
 		self.reprap = reprap
 		self.settings = self.parent.settings
 		self.images = self.parent.images
 		self.state = PrintState.idle
 		self.gcodeLoaded = False
+		self.gcodeFile = None
+		self.printerName = prtName
+		
+		self.currentLayer = 0
 		
 		self.gObj = None
 		
-		title = "%s print monitor" % prtName
+		title = self.buildTitle()
 		wx.Dialog.__init__(self, parent, title=title)
 		self.Show()
 		
 		self.gcf = GcFrame(self, self.gObj, self.settings)
+		
+		ht = self.gcf.GetSize().Get()[1]
+		
+		self.slLayers = wx.Slider(
+			self, wx.ID_ANY, 0, 0, 1000, size=(-1, ht), 
+			style=wx.SL_VERTICAL | wx.SL_AUTOTICKS | wx.SL_LABELS | wx.SL_INVERSE)
+		self.Bind(wx.EVT_SCROLL, self.onLayerScroll, self.slLayers)
+		self.slLayers.Enable(False)
+		
+		self.cbShowMoves = wx.CheckBox(self, wx.ID_ANY, "Show moves")
+		self.cbShowMoves.SetValue(self.settings.showmoves)
+		self.Bind(wx.EVT_CHECKBOX, self.onShowMoves, self.cbShowMoves)
+
+		self.cbShowPrevious = wx.CheckBox(self, wx.ID_ANY, "Show previous layer")
+		self.cbShowPrevious.SetValue(self.settings.showprevious)
+		self.Bind(wx.EVT_CHECKBOX, self.onShowPrevious, self.cbShowPrevious)
+
+		self.cbSyncPrint = wx.CheckBox(self, wx.ID_ANY, "Sync with print")
+		self.cbSyncPrint.SetValue(True)
+		self.Bind(wx.EVT_CHECKBOX, self.onSyncPrint, self.cbSyncPrint)
 		
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
 		self.bImport.SetToolTipString("Import G Code file from toolbox")
@@ -83,6 +108,17 @@ class PrintMonitorDlg(wx.Dialog):
 		szGcf.AddSpacer((10, 10))
 		szGcf.Add(self.gcf)
 		szGcf.AddSpacer((10, 10))
+		szGcf.Add(self.slLayers)
+		szGcf.AddSpacer((10, 10))
+		
+		szOpts = wx.BoxSizer(wx.HORIZONTAL)
+		szOpts.AddSpacer((10, 10))
+		szOpts.Add(self.cbShowMoves)
+		szOpts.AddSpacer((10, 10))
+		szOpts.Add(self.cbShowPrevious)
+		szOpts.AddSpacer((10, 10))
+		szOpts.Add(self.cbSyncPrint)
+		szOpts.AddSpacer((10, 10))
 		
 		szBtn = wx.BoxSizer(wx.HORIZONTAL)
 		szBtn.AddSpacer((10, 10))
@@ -99,6 +135,8 @@ class PrintMonitorDlg(wx.Dialog):
 		szDlg.AddSpacer((10, 10))
 		szDlg.Add(szGcf)
 		szDlg.AddSpacer((10, 10))
+		szDlg.Add(szOpts)
+		szDlg.AddSpacer((10, 10))
 		szDlg.Add(szBtn)
 		szDlg.AddSpacer((10, 10))
 		
@@ -108,13 +146,53 @@ class PrintMonitorDlg(wx.Dialog):
 		
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
 		self.reprap.registerEventHandler(self.reprapEvent)
+
+	def buildTitle(self):		
+		t = "%s print monitor" % self.printerName
+		
+		if self.gcodeLoaded:
+			t += " - %s" % self.gcodeFile
+			
+		return t
+	
+	def isPrinting(self):
+		return self.state == PrintState.printing
 				
 	def onClose(self, evt):
-		# TODO - prevent close if printing
+		if self.isPrinting():
+			dlg = wx.MessageDialog(self, 'Cannot exit with printing active',
+					   "Printer is active",
+					   wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
+			return
+
 		self.reprap.registerPositionHandler(None)
 		self.reprap.registerEventHandler(None)
 		self.parent.closePrintMon()
 		self.Destroy()
+		
+	def onShowMoves(self, evt):
+		v = self.cbShowMoves.GetValue()
+		self.settings.showmoves = v
+		self.gcf.setShowMoves(v)
+	
+	def onShowPrevious(self, evt):
+		v = self.cbShowPrevious.GetValue()
+		self.settings.showprevious = v
+		self.gcf.setShowPrevious(v)
+	
+	def onSyncPrint(self, evt):
+		v = self.cbSyncPrint.GetValue()
+		self.gcf.setSyncWithPrint(v)
+		
+	def onLayerScroll(self, evt):
+		v = self.slLayers.GetValue()
+		if v == self.currentLayer:
+			return
+		
+		self.gcFrame.setLayer(v)
+		self.currentLayer = v
 		
 	def onImport(self, evt):
 		fn = self.parent.importGcFile()
@@ -147,8 +225,26 @@ class PrintMonitorDlg(wx.Dialog):
 		self.settings.lastdirectory = os.path.dirname(path)
 		
 		self.loadGCode(path)
+		
+		if self.gObj is None:
+			lmax = 1
+			self.slLayers.Enable(False)
+		else:
+			lmax = self.gObj.layerCount()-1
+			self.slLayers.Enable(True)
+			
+		self.slLayers.SetRange(0, lmax)
+		self.slLayers.SetPageSize(int(lmax/10))
+		
+		self.gcf.loadModel(self.gObj)
+		
+		self.currentLayer = 0
+		self.slLayers.SetValue(0)
+		
 		self.state = PrintState.idle
 		self.enableButtonsByState()
+		t = self.buildTitle()
+		self.SetTitle(t)
 		
 	def loadGCode(self, fn):
 		def gnormal(s):
@@ -157,6 +253,7 @@ class PrintMonitorDlg(wx.Dialog):
 			else:
 				return s.rstrip()
 			
+		self.gcodeFile = None
 		self.gcodeLoaded = False
 		self.gcode = []
 		self.gObj = None
@@ -166,7 +263,7 @@ class PrintMonitorDlg(wx.Dialog):
 		try:
 			gc = list(open(fn))
 		except:
-			print "Error opening file %s" % fn
+			self.log("Error opening file %s" % fn)
 			self.gcode = []
 			self.gObj = None
 			self.gcodeLoaded = False
@@ -175,16 +272,16 @@ class PrintMonitorDlg(wx.Dialog):
 		self.gcode = map(gnormal, gc)		
 		self.gObj = self.buildModel()
 		self.gcodeLoaded = True
-		self.gcf.loadModel(self.gObj)
+		self.gcodeFile = fn
 	
 	def updatePrintPosition(self, position):
-		print "print position: ", position
-		self.gcf.setPrintPosition(position)
+		if self.state == PrintState.printing:
+			self.gcf.setPrintPosition(position)
 		
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:
-			print "Print complete event"
 			self.state = PrintState.idle
+			self.gcf.setPrintPosition(-1)
 			self.enableButtonsByState()
 		elif evt.event == PRINT_STOPPED:
 			print "print stopped"

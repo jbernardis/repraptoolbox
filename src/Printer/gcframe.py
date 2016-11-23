@@ -18,6 +18,7 @@ black = wx.Colour(0, 0, 0)
 class GcFrame (wx.Window):
 	def __init__(self, parent, model, settings):
 		self.parent = parent
+		self.log = self.parent.log
 		self.scale = settings.scale
 		self.zoom = 1
 		self.offsety = 0
@@ -72,7 +73,11 @@ class GcFrame (wx.Window):
 		self.syncWithPrint = flag
 		
 	def setPrintPosition(self, position):
-		self.printPosition = position
+		if position == -1:
+			self.printPosition = self.layerMap[-1][1]
+		else:
+			self.printPosition = position
+			
 		if not self.syncWithPrint:
 			return
 		
@@ -83,16 +88,12 @@ class GcFrame (wx.Window):
 				break
 			
 		if posLayer is None:
-			print "Unable to determine layer for print position ", position
+			self.log("Unable to determine layer for print position ", position)
 			return
-
-		print "we want to show layer ", posLayer
 		
 		if posLayer == self.currentlx:
-			print "it's the current layer = just redraw"
 			self.redrawCurrentLayer()
 		else:
-			print "it's a new layer"
 			self.setLayer(posLayer)
 		
 	def onPaint(self, evt):
@@ -161,8 +162,9 @@ class GcFrame (wx.Window):
 				self.offsety = 0
 
 		self.layerMap = []				
-		for lx in range(len(self.model)):
-			self.layerMap.append(self.model.getGCodeLines(lx))
+		if self.model is not None:
+			for lx in range(len(self.model)):
+				self.layerMap.append(self.model.getGCodeLines(lx))
 
 		self.redrawCurrentLayer()
 		

@@ -311,15 +311,3 @@ class TempGraph(wx.Window):
 			if s is not None:
 				dc.SetPen(h.getSettingPen())
 				dc.DrawLine(xLeft, s, xRight, s)
-
-			
-class App(wx.App):
-	def OnInit(self):
-		self.dlg = TempDlg(self, 1)
-		#self.dlg.Show()
-		return True
-			
-if __name__ == '__main__':
-	app = App(False)
-	app.MainLoop()
-

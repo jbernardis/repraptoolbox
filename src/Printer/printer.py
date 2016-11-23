@@ -24,6 +24,7 @@ class PrinterDlg(wx.Dialog):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
 		self.parent = parent
+		self.log = parent.log
 		self.printerName = printerName
 		self.reprap = reprap
 		self.settings = PrtSettings(cmdFolder, printerName)
@@ -67,7 +68,21 @@ class PrinterDlg(wx.Dialog):
 			pass
 		
 	def onClose(self, evt):
+		if self.pmonDlg and self.pmonDlg.isPrinting():
+			dlg = wx.MessageDialog(self, 'Cannot exit with printing active',
+					   "Printer is active",
+					   wx.OK | wx.ICON_INFORMATION)
+			dlg.ShowModal()
+			dlg.Destroy()
+			return
+		
 		self.terminate()
+		
+	def isPrinting(self):
+		if self.pmonDlg is None:
+			return False
+		
+		return self.pmonDlg.isPrinting()
 
 	def terminate(self):
 		if self.pmonDlg:
@@ -79,6 +94,7 @@ class PrinterDlg(wx.Dialog):
 		self.settings.save()
 		self.parent.PrinterClosed(self.printerName)
 		self.Destroy()
+		return True
 		
 	def onGraph(self, evt):
 		self.graphDlg = TempDlg(self, self.settings.nextruders, self.printerName)
@@ -95,35 +111,3 @@ class PrinterDlg(wx.Dialog):
 	def closePrintMon(self):
 		self.pmonDlg = None
 		self.bPrintMon.Enable(True)
-		
-class RepRap:
-	def __init__(self):
-		pass
-	
-	def sendNow(self, cmd):
-		print "Send Now (%s)" % cmd
-		
-	def registerTempHandler(self, handler):
-		pass
-
-class App(wx.App):
-	def OnInit(self):
-		prtr = RepRap()
-		self.dlg = PrinterDlg(self, "prism", prtr)
-		return True
-		
-	def PrinterClosed(self):
-		pass
-	def exportStlFile(self, fn):
-		pass
-	def exportGcFile(self, fn):
-		pass
-	def importStlFile(self):
-		return None
-	def importGcFile(self):
-		return None
-
-			
-if __name__ == '__main__':
-	app = App(False)
-	app.MainLoop()
