@@ -8,6 +8,8 @@ gcRegex = re.compile("[-]?\d+[.]?\d*")
 from cnc import CNC
 from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_AUTOSTOPPED, PRINT_STARTED, PRINT_RESUMED
 from gcframe import GcFrame
+from properties import PropertiesDlg
+from propenums import PropertyEnum
 
 
 BUTTONDIM = (48, 48)
@@ -144,6 +146,8 @@ class PrintMonitorDlg(wx.Dialog):
 		self.Fit()
 		self.Layout()	
 		
+		self.propDlg = PropertiesDlg(self, self.printerName)
+		
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
 		self.reprap.registerEventHandler(self.reprapEvent)
 
@@ -170,6 +174,7 @@ class PrintMonitorDlg(wx.Dialog):
 		self.reprap.registerPositionHandler(None)
 		self.reprap.registerEventHandler(None)
 		self.parent.closePrintMon()
+		self.propDlg.Destroy()
 		self.Destroy()
 		
 	def onShowMoves(self, evt):
@@ -273,9 +278,11 @@ class PrintMonitorDlg(wx.Dialog):
 		self.gObj = self.buildModel()
 		self.gcodeLoaded = True
 		self.gcodeFile = fn
+		self.propDlg.setProperty(PropertyEnum.fileName, fn)
 	
 	def updatePrintPosition(self, position):
 		if self.state == PrintState.printing:
+			self.propDlg.setProperty(PropertyEnum.position, "%d" % position)
 			self.gcf.setPrintPosition(position)
 		
 	def reprapEvent(self, evt):
