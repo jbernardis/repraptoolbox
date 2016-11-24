@@ -20,6 +20,7 @@ class PropertiesDlg(wx.Dialog):
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, size=(500, 500))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.printerName = printerName
+		self.parent = parent
 		self.log = self.parent.log
 		self.fileName = None
 		self.setTitle()
@@ -64,7 +65,7 @@ class PropertiesDlg(wx.Dialog):
 		dlgVsizer.Add(dlgHsizer, 1, wx.EXPAND)
 		dlgVsizer.AddSpacer((10, 10))
 		self.SetSizer(dlgVsizer)
-		self.SetClientSize((400, n*lines+24))
+		self.SetClientSize((600, n*lines+24))
 		pg.SetSplitterLeft()
 		
 	def onClose(self, evt):

@@ -244,8 +244,8 @@ class MyFrame(wx.Frame):
 					dlg.ShowModal()
 					dlg.Destroy()
 					return
-			else:
-				self.wPrinter[p].terminate()
+				else:
+					self.wPrinter[p].terminate()
 				
 		for p in self.reprap.keys():
 			self.reprap[p].terminate()

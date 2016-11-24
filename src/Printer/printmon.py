@@ -147,6 +147,7 @@ class PrintMonitorDlg(wx.Dialog):
 		self.Layout()	
 		
 		self.propDlg = PropertiesDlg(self, self.printerName)
+		self.propDlg.Show()
 		
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
 		self.reprap.registerEventHandler(self.reprapEvent)
@@ -196,7 +197,7 @@ class PrintMonitorDlg(wx.Dialog):
 		if v == self.currentLayer:
 			return
 		
-		self.gcFrame.setLayer(v)
+		self.gcf.setLayer(v)
 		self.currentLayer = v
 		
 	def onImport(self, evt):
