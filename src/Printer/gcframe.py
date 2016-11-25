@@ -77,9 +77,6 @@ class GcFrame (wx.Window):
 			self.printPosition = self.layerMap[-1][1]
 		else:
 			self.printPosition = position
-			
-		if not self.syncWithPrint:
-			return
 		
 		posLayer = None
 		for lx in range(len(self.layerMap)):
@@ -93,7 +90,7 @@ class GcFrame (wx.Window):
 		
 		if posLayer == self.currentlx:
 			self.redrawCurrentLayer()
-		else:
+		elif self.syncWithPrint:
 			self.setLayer(posLayer)
 		
 	def onPaint(self, evt):
@@ -308,6 +305,8 @@ class GcFrame (wx.Window):
 				if splitPos is not None:
 					ptsa = pts[:splitPos]
 					ptsb = pts[splitPos:]
+					if len(ptsb) != 0:
+						ptsa.append(ptsb[0])
 				else:
 					ptsa = pts
 					ptsb = []

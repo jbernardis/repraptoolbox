@@ -31,7 +31,7 @@ class MyFrame(wx.Frame):
 		self.exportedStlFile = None
 		self.exportedGcFile = None
 		self.modified = False
-		wx.Frame.__init__(self, None, -1, "RepRap Toolbox", size=(300, 300))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "RepRap Toolbox", size=(300, 300))
 		self.Show()
 		
 		self.settings = Settings(cmdFolder)
@@ -181,6 +181,20 @@ class MyFrame(wx.Frame):
 		bvsizer.Add(bhsizer)
 		bvsizer.AddSpacer((10, 10))
 		szVFrame.Add(bvsizer)
+		szVFrame.AddSpacer((20, 20))
+		
+		box = wx.StaticBox(self, wx.ID_ANY, " STL File ")
+		bstlsizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
+		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
+		bstlsizer.Add(self.tcStlFile)
+		szVFrame.Add(bstlsizer)
+		szVFrame.AddSpacer((20, 20))
+		
+		box = wx.StaticBox(self, wx.ID_ANY, " G Code File ")
+		bgcsizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
+		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
+		bgcsizer.Add(self.tcGcFile)
+		szVFrame.Add(bgcsizer)
 		szVFrame.AddSpacer((20, 20))
 		
 		szHFrame.AddSpacer((20, 20))
@@ -333,9 +347,17 @@ class MyFrame(wx.Frame):
 		
 	def exportStlFile(self, fn):
 		self.exportedStlFile = fn
+		if fn is None:
+			self.tcStlFile.SetValue("")
+		else:
+			self.tcStlFile.SetValue(fn)
 		
 	def exportGcFile(self, fn):
 		self.exportedGcFile = fn
+		if fn is None:
+			self.tcGcFile.SetValue("")
+		else:
+			self.tcGcFile.SetValue(fn)
 		
 	def importStlFile(self):
 		return self.exportedStlFile

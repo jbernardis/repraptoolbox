@@ -6,10 +6,11 @@ import time
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
-from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_AUTOSTOPPED, PRINT_STARTED, PRINT_RESUMED
+from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED
 from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
+from tools import formatElapsed
 
 
 BUTTONDIM = (48, 48)
@@ -49,6 +50,7 @@ class PauseButton(wx.BitmapButton):
 class PrintMonitorDlg(wx.Frame):
 	def __init__(self, parent, wparent, reprap, prtName):
 		self.parent = parent
+		self.wparent = wparent
 		self.log = self.parent.log
 		self.reprap = reprap
 		self.settings = self.parent.settings
@@ -203,7 +205,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.currentLayer = v
 		
 	def onImport(self, evt):
-		fn = self.parent.importGcFile()
+		fn = self.wparent.importGcFile()
 		if fn is None:
 			return
 		
@@ -265,6 +267,12 @@ class PrintMonitorDlg(wx.Frame):
 		self.gcodeLoaded = False
 		self.gcode = []
 		self.gObj = None
+		self.maxLine = 0
+		self.propDlg.setProperty(PropertyEnum.fileName, "")
+		self.propDlg.setProperty(PropertyEnum.sliceTime, "")
+		self.propDlg.setProperty(PropertyEnum.slicerCfg, "")
+		self.propDlg.setProperty(PropertyEnum.filamentSize, "")
+		self.propDlg.setProperty(PropertyEnum.temperatures, "")
 		if fn is None:
 			return
 		
@@ -279,14 +287,48 @@ class PrintMonitorDlg(wx.Frame):
 
 		self.gcode = map(gnormal, gc)		
 		self.gObj = self.buildModel()
+		self.maxLine = self.gObj.getMaxLine()
 		self.gcodeLoaded = True
 		self.gcodeFile = fn
 		self.propDlg.setProperty(PropertyEnum.fileName, fn)
+		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(fn))) 
+		self.propDlg.setProperty(PropertyEnum.sliceTime, ftime)
+		suffix = gc[-1]
+		print "need to extract file information from suffix: (%s)" % suffix
 	
 	def updatePrintPosition(self, position):
 		if self.state == PrintState.printing:
-			self.propDlg.setProperty(PropertyEnum.position, "%d" % position)
+			posString = "%d/%d" % (position, self.maxLine)
+			if self.maxLine != 0:
+				pct = float(position) / float(self.maxLine) * 100.0
+				posString += " (%.1f%%)" % pct
+			self.propDlg.setProperty(PropertyEnum.position, posString)
 			self.gcf.setPrintPosition(position)
+			lx = self.gcf.getCurrentLayer()
+			if lx != self.currentLayer:
+				self.currentLayer = lx
+				self.slLayers.SetValue(lx)
+				ht = self.gObj.getLayerHeight(lx)
+				if ht is None:
+					self.propDlg.setProperty(PropertyEnum.layerNum, "%d" % lx)
+				else:
+					self.propDlg.setProperty(PropertyEnum.layerNum, "%d (%.2f mm) " % (lx, ht))
+					
+				f, l = self.gObj.getGCodeLines(lx)
+				if f is None:
+					self.propDlg.setProperty(PropertyEnum.gCodeRange, "")
+				else:
+					self.propDlg.setProperty(PropertyEnum.gCodeRange, "%d - %d" % (f, l))
+					
+				x0, y0, xn, yn = self.gObj.getLayerMinMaxXY(lx)
+				if x0 is None:
+					self.propDlg.setProperty(PropertyEnum.minMaxXY, "")
+				else:
+					self.propDlg.setProperty(PropertyEnum.minMaxXY, "(%.2f, %.2f) - (%.2f, %.2f)" % (x0, y0, xn, yn))
+					
+			
+			elapsed = time.time() - self.startTime
+			self.propDlg.setProperty(PropertyEnum.elapsed, elapsed)
 		
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:
@@ -294,16 +336,15 @@ class PrintMonitorDlg(wx.Frame):
 			self.gcf.setPrintPosition(-1)
 			self.enableButtonsByState()
 		elif evt.event == PRINT_STOPPED:
-			print "print stopped"
-		elif evt.event == PRINT_AUTOSTOPPED:
-			print "print auto-stopped"
+			self.state = PrintState.paused
+			self.enableButtonsByState()
 		elif evt.event == PRINT_STARTED:
-			print "print started"
+			pass
 		elif evt.event == PRINT_RESUMED:
-			print "print resumed"
+			pass
 		else:
 			print "unknown reprap event: ", evt.event
-		
+				
 	def buildModel(self):
 		cnc = CNC()
 		
@@ -391,7 +432,9 @@ class PrintMonitorDlg(wx.Frame):
 		else:
 			action = "started"
 			self.reprap.startPrint(self.gcode)
-		print "Print %s at %s" % (action, time.strftime('%H:%M:%S', time.localtime(self.startTime)))
+		stime = time.strftime('%H:%M:%S', time.localtime(self.startTime))
+		self.propDlg.setProperty(PropertyEnum.startTime, stime)
+		self.log("Print %s at %s" % (action, stime))
 
 	def onPause(self, evt):
 		if self.state == PrintState.paused:

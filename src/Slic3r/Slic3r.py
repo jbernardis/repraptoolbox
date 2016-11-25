@@ -114,9 +114,9 @@ class SlicerThread:
 		self.running = False
 
 
-class Slic3rDlg(wx.Dialog):
+class Slic3rDlg(wx.Frame):
 	def __init__(self, parent):
-		wx.Dialog.__init__(self, None, title='Slic3r', size=(100, 100))
+		wx.Frame.__init__(self, None, wx.ID_ANY, 'Slic3r', size=(100, 100))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
 		self.parent = parent
@@ -384,7 +384,8 @@ class Slic3rDlg(wx.Dialog):
 		self.enableButtons()
 		
 	def buildSuffix(self, cfg):
-		suffix = ";@#@# "
+		suffix = ";@#@# CFG:%s" % self.getConfigString()
+		
 		if "filament_diameter" in cfg.keys():
 			suffix += " F:%s " % cfg["filament_diameter"]
 		else:
@@ -488,6 +489,16 @@ class Slic3rDlg(wx.Dialog):
 		self.settings.save()
 		self.parent.Slic3rClosed()
 		self.Destroy()
+		
+	def getConfigString(self):
+		cprint = self.chPrint.GetString(self.chPrint.GetSelection())
+		cprinter = self.chPrint.GetString(self.chPrinter.GetSelection())
+		cfilament = []
+		for ex in range(self.nExtruders):
+			cfilament.append(self.chFilament[ex].GetString(self.chFilament[ex].GetSelection()))
+			
+		result = "%s/%s/%s" % (cprint, cprinter, ",".join(cfilament))
+		return result
 
 	def mergeConfigFiles(self):		
 		dProfile = {}

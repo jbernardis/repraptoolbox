@@ -125,6 +125,9 @@ class layer:
 	def printHeight(self):
 		return self.height
 	
+	def minMaxXY(self):
+		return self.minx, self.miny, self.maxx, self.maxy
+	
 	def startingE(self):
 		return self.starte
 	
@@ -161,6 +164,9 @@ class gobject:
 	def setMaxLine(self, mxl):
 		self.maxLine = mxl
 		
+	def getMaxLine(self):
+		return self.maxLine
+		
 	def addLayer(self, layer):
 		if layer.printSegments > 0:
 			if layer.xmax > self.xmax: self.xmax = layer.xmax
@@ -187,6 +193,18 @@ class gobject:
 			last = self.layers[lx+1].getFirstLine() - 1
 			
 		return first, last
+	
+	def getLayerHeight(self, lx):
+		if len(self.layers) <= lx:
+			return None
+		
+		return self.layers[lx].printHeight()
+	
+	def getLayerMinMaxXY(self, lx):
+		if len(self.layers) <= lx:
+			return None, None, None, None
+		
+		return self.layers[lx].minMaxXY()
 	
 	def getTemps(self):
 		return (self.bed, self.hes)

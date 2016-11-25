@@ -28,10 +28,10 @@ reF = re.compile("(.*[fF])([0-9\.]+)(.*)")
 reE = re.compile("(.*[eE])([0-9\.]+)(.*)")
 
 
-class GEditDlg(wx.Dialog):
+class GEditDlg(wx.Frame):
 	def __init__(self, parent):
 		self.parent = parent
-		wx.Dialog.__init__(self, None, title=TITLE_PREFIX, size=(600, 600))
+		wx.Frame.__init__(self, None, wx.ID_ANY, TITLE_PREFIX, size=(600, 600))
 		self.Show()
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)

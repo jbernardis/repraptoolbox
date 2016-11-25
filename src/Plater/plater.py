@@ -68,9 +68,9 @@ class SplitThread:
 		
 		return nf
 
-class PlaterDlg(wx.Dialog):
+class PlaterDlg(wx.Frame):
 	def __init__(self, parent):
-		wx.Dialog.__init__(self, None, title='Plater', size=(600, 600))
+		wx.Frame.__init__(self, None, wx.ID_ANY, 'Plater', size=(600, 600))
 		self.parent = parent
 		self.log = self.parent.log
 		self.t = 0

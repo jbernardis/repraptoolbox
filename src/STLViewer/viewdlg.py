@@ -291,9 +291,9 @@ class StlCanvas(glcanvas.GLCanvas):
 		self.transx = self.transy = 0
 		
 
-class StlViewDlg(wx.Dialog):
+class StlViewDlg(wx.Frame):
 	def __init__(self, parent):
-		wx.Dialog.__init__(self, None, title='', size=(600, 600))
+		wx.Frame.__init__(self, None, wx.ID_ANY, '', size=(600, 600))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)
 		self.parent = parent

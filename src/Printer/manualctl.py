@@ -197,6 +197,10 @@ class ManualCtl(wx.Window):
 		self.Layout()
 		self.Fit()
 		
+		self.reprap.registerSpeedHandler(self.updateSpeed)
+		self.reprap.registerToolHandler(self.updateTool)
+
+		
 	def doBFanSpeed(self, evt):
 		self.reprap.sendNow("M106 S%d" % self.slFanSpeed.GetValue())
 		
@@ -205,6 +209,13 @@ class ManualCtl(wx.Window):
 		
 	def doBQuery(self, evt):
 		self.reprap.sendNow(self.settings.speedquery)
+
+	def updateSpeed(self, fan, feed, flow):
+		self.slFanSpeed.SetValue(int(fan))	
+		self.slPrintSpeed.SetValue(int(feed))	
+			
+	def updateTool(self, tool):
+		print "update tool: ", tool
 		
 	def onToolChoice(self, evt):
 		t = self.chTool.GetSelection()

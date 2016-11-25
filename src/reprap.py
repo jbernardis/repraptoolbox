@@ -25,7 +25,6 @@ SD_PRINT_POSITION = 2
 
 PRINT_COMPLETE = 10
 PRINT_STOPPED = 11
-PRINT_AUTOSTOPPED = 12
 PRINT_STARTED = 13
 PRINT_RESUMED = 14
 PRINT_MESSAGE = 15
@@ -410,9 +409,17 @@ class RepRapParser:
 		self.sd = None
 		self.insideListing = False
 		self.tempHandler = None
+		self.speedHandler = None
+		self.toolHandler = None
 		
 	def setTempHandler(self, handler):
 		self.tempHandler = handler
+
+	def setSpeedHandler(self, handler):
+		self.speedHandler = handler
+
+	def setToolHandler(self, handler):
+		self.toolHandler = handler
 
 	def parseMsg(self, msg):
 		#if 'M92' in msg:
@@ -627,8 +634,8 @@ class RepRapParser:
 			if len(t) >= 3:
 				flow = float(t[2])
 				
-			#if self.manctl is not None:
-				#self.manctl.updateSpeeds(fan, feed, flow)
+			if self.speedHandler is not None:
+				self.speedHandler(fan, feed, flow)
 			return False
 		
 		m = self.toolchgre.search(msg)
@@ -638,8 +645,8 @@ class RepRapParser:
 			if len(t) >= 1:
 				tool = int(t[0])
 				
-			#if tool is not None and self.manualctl is not None:
-				#self.manualctl.setActiveTool(tool)
+			if tool is not None and self.toolHandler is not None:
+				self.toolHandler(tool)
 			return False
 	
 		return False
@@ -697,7 +704,6 @@ class RepRap:
 		self.priQ = Queue.Queue(0)
 		self.mainQ = Queue.Queue(0)
 		self.prtport = None
-		self.tempHandler = None
 		self.positionHandler = None
 		self.eventHandler = None
 		
@@ -711,8 +717,13 @@ class RepRap:
 		self.ready = True
 		
 	def registerTempHandler(self, handler):
-		self.tempHandler = handler
 		self.parser.setTempHandler(handler)
+		
+	def registerSpeedHandler(self, handler):
+		self.parser.setSpeedHandler(handler)
+		
+	def registerToolHandler(self, handler):
+		self.parser.setToolHandler(handler)
 		
 	def registerPositionHandler(self, handler):
 		self.positionHandler = handler
