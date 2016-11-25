@@ -20,12 +20,12 @@ yTop = normaly(maxTemp)
 xLeft = 0
 xRight = xsize-1
 
-class TempDlg(wx.Dialog):
-	def __init__(self, parent, nextr, prtName):
+class TempDlg(wx.Frame):
+	def __init__(self, parent, wparent, nextr, prtName):
 		self.nextr = nextr
 		self.parent = parent
 		title = "%s temperatures" % prtName
-		wx.Dialog.__init__(self, parent, title=title)
+		wx.Frame.__init__(self, wparent, wx.ID_ANY, title)
 		self.Show()
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.font12bold = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -152,6 +152,9 @@ class TempDlg(wx.Dialog):
 		h.getValueHandle().SetLabel("%s / %s" % (vAct, vSet))
 		
 	def onClose(self, evt):
+		self.terminate()
+
+	def terminate(self):
 		self.graph.stop()
 		self.parent.closeGraph()
 		self.Destroy()

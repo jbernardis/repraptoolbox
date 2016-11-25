@@ -15,9 +15,9 @@ propertyMap = {
 			PropertyEnum.remaining, PropertyEnum.revisedEta]
 		}
 
-class PropertiesDlg(wx.Dialog):
-	def __init__(self, parent, printerName):
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, size=(500, 500))
+class PropertiesDlg(wx.Frame):
+	def __init__(self, parent, wparent, printerName):
+		wx.Frame.__init__(self, wparent, wx.ID_ANY, size=(500, 500))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.printerName = printerName
 		self.parent = parent

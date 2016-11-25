@@ -18,9 +18,9 @@ from printmon import PrintMonitorDlg
 
 BUTTONDIM = (48, 48)
 
-class PrinterDlg(wx.Dialog):
+class PrinterDlg(wx.Frame):
 	def __init__(self, parent, printerName, reprap):
-		wx.Dialog.__init__(self, None, title=printerName, size=(100, 100))
+		wx.Frame.__init__(self, None, wx.ID_ANY, printerName, size=(100, 100))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
 		self.parent = parent
@@ -86,9 +86,9 @@ class PrinterDlg(wx.Dialog):
 
 	def terminate(self):
 		if self.pmonDlg:
-			self.pmonDlg.Destroy()
+			self.pmonDlg.terminate()
 		if self.graphDlg:
-			self.graphDlg.Destroy()
+			self.graphDlg.terminate()
 			
 		self.reprap.registerTempHandler(None)
 		self.settings.save()
@@ -97,7 +97,7 @@ class PrinterDlg(wx.Dialog):
 		return True
 		
 	def onGraph(self, evt):
-		self.graphDlg = TempDlg(self, self.settings.nextruders, self.printerName)
+		self.graphDlg = TempDlg(self, self.parent, self.settings.nextruders, self.printerName)
 		self.bGraph.Enable(False)
 		
 	def closeGraph(self):
@@ -105,7 +105,7 @@ class PrinterDlg(wx.Dialog):
 		self.bGraph.Enable(True)
 		
 	def onPrintMon(self, evt):
-		self.pmonDlg = PrintMonitorDlg(self, self.reprap, self.printerName)
+		self.pmonDlg = PrintMonitorDlg(self, self.parent, self.reprap, self.printerName)
 		self.bPrintMon.Enable(False)
 		
 	def closePrintMon(self):

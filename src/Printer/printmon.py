@@ -46,8 +46,8 @@ class PauseButton(wx.BitmapButton):
 	def setResume(self):
 		self.SetToolTipString("Resume print from the paused point")
 
-class PrintMonitorDlg(wx.Dialog):
-	def __init__(self, parent, reprap, prtName):
+class PrintMonitorDlg(wx.Frame):
+	def __init__(self, parent, wparent, reprap, prtName):
 		self.parent = parent
 		self.log = self.parent.log
 		self.reprap = reprap
@@ -63,7 +63,7 @@ class PrintMonitorDlg(wx.Dialog):
 		self.gObj = None
 		
 		title = self.buildTitle()
-		wx.Dialog.__init__(self, parent, title=title)
+		wx.Frame.__init__(self, wparent, wx.ID_ANY, title=title)
 		self.Show()
 		
 		self.gcf = GcFrame(self, self.gObj, self.settings)
@@ -146,7 +146,7 @@ class PrintMonitorDlg(wx.Dialog):
 		self.Fit()
 		self.Layout()	
 		
-		self.propDlg = PropertiesDlg(self, self.printerName)
+		self.propDlg = PropertiesDlg(self, wparent, self.printerName)
 		self.propDlg.Show()
 		
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
@@ -171,7 +171,9 @@ class PrintMonitorDlg(wx.Dialog):
 			dlg.ShowModal()
 			dlg.Destroy()
 			return
+		self.terminate()
 
+	def terminate(self):
 		self.reprap.registerPositionHandler(None)
 		self.reprap.registerEventHandler(None)
 		self.parent.closePrintMon()
