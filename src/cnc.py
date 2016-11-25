@@ -11,15 +11,16 @@ class CNC:
 		self.gObject = gobject()
 		self.currentLayer = layer(0, 0)
 		self.currentHeight = 0
-		self.currentSegment = segment(0)
-		self.currentSegmentType = 0
-		self.recordPoint((0, 0), 0, ST_MOVE, 0, 0)
-		
-		self.minERate = [999.9, 999.0]
-		self.maxERate = [0.0, 0.0]
 		self.curTool = 0
+		self.currentSegment = segment(0, self.curTool)
+		self.currentSegmentType = 0
+		self.recordPoint((0, 0), 0, ST_MOVE, 0, 0, 0)
+		
+		self.minERate = [999.9, 999.0, 999.0, 999.0]
+		self.maxERate = [0.0, 0.0, 0.0, 0.0]
 		self.maxTool = 0
-		self.totalE = [0.0, 0.0]
+		self.totalE = [0.0, 0.0, 0.0, 0.0]
+		self.layerE = [0.0, 0.0, 0.0, 0.0]
 		self.layerHt = 0.0
 		self.ew = 0.56
 		
@@ -54,9 +55,12 @@ class CNC:
 		elif cmd.startswith("T"):
 			nt = int(cmd.strip()[1:])
 			if nt > 0 and nt < 4:
-				self.curTool = nt
-				if self.curTool > self.maxTool:
-					self.maxTool = self.curTool
+				if nt != self.curTool:
+					self.currentLayer.addSegment(self.currentSegment)
+					self.curTool = nt
+					self.currentSegment = segment(self.currentSegmentType, self.curTool)
+					if self.curTool > self.maxTool:
+						self.maxTool = self.curTool
 		else:
 			pass
 		
@@ -91,26 +95,26 @@ class CNC:
 			else:
 				st = ST_RETRACTION
 			
-		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e)
+		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed)
 	
-	def recordPoint(self, p, ht, st, sourceLine, eBefore):
+	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed):
 		if ht != self.currentHeight:
 			self.currentLayer.addSegment(self.currentSegment)
 			self.gObject.addLayer(self.currentLayer)
 			self.currentLayer = layer(ht, eBefore)
 			self.currentHeight = ht
-			self.currentSegment = segment(st)
+			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, self.curTool)
 			
 		elif st != self.currentSegmentType:
 			self.currentLayer.addSegment(self.currentSegment)
-			self.currentSegment = segment(st)
+			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, self.curTool)
 			
 		else:
-			self.currentSegment.addPoint(p, sourceLine)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, self.curTool)
 			
 	def getGObject(self):
 		self.currentLayer.addSegment(self.currentSegment);
@@ -126,6 +130,9 @@ class CNC:
 				
 		self.gObject.setTemps(self.maxBedTemp, hes)
 		return self.gObject
+	
+	def getMaxTool(self):
+		return self.maxTool
 	
 	def dwell(self, parms, sourceLine):
 		pass
@@ -153,7 +160,7 @@ class CNC:
 			self.curY = 0
 			self.curZ = 0
 			
-		self.recordPoint((self.curX, self.curY), self.curZ, ST_MOVE, sourceLine, self.curE)
+		self.recordPoint((self.curX, self.curY), self.curZ, ST_MOVE, sourceLine, self.curE, 0)
 		
 	def setAbsolute(self, parms, sourceLine):
 		self.relative = False

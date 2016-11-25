@@ -4,16 +4,19 @@ ST_REV_RETRACTION = -2
 ST_PRINT = 1
 
 class segment:
-	def __init__(self, stype):
+	def __init__(self, stype, tool):
 		self.points = []
 		self.lineRef = []
 		self.stype = stype
+		self.tool = tool
+		self.eUsed = 0
 		self.xmin = 99999
 		self.xmax = -99999
 		self.ymin = 99999
 		self.ymax = -99999
 		
-	def addPoint(self, p, lineNbr):
+	def addPoint(self, p, lineNbr, eUsed):
+		self.eUsed += eUsed
 		if p[0] < self.xmin: self.xmin = p[0]
 		if p[0] > self.xmax: self.xmax = p[0]
 		if p[1] < self.ymin: self.ymin = p[1]
@@ -54,6 +57,9 @@ class segment:
 	
 	def segmentType(self):
 		return self.stype
+	
+	def getFilament(self):
+		return self.tool, self.eUsed
 	
 	def getFirstLine(self):
 		if len(self.lineRef) == 0:
@@ -96,6 +102,7 @@ class layer:
 		self.ymin = 99999
 		self.ymax = -99999
 		self.printSegments = 0
+		self.eUsed = [0.0, 0.0, 0.0, 0.0]
 		
 	def addSegment(self, segment):
 		if segment.segmentType() == ST_PRINT:
@@ -106,6 +113,11 @@ class layer:
 			if segment.ymin < self.ymin: self.ymin = segment.ymin
 			
 		self.segments.append(segment)
+		t, e = segment.getFilament()
+		self.eUsed[t] += e
+		
+	def getFilament(self):
+		return self.eUsed
 		
 	def getPointsBetween(self, bracket):
 		result = []
@@ -126,7 +138,7 @@ class layer:
 		return self.height
 	
 	def minMaxXY(self):
-		return self.minx, self.miny, self.maxx, self.maxy
+		return self.xmin, self.ymin, self.xmax, self.ymax
 	
 	def startingE(self):
 		return self.starte
@@ -160,6 +172,7 @@ class gobject:
 		self.ymax = -99999
 		self.maxLine = 0
 		self.layers = []
+		self.eUsed = [0.0, 0.0, 0.0, 0.0]
 		
 	def setMaxLine(self, mxl):
 		self.maxLine = mxl
@@ -174,6 +187,18 @@ class gobject:
 			if layer.ymax > self.ymax: self.ymax = layer.ymax
 			if layer.ymin < self.ymin: self.ymin = layer.ymin
 		self.layers.append(layer)
+		le = layer.getFilament()
+		for i in range(len(self.eUsed)):
+			self.eUsed[i] += le[i]
+			
+	def getFilament(self):
+		return self.eUsed
+	
+	def getLayerFilament(self, lx):
+		if len(self.layers) <= lx:
+			return None
+		
+		return self.layers[lx].getFilament()
 		
 	def layerCount(self):
 		return len(self.layers)

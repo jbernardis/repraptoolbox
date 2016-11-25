@@ -80,12 +80,12 @@ class GcFrame (wx.Window):
 		
 		posLayer = None
 		for lx in range(len(self.layerMap)):
-			if self.layerMap[lx][0] <= position and self.layerMap[lx][1] >= position:
+			if self.layerMap[lx][0] <= self.printPosition and self.layerMap[lx][1] >= self.printPosition:
 				posLayer = lx
 				break
 			
 		if posLayer is None:
-			self.log("Unable to determine layer for print position ", position)
+			self.log("Unable to determine layer for print position %d" % position)
 			return
 		
 		if posLayer == self.currentlx:

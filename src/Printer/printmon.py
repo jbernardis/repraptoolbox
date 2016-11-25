@@ -61,6 +61,8 @@ class PrintMonitorDlg(wx.Frame):
 		self.printerName = prtName
 		
 		self.currentLayer = 0
+		self.maxTool = 0
+		self.eUsed = [0.0, 0.0, 0.0, 0.0]
 		
 		self.gObj = None
 		
@@ -288,6 +290,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.gcode = map(gnormal, gc)		
 		self.gObj = self.buildModel()
 		self.maxLine = self.gObj.getMaxLine()
+		self.eUsed = self.gObj.getFilament()
 		self.gcodeLoaded = True
 		self.gcodeFile = fn
 		self.propDlg.setProperty(PropertyEnum.fileName, fn)
@@ -326,9 +329,14 @@ class PrintMonitorDlg(wx.Frame):
 				else:
 					self.propDlg.setProperty(PropertyEnum.minMaxXY, "(%.2f, %.2f) - (%.2f, %.2f)" % (x0, y0, xn, yn))
 					
+				le = self.gObj.getLayerFilament(lx)
+				print "Max tool: ", self.maxTool
+				print "filament on layer = ", le
+				print "total filament = ", self.eUsed
+					
 			
 			elapsed = time.time() - self.startTime
-			self.propDlg.setProperty(PropertyEnum.elapsed, elapsed)
+			self.propDlg.setProperty(PropertyEnum.elapsed, formatElapsed(elapsed))
 		
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:
@@ -381,6 +389,7 @@ class PrintMonitorDlg(wx.Frame):
 			
 		gobj = cnc.getGObject()
 		gobj.setMaxLine(ln)
+		self.maxTool = cnc.getMaxTool()
 		return gobj
 				
 	def _get_float(self,which):
