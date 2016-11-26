@@ -91,7 +91,7 @@ class CNC:
 		
 		self.lastSpeed = self.speed
 		if 'F' in parms.keys():
-			self.speed = float(parms["F"])
+			self.speed = float(parms["F"]) / 60.0
 			
 		eUsed = self.curE - e
 		
@@ -100,23 +100,23 @@ class CNC:
 		else:
 			st = ST_PRINT
 			
+		dx = self.curX - x
+		dy = self.curY - y
+		dz = self.curZ - z
+		
+		calcTime = 0.0
+		dist = math.hypot(dx, dy)
+		if dist == 0 and dz == 0 and eUsed != 0:
+			if eUsed > 0:
+				st = ST_REV_RETRACTION
+			else:
+				st = ST_RETRACTION
+			
 		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed)
 
 		if self.measure:
-			dx = self.curX - x
-			dy = self.curY - y
 			if dx * self.lastDx + dy * self.lastDy <= 0:
 				self.lastSpeed = 0
-	
-			dz = self.curZ - z
-				
-			dist = math.hypot(dx, dy)
-			calcTime = 0.0
-			if dist == 0 and dz == 0 and eUsed != 0:
-				if eUsed > 0:
-					st = ST_REV_RETRACTION
-				else:
-					st = ST_RETRACTION
 					
 			de = self.curE - e
 				

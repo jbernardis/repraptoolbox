@@ -12,7 +12,7 @@ from properties import PropertiesDlg
 from propenums import PropertyEnum
 from tools import formatElapsed
 
-
+PREFIX = ";@#@# "
 BUTTONDIM = (48, 48)
 
 class PrintState:
@@ -296,9 +296,30 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.fileName, fn)
 		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(fn))) 
 		self.propDlg.setProperty(PropertyEnum.sliceTime, ftime)
-		suffix = gc[-1]
-		print "need to extract file information from suffix: (%s)" % suffix
-	
+		if len(self.gcode) < 10:
+			sx = 0
+		else:
+			sx = -9
+		suffix = [s for s in self.gcode[sx:] is s.startswith(PREFIX)]
+		slCfg = "??"
+		filSiz = "??"
+		tempsHE = "??"
+		tempsBed = "??"
+		
+		for s in suffix:
+			if "CFG:" in s:
+				slCfg = s.split("CFG:")[1].strip()
+			elif "FIL:" in s:
+				filSiz = s.split("FIL:")[1].strip()
+			elif "THE:" in s:
+				tempsHE = s.split("THE:")[1].strip()
+			elif "TBED:" in s:
+				tempsBed = s.split("TBED:")[1].strip()
+				
+		self.propDlg.setProperty(PropertyEnum.slicerCfg, slCfg)	
+		self.propDlg.setProperty(PropertyEnum.filamentSize, filSiz)	
+		self.propDlg.setProperty(PropertyEnum.temperatures, "HE:%s  BED:%s" % (tempsHE, tempsBed))
+		
 	def updatePrintPosition(self, position):
 		if self.state == PrintState.printing:
 			posString = "%d/%d" % (position, self.maxLine)

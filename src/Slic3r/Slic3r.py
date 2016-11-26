@@ -25,6 +25,8 @@ SLIC3R_CANCELLED = 3
 FILAMENT_BASE = 1000
 BUTTONDIM = (48, 48)
 
+PREFIX = ";@#@# "
+
 filamentMergeKeys = ['extrusion_multiplier', 'filament_diameter', 'first_layer_temperature', 'temperature']
 
 
@@ -384,28 +386,23 @@ class Slic3rDlg(wx.Frame):
 		self.enableButtons()
 		
 	def buildSuffix(self, cfg):
-		suffix = ";@#@# CFG:%s" % self.getConfigString()
+		s = []
+		s.append("%s CFG:%s" % (PREFIX, self.getConfigString()))
 		
 		if "filament_diameter" in cfg.keys():
-			suffix += " F:%s " % cfg["filament_diameter"]
-		else:
-			suffix += " F:? "
+			s.append("%s FIL:%s " % (PREFIX, cfg["filament_diameter"]))
 			
 		if "first_layer_temperature" in cfg.keys():
-			suffix += " T:%s " % cfg["first_layer_temperature"]
+			s.append("%s THE:%s " % (PREFIX, cfg["first_layer_temperature"]))
 		elif "temperature" in cfg.keys():
-			suffix += " T:%s " % cfg["temperature"]
-		else:
-			suffix += " T:? "
+			s.append("%s THE:%s " % (PREFIX, cfg["temperature"]))
 			
 		if "first_layer_bed_temperature" in cfg.keys():
-			suffix += " B:%s " % cfg["first_layer_bed_temperature"]
+			s.append("%s TBED:%s " % (PREFIX, cfg["first_layer_bed_temperature"]))
 		elif "bed_temperature" in cfg.keys():
-			suffix += " B:%s " % cfg["bed_temperature"]
-		else:
-			suffix += " B:? "
+			s.append("%s TBED:%s " % (PREFIX, cfg["bed_temperature"]))
 		
-		return suffix
+		return s
 		
 	def onBImport(self, evt):
 		self.stlFn = self.parent.importStlFile()
@@ -462,7 +459,8 @@ class Slic3rDlg(wx.Frame):
 			
 	def addGcSuffix(self):
 		fp = open(self.gcFn, "a")
-		fp.write(self.gcSuffix + "\n")
+		for s in self.gcSuffix:
+			fp.write(s + "\n")
 		fp.close()
 			
 	def updateFileDisplay(self):

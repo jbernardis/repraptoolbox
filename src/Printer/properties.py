@@ -38,7 +38,7 @@ class PropertiesDlg(wx.Frame):
 		pg.SetCellBackgroundColour(wx.Colour(255, 255, 191))
 		pg.SetCellTextColour(wx.Colour(0, 0, 0))
 		pg.SetCellDisabledTextColour(wx.Colour(0, 0, 0))
-		pg.SetEmptySpaceColour(wx.Colour(255, 255, 191))
+		pg.SetEmptySpaceColour(wx.Colour(215, 255, 215))
 		pg.SetLineColour(wx.Colour(0, 0, 0))
 		
 		self.properties = {}
