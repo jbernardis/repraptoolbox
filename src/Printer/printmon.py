@@ -63,6 +63,8 @@ class PrintMonitorDlg(wx.Frame):
 		self.currentLayer = 0
 		self.maxTool = 0
 		self.eUsed = [0.0, 0.0, 0.0, 0.0]
+		self.totalTime = 0
+		self.layerTimes = []
 		
 		self.gObj = None
 		
@@ -204,7 +206,7 @@ class PrintMonitorDlg(wx.Frame):
 			return
 		
 		self.gcf.setLayer(v)
-		self.currentLayer = v
+		self.changeLayer(v)
 		
 	def onImport(self, evt):
 		fn = self.wparent.importGcFile()
@@ -270,11 +272,9 @@ class PrintMonitorDlg(wx.Frame):
 		self.gcode = []
 		self.gObj = None
 		self.maxLine = 0
-		self.propDlg.setProperty(PropertyEnum.fileName, "")
-		self.propDlg.setProperty(PropertyEnum.sliceTime, "")
-		self.propDlg.setProperty(PropertyEnum.slicerCfg, "")
-		self.propDlg.setProperty(PropertyEnum.filamentSize, "")
-		self.propDlg.setProperty(PropertyEnum.temperatures, "")
+		self.totalTime = 0
+		self.layerTimes = []
+		self.propDlg.clearAllProperties()
 		if fn is None:
 			return
 		
@@ -309,34 +309,41 @@ class PrintMonitorDlg(wx.Frame):
 			self.gcf.setPrintPosition(position)
 			lx = self.gcf.getCurrentLayer()
 			if lx != self.currentLayer:
-				self.currentLayer = lx
-				self.slLayers.SetValue(lx)
-				ht = self.gObj.getLayerHeight(lx)
-				if ht is None:
-					self.propDlg.setProperty(PropertyEnum.layerNum, "%d" % lx)
-				else:
-					self.propDlg.setProperty(PropertyEnum.layerNum, "%d (%.2f mm) " % (lx, ht))
-					
-				f, l = self.gObj.getGCodeLines(lx)
-				if f is None:
-					self.propDlg.setProperty(PropertyEnum.gCodeRange, "")
-				else:
-					self.propDlg.setProperty(PropertyEnum.gCodeRange, "%d - %d" % (f, l))
-					
-				x0, y0, xn, yn = self.gObj.getLayerMinMaxXY(lx)
-				if x0 is None:
-					self.propDlg.setProperty(PropertyEnum.minMaxXY, "")
-				else:
-					self.propDlg.setProperty(PropertyEnum.minMaxXY, "(%.2f, %.2f) - (%.2f, %.2f)" % (x0, y0, xn, yn))
-					
-				le = self.gObj.getLayerFilament(lx)
-				print "Max tool: ", self.maxTool
-				print "filament on layer = ", le
-				print "total filament = ", self.eUsed
-					
+				self.changeLayer(lx)
 			
 			elapsed = time.time() - self.startTime
 			self.propDlg.setProperty(PropertyEnum.elapsed, formatElapsed(elapsed))
+			
+	def changeLayer(self, lx):
+		self.currentLayer = lx
+		self.slLayers.SetValue(lx)
+		ht = self.gObj.getLayerHeight(lx)
+		if ht is None:
+			self.propDlg.setProperty(PropertyEnum.layerNum, "%d" % lx)
+		else:
+			self.propDlg.setProperty(PropertyEnum.layerNum, "%d (%.2f mm) " % (lx, ht))
+			
+		f, l = self.gObj.getGCodeLines(lx)
+		if f is None:
+			self.propDlg.setProperty(PropertyEnum.gCodeRange, "")
+		else:
+			self.propDlg.setProperty(PropertyEnum.gCodeRange, "%d - %d" % (f, l))
+			
+		x0, y0, xn, yn = self.gObj.getLayerMinMaxXY(lx)
+		if x0 is None:
+			self.propDlg.setProperty(PropertyEnum.minMaxXY, "")
+		else:
+			self.propDlg.setProperty(PropertyEnum.minMaxXY, "(%.2f, %.2f) - (%.2f, %.2f)" % (x0, y0, xn, yn))
+			
+		le = self.gObj.getLayerFilament(lx)
+		
+		s = []
+		for i in range(self.maxTool+1):
+			s.append("%.2f/%.2f" % (le[i], self.eUsed[i]))
+			
+		self.propDlg.setProperty(PropertyEnum.filamentUsed, ",".join(s))
+		
+		self.propDlg.setProperty(PropertyEnum.layerPrintTime, "%d/%d" % (int(self.layerTimes[lx]), int(self.totalTime)))
 		
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:
@@ -354,7 +361,7 @@ class PrintMonitorDlg(wx.Frame):
 			print "unknown reprap event: ", evt.event
 				
 	def buildModel(self):
-		cnc = CNC()
+		cnc = CNC(measure = True)
 		
 		ln = -1
 		for gl in self.gcode:
@@ -385,11 +392,15 @@ class PrintMonitorDlg(wx.Frame):
 					if "S" in self.paramStr:
 						params["S"] = self._get_float("S")
 			
+					if "P" in self.paramStr:
+						params["P"] = self._get_float("P")
+			
 			cnc.execute(p[0], params, ln)
 			
 		gobj = cnc.getGObject()
 		gobj.setMaxLine(ln)
 		self.maxTool = cnc.getMaxTool()
+		self.totalTime, self.layerTimes = cnc.getTimes()
 		return gobj
 				
 	def _get_float(self,which):

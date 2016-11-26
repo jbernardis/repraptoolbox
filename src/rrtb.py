@@ -34,6 +34,11 @@ class MyFrame(wx.Frame):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "RepRap Toolbox", size=(300, 300))
 		self.Show()
 		
+		self.dlgSlic3r = None
+		self.dlgViewStl = None
+		self.dlgPlater = None
+		self.dlgGEdit = None
+		
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
@@ -263,35 +268,68 @@ class MyFrame(wx.Frame):
 				
 		for p in self.reprap.keys():
 			self.reprap[p].terminate()
+			
+		try:
+			self.dlgSlic3r.Destroy()
+		except:
+			pass
+			
+		try:
+			self.dlgViewStl.Destroy()
+		except:
+			pass
+			
+		try:
+			self.dlgPlater.Destroy()
+		except:
+			pass
+			
+		try:
+			self.dlgGEdit.Destroy()
+		except:
+			pass
+		
 		self.Destroy()
 
 	def doViewStl(self, evt):
 		dlg = StlViewDlg(self)
 		dlg.Show()
+		self.bStlView.Enable(False);
+		self.dlgViewStl = dlg
+	
+	def viewStlClosed(self):
+		self.bViewStl.Enable(True);
+		self.dlgViewStl = None
 	
 	def doPlater(self, evt):
 		dlg = PlaterDlg(self)
 		self.bPlater.Enable(False);
 		dlg.Show()
+		self.dlgPlater = dlg
 	
 	def platerClosed(self):
 		self.bPlater.Enable(True);
+		self.dlgPlater = None
 		
 	def doGEdit(self, evt):
 		dlg = GEditDlg(self)
-		self.bGEdit.Enable(False);
+		self.bGEdit.Enable(False)
 		dlg.Show()
+		self.dlgGEdit = dlg
 	
 	def GEditClosed(self):
-		self.bGEdit.Enable(True);
+		self.bGEdit.Enable(True)
+		self.dlgGEdir = None
 		
 	def doSlic3r(self, evt):
 		dlg = Slic3rDlg(self)
-		self.bSlic3r.Enable(False);
+		self.bSlic3r.Enable(False)
 		dlg.Show()
+		self.dlgSlic3r = dlg
 	
 	def Slic3rClosed(self):
-		self.bSlic3r.Enable(True);
+		self.bSlic3r.Enable(True)
+		self.dlgSlic3r = None
 		
 	def doPrinter(self, evt):
 		bid = evt.GetId()

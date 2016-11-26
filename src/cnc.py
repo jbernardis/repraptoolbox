@@ -2,11 +2,13 @@ import math
 from gobject import gobject, layer, segment, ST_MOVE, ST_PRINT, ST_RETRACTION, ST_REV_RETRACTION;
 
 class CNC:
-	def __init__(self):
+	def __init__(self, measure=False):
 		self.curX = 0
 		self.curY = 0
 		self.curZ = 0
 		self.curE = 0
+		
+		self.measure = measure
 		
 		self.gObject = gobject()
 		self.currentLayer = layer(0, 0)
@@ -24,6 +26,10 @@ class CNC:
 		self.layerHt = 0.0
 		self.ew = 0.56
 		
+		self.layerTimes = []
+		self.layerTime = 0
+		self.totalTime = 0.0
+		
 		self.minBedTemp = 999.0
 		self.maxBedTemp = 0.0
 		self.minHETemp = [999.0, 999.0, 999.0, 999.0]
@@ -31,6 +37,12 @@ class CNC:
 		
 		self.speed = 0
 		self.relative = False
+		
+		self.lastSpeed = 0.0
+		self.lastDx = 0.0
+		self.lastDy = 0.0
+		
+		self.acceleration = 1500
 
 		self.dispatch = {
 			"G0": self.moveFast,
@@ -76,6 +88,8 @@ class CNC:
 		z = self.curZ
 		e = self.curE
 		self.checkCoords(parms)
+		
+		self.lastSpeed = self.speed
 		if 'F' in parms.keys():
 			self.speed = float(parms["F"])
 			
@@ -86,39 +100,73 @@ class CNC:
 		else:
 			st = ST_PRINT
 			
-		dz = self.curZ - z
-			
-		dist = math.hypot(self.curX - x, self.curY - y)
-		if dist == 0 and dz == 0 and eUsed != 0:
-			if eUsed > 0:
-				st = ST_REV_RETRACTION
-			else:
-				st = ST_RETRACTION
-			
 		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed)
+
+		if self.measure:
+			dx = self.curX - x
+			dy = self.curY - y
+			if dx * self.lastDx + dy * self.lastDy <= 0:
+				self.lastSpeed = 0
+	
+			dz = self.curZ - z
+				
+			dist = math.hypot(dx, dy)
+			calcTime = 0.0
+			if dist == 0 and dz == 0 and eUsed != 0:
+				if eUsed > 0:
+					st = ST_REV_RETRACTION
+				else:
+					st = ST_RETRACTION
+					
+			de = self.curE - e
+				
+			if dist == 0:
+				if dz > 0:
+					dist = dz
+				else:
+					dist = de
+					
+			if self.speed == self.lastSpeed:
+				calcTime = dist / self.speed if self.speed != 0 else 0
+			else:
+				d = 2 * abs(((self.speed + self.lastSpeed) * (self.speed - self.lastSpeed) * 0.5) / self.acceleration)
+				if d <= dist and self.lastSpeed + self.speed != 0 and self.speed != 0:
+					calcTime = 2 * d / (self.lastSpeed + self.speed)
+					calcTime += (dist - d) / self.speed
+				else:
+					calcTime = 2 * dist / (self.lastSpeed + self.speed)  
+	
+			self.lastDx = dx
+			self.lastDy = dy
+				
+			self.layerTime += calcTime
+			self.totalTime += calcTime
 	
 	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed):
 		if ht != self.currentHeight:
 			self.currentLayer.addSegment(self.currentSegment)
 			self.gObject.addLayer(self.currentLayer)
+			self.layerTimes.append(self.layerTime)
+			self.layerTime = 0
 			self.currentLayer = layer(ht, eBefore)
 			self.currentHeight = ht
 			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine, eUsed, self.curTool)
+			self.currentSegment.addPoint(p, sourceLine, eUsed)
 			
 		elif st != self.currentSegmentType:
 			self.currentLayer.addSegment(self.currentSegment)
 			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine, eUsed, self.curTool)
+			self.currentSegment.addPoint(p, sourceLine, eUsed)
 			
 		else:
-			self.currentSegment.addPoint(p, sourceLine, eUsed, self.curTool)
+			self.currentSegment.addPoint(p, sourceLine, eUsed)
 			
 	def getGObject(self):
 		self.currentLayer.addSegment(self.currentSegment);
 		self.gObject.addLayer(self.currentLayer)
+		self.layerTimes.append(self.layerTime)
 		self.gObject.setMaxLine(self.sourceLine)
 		
 		hes = []
@@ -134,8 +182,18 @@ class CNC:
 	def getMaxTool(self):
 		return self.maxTool
 	
+	def getTimes(self):
+		return self.totalTime, self.layerTimes
+	
 	def dwell(self, parms, sourceLine):
-		pass
+		if self.measure:
+			ct = 0
+			if 'P' in parms.keys():
+				ct = float(parms['P'])/1000.0
+			elif 'S' in parms.keys():
+				ct = float(parms['S'])
+			self.layerTime += ct
+			self.totalTime += ct
 		
 	def setInches(self, parms, sourceLine):
 		pass

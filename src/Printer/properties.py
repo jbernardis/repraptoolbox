@@ -88,3 +88,8 @@ class PropertiesDlg(wx.Frame):
 		if pid == PropertyEnum.fileName:
 			self.fileName = value
 			self.setTitle()
+			
+	def clearAllProperties(self):
+		for cat in propertyMap.keys():
+			for prop in propertyMap[cat]:
+				self.properties[prop].SetValue("")

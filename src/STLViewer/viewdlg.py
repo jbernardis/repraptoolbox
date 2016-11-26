@@ -340,7 +340,7 @@ class StlViewDlg(wx.Frame):
 	def onClose(self, evt):
 		self.settings.save()
 		self.gl.Destroy()
-		#self.EndModal(wx.ID_OK)
+		self.parent.viewStlClosed()
 		self.Destroy()
 		
 	def onExport(self, evt):

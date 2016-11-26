@@ -680,6 +680,7 @@ class RepRapParser:
 class RepRap:
 	def __init__(self, win, pname, port, baud, firmware):
 		self.win = win
+		self.log = self.win.log
 		self.sender = None
 		self.ready = False
 		self.printerName = pname
@@ -883,7 +884,8 @@ class RepRap:
 		elif evt.event == RECEIVED_MSG:
 			if TRACE:
 				print "==> received message (%s)" % evt.msg
-			self.parser.parseMsg(evt.msg)
+			if not self.parser.parseMsg(evt.msg):
+				self.log(evt.msg.rstrip())
 		else:
 			if self.eventHandler is not None:
 				if TRACE:
