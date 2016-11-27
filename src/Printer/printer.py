@@ -47,10 +47,12 @@ class PrinterDlg(wx.Frame):
 		
 		self.bGraph = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGraph, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
+		self.bGraph.SetToolTipString("Show Temperature monitoring grapg")
 		szWindow.Add(self.bGraph)
 		
-		self.bPrintMon = wx.Button(self, wx.ID_ANY, "PM", size=BUTTONDIM)
+		self.bPrintMon = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPrintmon, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onPrintMon, self.bPrintMon)
+		self.bPrintMon.SetToolTipString("Show dialog box to monitor printing a G Code file")
 		szWindow.Add(self.bPrintMon)
 		
 		self.SetSizer(szWindow)

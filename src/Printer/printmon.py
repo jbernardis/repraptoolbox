@@ -67,6 +67,8 @@ class PrintMonitorDlg(wx.Frame):
 		self.totalTimeStr = ""
 		self.layerTimes = []
 		self.layerTimeStr = []
+		self.layerRange = (0, 0)
+
 		
 		self.gObj = None
 		
@@ -334,8 +336,44 @@ class PrintMonitorDlg(wx.Frame):
 			if lx != self.currentLayer:
 				self.changeLayer(lx)
 			
-			elapsed = time.time() - self.startTime
-			self.propDlg.setProperty(PropertyEnum.elapsed, formatElapsed(elapsed))
+			layersSplit = self.sumLayerTimes(lx)
+			layerSplit  = self.partialCurrentLayer(position)
+			
+			self.elapsed = time.time() - self.startTime
+			expected = layersSplit[0] + layerSplit[0]
+			elapsedStr = "%s (%s)" % (self.elapsed, expected)
+			self.propDlg.setProperty(PropertyEnum.elapsed, elapsedStr)
+			
+			self.remaining = layersSplit[1] + layerSplit[1]
+			self.propDlg.setProperty(PropertyEnum.remaining, formatElapsed(self.remaining))
+			
+			newEta = time.time() + self.remaining
+			revisedStr = time.strftime('%H:%M:%S', time.localtime(newEta))
+			tdiff = newEta - self.origEta
+			if tdiff < 0:
+				revisedStr += "(%s) ahead of schedule" % formatElapsed(-tdiff)
+			elif tdiff > 0:
+				revisedStr += "(%s) behind schedule" % formatElapsed(tdiff)
+			self.propDlg.setProperty(PropertyEnum.revisedEta, revisedStr)
+
+			
+	def partialCurrentLayer(self, pos):
+		if self.layerRange[0] <= pos and pos <= self.layerRange[1]:
+			done = pos - self.layerRange[0]
+			todo = self.layerRange[1] - pos + 1
+			total = self.layerRange[1] - self.layerRange[0] + 1
+			
+			lt = self.layerTimes[self.currentLayer]
+			pctDone = float(done) / float(total)
+			pctToDo = float(todo) / float(total)
+			return (pctDone*lt, pctToDo*lt)
+		else:
+			return (0.0, 0.0)
+
+	def sumLayerTimes(self, lx):
+		tBefore = sum(self.layerTimes[:lx])
+		tAfter = sum(self.layerTimes[lx+1:])
+		return (tBefore, tAfter)
 			
 	def changeLayer(self, lx):
 		self.currentLayer = lx
@@ -349,8 +387,10 @@ class PrintMonitorDlg(wx.Frame):
 		f, l = self.gObj.getGCodeLines(lx)
 		if f is None:
 			self.propDlg.setProperty(PropertyEnum.gCodeRange, "")
+			self.layerRange = (0, 0)
 		else:
 			self.propDlg.setProperty(PropertyEnum.gCodeRange, "%d - %d" % (f, l))
+			self.layerRange = (f, l)
 			
 		x0, y0, xn, yn = self.gObj.getLayerMinMaxXY(lx)
 		if x0 is None:
@@ -471,6 +511,9 @@ class PrintMonitorDlg(wx.Frame):
 		self.printPos = 0
 		self.startTime = time.time()
 		self.endTime = None
+		self.origEta = self.startTime + self.totalTime
+		self.elapsed = 0
+		self.remaining = self.totalTime
 		if oldState == PrintState.paused:
 			action = "restarted"
 			self.reprap.restartPrint(self.gcode)
@@ -479,6 +522,11 @@ class PrintMonitorDlg(wx.Frame):
 			self.reprap.startPrint(self.gcode)
 		stime = time.strftime('%H:%M:%S', time.localtime(self.startTime))
 		self.propDlg.setProperty(PropertyEnum.startTime, stime)
+		self.propDlg.setProperty(PropertyEnum.origEta, 
+					time.strftime('%H:%M:%S', time.localtime(self.origEta)))
+		self.propDlg.setProperty(PropertyEnum.elapsed, formatElapsed(self.elapsed))
+		self.propDlg.setProperty(PropertyEnum.remaining, formatElapsed(self.remaining))
+		self.propDlg.setProperty(PropertyEnum.revisedEta, "")
 		self.log("Print %s at %s" % (action, stime))
 
 	def onPause(self, evt):
