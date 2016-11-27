@@ -64,7 +64,9 @@ class PrintMonitorDlg(wx.Frame):
 		self.maxTool = 0
 		self.eUsed = [0.0, 0.0, 0.0, 0.0]
 		self.totalTime = 0
+		self.totalTimeStr = ""
 		self.layerTimes = []
+		self.layerTimeStr = []
 		
 		self.gObj = None
 		
@@ -251,9 +253,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.slLayers.SetPageSize(int(lmax/10))
 		
 		self.gcf.loadModel(self.gObj)
-		
-		self.currentLayer = 0
-		self.slLayers.SetValue(0)
+		self.changeLayer(0)
 		
 		self.state = PrintState.idle
 		self.enableButtonsByState()
@@ -273,7 +273,9 @@ class PrintMonitorDlg(wx.Frame):
 		self.gObj = None
 		self.maxLine = 0
 		self.totalTime = 0
+		self.totalTimeStr = ""
 		self.layerTimes = []
+		self.layerTimeStr = []
 		self.propDlg.clearAllProperties()
 		if fn is None:
 			return
@@ -296,11 +298,11 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.fileName, fn)
 		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(fn))) 
 		self.propDlg.setProperty(PropertyEnum.sliceTime, ftime)
-		if len(self.gcode) < 10:
+		if len(gc) < 10:
 			sx = 0
 		else:
 			sx = -9
-		suffix = [s for s in self.gcode[sx:] is s.startswith(PREFIX)]
+		suffix = [s for s in gc[sx:] if s.startswith(PREFIX)]
 		slCfg = "??"
 		filSiz = "??"
 		tempsHE = "??"
@@ -340,9 +342,9 @@ class PrintMonitorDlg(wx.Frame):
 		self.slLayers.SetValue(lx)
 		ht = self.gObj.getLayerHeight(lx)
 		if ht is None:
-			self.propDlg.setProperty(PropertyEnum.layerNum, "%d" % lx)
+			self.propDlg.setProperty(PropertyEnum.layerNum, "%d / %d" % (lx, self.gObj.layerCount()))
 		else:
-			self.propDlg.setProperty(PropertyEnum.layerNum, "%d (%.2f mm) " % (lx, ht))
+			self.propDlg.setProperty(PropertyEnum.layerNum, "%d / %d (%.2f mm) " % (lx, self.gObj.layerCount(), ht))
 			
 		f, l = self.gObj.getGCodeLines(lx)
 		if f is None:
@@ -364,7 +366,7 @@ class PrintMonitorDlg(wx.Frame):
 			
 		self.propDlg.setProperty(PropertyEnum.filamentUsed, ",".join(s))
 		
-		self.propDlg.setProperty(PropertyEnum.layerPrintTime, "%d/%d" % (int(self.layerTimes[lx]), int(self.totalTime)))
+		self.propDlg.setProperty(PropertyEnum.layerPrintTime, "%s / %s" % (self.layerTimeStr[lx], self.totalTimeStr))
 		
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:
@@ -422,6 +424,8 @@ class PrintMonitorDlg(wx.Frame):
 		gobj.setMaxLine(ln)
 		self.maxTool = cnc.getMaxTool()
 		self.totalTime, self.layerTimes = cnc.getTimes()
+		self.totalTimeStr = formatElapsed(self.totalTime)
+		self.layerTimeStr = [formatElapsed(s) for s in self.layerTimes]
 		return gobj
 				
 	def _get_float(self,which):

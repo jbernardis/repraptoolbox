@@ -151,7 +151,34 @@ class MyFrame(wx.Frame):
 		szButtonRow.Add(bvsizer)
 		
 		szVFrame.Add(szButtonRow)
+		szVFrame.AddSpacer((30, 30))
+		
+		box = wx.StaticBox(self, wx.ID_ANY, " STL File ")
+		bstlvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bstlsizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
+		bstlsizer.AddSpacer((20, 20))
+		bstlsizer.Add(self.tcStlFile)
+		bstlsizer.AddSpacer((20, 20))
+		bstlvsizer.AddSpacer((20, 20))
+		bstlvsizer.Add(bstlsizer)
+		bstlvsizer.AddSpacer((20, 20))
+		szVFrame.Add(bstlvsizer)
 		szVFrame.AddSpacer((20, 20))
+		
+		box = wx.StaticBox(self, wx.ID_ANY, " G Code File ")
+		bgcvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bgcsizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
+		bgcsizer.AddSpacer((20, 20))
+		bgcsizer.Add(self.tcGcFile)
+		bgcsizer.AddSpacer((20, 20))
+		bgcvsizer.AddSpacer((20, 20))
+		bgcvsizer.Add(bgcsizer)
+		bgcvsizer.AddSpacer((20, 20))
+		szVFrame.Add(bgcvsizer)
+		szVFrame.AddSpacer((20, 20))
+
 		
 		self.reprap = {}
 		self.bPrinter = {}
@@ -187,20 +214,8 @@ class MyFrame(wx.Frame):
 		bvsizer.AddSpacer((10, 10))
 		szVFrame.Add(bvsizer)
 		szVFrame.AddSpacer((20, 20))
-		
-		box = wx.StaticBox(self, wx.ID_ANY, " STL File ")
-		bstlsizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
-		bstlsizer.Add(self.tcStlFile)
-		szVFrame.Add(bstlsizer)
-		szVFrame.AddSpacer((20, 20))
-		
-		box = wx.StaticBox(self, wx.ID_ANY, " G Code File ")
-		bgcsizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
-		bgcsizer.Add(self.tcGcFile)
-		szVFrame.Add(bgcsizer)
-		szVFrame.AddSpacer((20, 20))
+
+
 		
 		szHFrame.AddSpacer((20, 20))
 		szHFrame.Add(szVFrame)
@@ -209,6 +224,7 @@ class MyFrame(wx.Frame):
 		self.SetSizer(szHFrame)
 		self.Layout()
 		self.Fit()
+		self.Refresh()
 		
 	def createSectionButtons(self, section, handler):
 		buttons = {}
@@ -410,7 +426,7 @@ class MyFrame(wx.Frame):
 class App(wx.App):
 	def OnInit(self):
 		self.frame = MyFrame()
-		self.frame.Show()
+		#self.frame.Show()
 		self.SetTopWindow(self.frame)
 		return True
 
