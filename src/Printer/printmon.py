@@ -291,7 +291,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.gcodeLoaded = False
 			return
 
-		self.gcode = map(gnormal, gc)		
+		self.gcode = [s for s in map(gnormal, gc) if s.strip() != ""]	
 		self.gObj = self.buildModel()
 		self.maxLine = self.gObj.getMaxLine()
 		self.eUsed = self.gObj.getFilament()
@@ -341,7 +341,7 @@ class PrintMonitorDlg(wx.Frame):
 			
 			self.elapsed = time.time() - self.startTime
 			expected = layersSplit[0] + layerSplit[0]
-			elapsedStr = "%s (%s)" % (self.elapsed, expected)
+			elapsedStr = "%s (%s)" % (formatElapsed(self.elapsed), formatElapsed(expected))
 			self.propDlg.setProperty(PropertyEnum.elapsed, elapsedStr)
 			
 			self.remaining = layersSplit[1] + layerSplit[1]
@@ -351,9 +351,9 @@ class PrintMonitorDlg(wx.Frame):
 			revisedStr = time.strftime('%H:%M:%S', time.localtime(newEta))
 			tdiff = newEta - self.origEta
 			if tdiff < 0:
-				revisedStr += "(%s) ahead of schedule" % formatElapsed(-tdiff)
+				revisedStr += "  (%s) ahead of schedule" % formatElapsed(-tdiff)
 			elif tdiff > 0:
-				revisedStr += "(%s) behind schedule" % formatElapsed(tdiff)
+				revisedStr += "  (%s) behind schedule" % formatElapsed(tdiff)
 			self.propDlg.setProperty(PropertyEnum.revisedEta, revisedStr)
 
 			
@@ -416,6 +416,13 @@ class PrintMonitorDlg(wx.Frame):
 		elif evt.event == PRINT_STOPPED:
 			self.state = PrintState.paused
 			self.enableButtonsByState()
+			self.elapsed = time.time() - self.startTime
+			cmpTime = time.time()
+			expCmpTime = self.origEta - self.startTime
+			cmpTimeStr = time.strftime('%H:%M:%S', time.localtime(cmpTime))
+			self.log("Print completed at %s" % (cmpTimeStr))
+			self.log("Total print time of %s - expected print time %s" %
+					formatElapsed(self.elapsed), formatElapsed(expCmpTime))
 		elif evt.event == PRINT_STARTED:
 			pass
 		elif evt.event == PRINT_RESUMED:
