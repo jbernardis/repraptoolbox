@@ -3,7 +3,7 @@ Created on Oct 28, 2016
 
 @author: Jeff
 '''
-import os, sys, inspect
+import os, inspect
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
@@ -33,6 +33,8 @@ class PrinterDlg(wx.Frame):
 		self.graphDlg = None
 		self.pmonDlg = None
 		
+		self.zEngaged = False
+		
 		self.moveAxis = ManualCtl(self, reprap, printerName)				
 		szWindow = wx.BoxSizer(wx.VERTICAL)
 		szWindow.Add(self.moveAxis)
@@ -45,15 +47,45 @@ class PrinterDlg(wx.Frame):
 		szWindow.Add(szHeaters, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		szWindow.AddSpacer((20, 20))
 		
+		box = wx.StaticBox(self, wx.ID_ANY, " Buttons ")
+		btnvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		btnhsizer = wx.BoxSizer(wx.HORIZONTAL)
+		btnhsizer.AddSpacer((10, 10))
+		
 		self.bGraph = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGraph, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
-		self.bGraph.SetToolTipString("Show Temperature monitoring grapg")
-		szWindow.Add(self.bGraph)
+		self.bGraph.SetToolTipString("Show Temperature monitoring graph")
+		btnhsizer.Add(self.bGraph)
+		btnhsizer.AddSpacer((10, 10))
 		
 		self.bPrintMon = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPrintmon, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onPrintMon, self.bPrintMon)
 		self.bPrintMon.SetToolTipString("Show dialog box to monitor printing a G Code file")
-		szWindow.Add(self.bPrintMon)
+		btnhsizer.Add(self.bPrintMon)
+		btnhsizer.AddSpacer((10, 10))
+		
+		self.bEngageZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngEngagez, size=BUTTONDIM)
+		self.Bind(wx.EVT_BUTTON, self.onEngageZ, self.bEngageZ)
+		self.bEngageZ.SetToolTipString("Lock the Z axis")
+		btnhsizer.Add(self.bEngageZ)
+		btnhsizer.AddSpacer((10, 10))
+		
+		self.bFirmware = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFirmware, size=BUTTONDIM)
+		self.Bind(wx.EVT_BUTTON, self.onFirmware, self.bFirmware)
+		self.bFirmware.SetToolTipString("Firmware settings")
+		btnhsizer.Add(self.bFirmware)
+		btnhsizer.AddSpacer((10, 10))
+		
+		self.bMacros = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRunmacro, size=BUTTONDIM)
+		self.Bind(wx.EVT_BUTTON, self.onRunMacro, self.bMacros)
+		self.bMacros.SetToolTipString("Run macros")
+		btnhsizer.Add(self.bMacros)
+		btnhsizer.AddSpacer((10, 10))
+
+		btnvsizer.AddSpacer((10, 10))
+		btnvsizer.Add(btnhsizer)
+		btnvsizer.AddSpacer((10, 10))
+		szWindow.Add(btnvsizer)
 		
 		self.SetSizer(szWindow)
 		
@@ -68,6 +100,9 @@ class PrinterDlg(wx.Frame):
 			self.graphDlg.tempHandler(actualOrTarget, hName, tool, value)
 		except AttributeError:
 			pass
+		
+	def registerGCodeTemps(self, hes, bed):
+		self.heaters.registerGCodeTemps(hes, bed)
 		
 	def onClose(self, evt):
 		if self.pmonDlg and self.pmonDlg.isPrinting():
@@ -113,3 +148,18 @@ class PrinterDlg(wx.Frame):
 	def closePrintMon(self):
 		self.pmonDlg = None
 		self.bPrintMon.Enable(True)
+		
+	def onEngageZ(self, evt):
+		print "engage z"
+		self.zEngaged = not self.zEngaged
+		if self.zEngaged:
+			self.bEngageZ.SetBitmap(self.images.pngDisengagez)
+		else:
+			self.bEngageZ.SetBitmal(self.images.pngEngagez)
+		
+	def onRunMacro(self, evt):
+		print "run macro"
+		
+	def onFirmware(self, evt):
+		print "firmware"
+		

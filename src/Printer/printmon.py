@@ -320,6 +320,28 @@ class PrintMonitorDlg(wx.Frame):
 			elif "TBED:" in s:
 				tempsBed = s.split("TBED:")[1].strip()
 				
+		if tempsBed == "??":
+			tBed = 0
+		else:
+			try:
+				tBed = int(tempsBed)
+			except:
+				tBed = 0
+		
+		if tempsHE == "??":
+			tHe = [0] * self.settings.nextruders
+		else:
+			try:
+				x = [int(x) for x in re.split(", *", tempsHE)] + [0]*self.settings.nextruders
+				tHe = x[:self.settings.nextruders]
+			except:
+				tHe = [0] * self.settings.nextruders
+				
+		print "parsed bed temp ", tBed, " from ", tempsBed
+		print "parsed he temps ", tHe, " from ", tempsHE
+		
+		self.parent.registerGCodeTemps(tHe, tBed)
+				
 		self.propDlg.setProperty(PropertyEnum.slicerCfg, slCfg)	
 		self.propDlg.setProperty(PropertyEnum.filamentSize, filSiz)	
 		self.propDlg.setProperty(PropertyEnum.temperatures, "HE:%s  BED:%s" % (tempsHE, tempsBed))
@@ -413,9 +435,6 @@ class PrintMonitorDlg(wx.Frame):
 			self.state = PrintState.idle
 			self.gcf.setPrintPosition(-1)
 			self.enableButtonsByState()
-		elif evt.event == PRINT_STOPPED:
-			self.state = PrintState.paused
-			self.enableButtonsByState()
 			self.elapsed = time.time() - self.startTime
 			cmpTime = time.time()
 			expCmpTime = self.origEta - self.startTime
@@ -423,6 +442,9 @@ class PrintMonitorDlg(wx.Frame):
 			self.log("Print completed at %s" % (cmpTimeStr))
 			self.log("Total print time of %s - expected print time %s" %
 					formatElapsed(self.elapsed), formatElapsed(expCmpTime))
+		elif evt.event == PRINT_STOPPED:
+			self.state = PrintState.paused
+			self.enableButtonsByState()
 		elif evt.event == PRINT_STARTED:
 			pass
 		elif evt.event == PRINT_RESUMED:

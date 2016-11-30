@@ -50,6 +50,11 @@ class Heaters(wx.Window):
 		self.Layout()
 		self.Fit()
 		
+	def registerGCodeTemps(self, hes, bed):
+		for i in range(self.settings.nextruders):
+			self.hHEs[i].enableExtract(hes[i])
+		self.hBed.enableExtract(bed)
+		
 	def tempHandler(self, actualOrTarget, hName, tool, value):
 		if hName == "Bed":
 			self.hBed.setTemperature(actualOrTarget, value)
@@ -67,6 +72,7 @@ class Heater(wx.Window):
 		self.settings = self.parent.settings
 		self.reprap = reprap
 		self.htrInfo = hi
+		self.GCodeTemp = None
 		
 		self.setting = None
 		self.actual = None
@@ -84,6 +90,7 @@ class Heater(wx.Window):
 		
 		t = wx.StaticText(self, wx.ID_ANY, "%s:" % hi.name, size=(50, -1), style=wx.ALIGN_RIGHT)
 		t.SetFont(self.font12bold)
+		szHeater.AddSpacer((10, 10))
 		szHeater.Add(t, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 		
 		szHeater.AddSpacer((10, 10))
@@ -133,6 +140,14 @@ class Heater(wx.Window):
 		
 		szHeater.AddSpacer((10, 10))
 		
+		self.bExtract = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
+		self.bExtract.SetToolTipString("Extract temperature setting from G Code")
+		self.Bind(wx.EVT_BUTTON, self.onBExtract, self.bExtract)
+		szHeater.Add(self.bExtract)
+		self.bExtract.Enable(False)
+		
+		szHeater.AddSpacer((10, 10))
+		
 		self.SetSizer(szHeater)
 		self.Layout()
 		self.Fit()
@@ -152,6 +167,14 @@ class Heater(wx.Window):
 		if self.htrInfo.tool is not None:
 			cmd += " T%d" % self.htrInfo.tool
 		self.reprap.sendNow(cmd)
+		
+	def onBExtract(self, evt):
+		if self.GCodeTemp is not None:
+			self.slThermostat.SetValue(self.GCodeTemp)	
+	
+	def enableExtract(self, temp, flag=True):
+		self.bExtract.Enable(flag)
+		self.GCodeTemp = temp
 
 	def updateSetting(self, newSetting):
 		self.setting = newSetting
