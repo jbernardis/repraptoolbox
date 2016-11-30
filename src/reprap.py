@@ -115,7 +115,7 @@ class SendThread:
 		self.resendFrom = n
 	
 	def getPrintIndex(self):
-		return self.printIndex
+		return self.printIndex-1
 		
 	def setCheckSum(self, flag):
 		self.checksum = flag

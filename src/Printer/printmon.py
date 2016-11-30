@@ -6,7 +6,7 @@ import time
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
-from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED
+from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED, PRINT_ERROR
 from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
@@ -59,6 +59,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.gcodeLoaded = False
 		self.gcodeFile = None
 		self.printerName = prtName
+		self.layerMap = []
 		
 		self.currentLayer = 0
 		self.maxTool = 0
@@ -71,6 +72,7 @@ class PrintMonitorDlg(wx.Frame):
 
 		
 		self.gObj = None
+		self.printLayer = 0
 		
 		title = self.buildTitle()
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, title=title)
@@ -300,6 +302,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.fileName, fn)
 		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(fn))) 
 		self.propDlg.setProperty(PropertyEnum.sliceTime, ftime)
+		self.propDlg.setProperty(PropertyEnum.printEstimate, self.totalTimeStr)
 		if len(gc) < 10:
 			sx = 0
 		else:
@@ -336,9 +339,6 @@ class PrintMonitorDlg(wx.Frame):
 				tHe = x[:self.settings.nextruders]
 			except:
 				tHe = [0] * self.settings.nextruders
-				
-		print "parsed bed temp ", tBed, " from ", tempsBed
-		print "parsed he temps ", tHe, " from ", tempsHE
 		
 		self.parent.registerGCodeTemps(tHe, tBed)
 				
@@ -347,6 +347,8 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.temperatures, "HE:%s  BED:%s" % (tempsHE, tempsBed))
 		
 	def updatePrintPosition(self, position):
+		self.printLayer = self.getLayerByPosition(position)
+		self.printPosition = position
 		if self.state == PrintState.printing:
 			posString = "%d/%d" % (position, self.maxLine)
 			if self.maxLine != 0:
@@ -377,7 +379,14 @@ class PrintMonitorDlg(wx.Frame):
 			elif tdiff > 0:
 				revisedStr += "  (%s) behind schedule" % formatElapsed(tdiff)
 			self.propDlg.setProperty(PropertyEnum.revisedEta, revisedStr)
+			self.updateTimeUntil()
 
+	def getLayerByPosition(self, pos):
+		for lx in range(len(self.layerMap)):
+			if self.layerMap[lx][0] <= pos and pos <= self.layerMap[lx][1]:
+				return lx
+			
+		return 0
 			
 	def partialCurrentLayer(self, pos):
 		if self.layerRange[0] <= pos and pos <= self.layerRange[1]:
@@ -396,6 +405,9 @@ class PrintMonitorDlg(wx.Frame):
 		tBefore = sum(self.layerTimes[:lx])
 		tAfter = sum(self.layerTimes[lx+1:])
 		return (tBefore, tAfter)
+	
+	def sumLayerRangeTime(self, slx, elx):
+		return sum(self.layerTimes[slx:elx])
 			
 	def changeLayer(self, lx):
 		self.currentLayer = lx
@@ -429,6 +441,16 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.filamentUsed, ",".join(s))
 		
 		self.propDlg.setProperty(PropertyEnum.layerPrintTime, "%s / %s" % (self.layerTimeStr[lx], self.totalTimeStr))
+	
+		self.updateTimeUntil()
+		
+	def updateTimeUntil(self):	
+		if self.currentLayer <= self.printLayer:
+			self.propDlg.setProperty(PropertyEnum.timeUntil, "")
+		else:
+			t = sum(self.layerTimes[self.printLayer+1:self.currentLayer-1]) + self.partialCurrentLayer(self.printPosition)
+			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
+
 		
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:
@@ -441,7 +463,7 @@ class PrintMonitorDlg(wx.Frame):
 			cmpTimeStr = time.strftime('%H:%M:%S', time.localtime(cmpTime))
 			self.log("Print completed at %s" % (cmpTimeStr))
 			self.log("Total print time of %s - expected print time %s" %
-					formatElapsed(self.elapsed), formatElapsed(expCmpTime))
+					(formatElapsed(self.elapsed), formatElapsed(expCmpTime)))
 		elif evt.event == PRINT_STOPPED:
 			self.state = PrintState.paused
 			self.enableButtonsByState()
@@ -449,6 +471,8 @@ class PrintMonitorDlg(wx.Frame):
 			pass
 		elif evt.event == PRINT_RESUMED:
 			pass
+		elif evt.event == PRINT_ERROR:
+			self.log("Error communicating with printer")
 		else:
 			print "unknown reprap event: ", evt.event
 				
@@ -493,6 +517,10 @@ class PrintMonitorDlg(wx.Frame):
 		gobj.setMaxLine(ln)
 		self.maxTool = cnc.getMaxTool()
 		self.totalTime, self.layerTimes = cnc.getTimes()
+		self.layerMap = []				
+		for lx in range(len(gobj)):
+			self.layerMap.append(gobj.getGCodeLines(lx))
+
 		self.totalTimeStr = formatElapsed(self.totalTime)
 		self.layerTimeStr = [formatElapsed(s) for s in self.layerTimes]
 		return gobj

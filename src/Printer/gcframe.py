@@ -74,7 +74,7 @@ class GcFrame (wx.Window):
 		
 	def setPrintPosition(self, position):
 		if position == -1:
-			self.printPosition = self.layerMap[-1][1]-1
+			self.printPosition = self.layerMap[-1][1]
 		else:
 			self.printPosition = position
 		

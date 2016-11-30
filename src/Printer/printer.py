@@ -85,7 +85,13 @@ class PrinterDlg(wx.Frame):
 		btnvsizer.AddSpacer((10, 10))
 		btnvsizer.Add(btnhsizer)
 		btnvsizer.AddSpacer((10, 10))
-		szWindow.Add(btnvsizer)
+		
+		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz.AddSpacer(10, 10)
+		hsz.Add(btnvsizer)
+		
+		szWindow.Add(hsz)
+		szWindow.AddSpacer((10, 10))
 		
 		self.SetSizer(szWindow)
 		
@@ -155,7 +161,7 @@ class PrinterDlg(wx.Frame):
 		if self.zEngaged:
 			self.bEngageZ.SetBitmap(self.images.pngDisengagez)
 		else:
-			self.bEngageZ.SetBitmal(self.images.pngEngagez)
+			self.bEngageZ.SetBitmap(self.images.pngEngagez)
 		
 	def onRunMacro(self, evt):
 		print "run macro"

@@ -41,6 +41,7 @@ class Heaters(wx.Window):
 
 			hi = HeaterInfo(title, tool, self.settings.heinfo)	
 			h = Heater(self, hi, self.reprap)
+			szHeaters.AddSpacer((5, 5))
 			szHeaters.Add(h)
 			self.hHEs.append(h)
 			self.hHEInfo.append(hi)
