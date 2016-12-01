@@ -314,7 +314,7 @@ class MyFrame(wx.Frame):
 		self.dlgViewStl = dlg
 	
 	def viewStlClosed(self):
-		self.bViewStl.Enable(True);
+		self.bStlView.Enable(True);
 		self.dlgViewStl = None
 	
 	def doPlater(self, evt):

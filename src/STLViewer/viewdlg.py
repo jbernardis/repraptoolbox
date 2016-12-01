@@ -298,6 +298,7 @@ class StlViewDlg(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)
 		self.parent = parent
+		self.log = self.parent.log
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		self.Show()
 		self.fileName = None
