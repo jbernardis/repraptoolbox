@@ -37,6 +37,7 @@ class PrtSettings:
 		self.buildarea = [200, 200]
 		self.showmoves = False
 		self.showprevious = False
+		self.tempposition = None
 		
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -54,6 +55,14 @@ class PrtSettings:
 					except:
 						print "invalid value in ini file for buildarea"
 						self.buildarea = (200, 200)
+						
+				if opt == 'tempposition':
+					try:
+						s = None
+						exec("s=%s" % value)
+						self.tempposition = s
+					except:
+						self.tempposition = None
 						
 				elif opt == "lastdirectory":
 					self.lastdirectory = value
@@ -157,6 +166,7 @@ class PrtSettings:
 		self.cfg.set(self.section, "buildarea", str(self.buildarea))
 		self.cfg.set(self.section, "showmoves", str(self.showmoves))
 		self.cfg.set(self.section, "showprevious", str(self.showprevious))
+		self.cfg.set(self.section, "tempposition", str(self.tempposition))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

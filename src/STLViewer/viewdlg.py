@@ -29,6 +29,7 @@ class StlCanvas(glcanvas.GLCanvas):
 					  glcanvas.WX_GL_DEPTH_SIZE, 24)  # 24 bit
 
 		glcanvas.GLCanvas.__init__(self, parent, wid, size=size, style=style, pos=pos, attribList=attribList)
+		self.parent = parent
 		self.log = self.parent.log
 		self.init = False
 		self.context = glcanvas.GLContext(self)

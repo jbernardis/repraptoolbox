@@ -141,6 +141,8 @@ class PrinterDlg(wx.Frame):
 		
 	def onGraph(self, evt):
 		self.graphDlg = TempDlg(self, self.parent, self.settings.nextruders, self.printerName)
+		if not self.settings.tempposition is None:
+			self.graphDlg.SetPosition(self.settings.tempposition)
 		self.bGraph.Enable(False)
 		
 	def closeGraph(self):
@@ -157,6 +159,9 @@ class PrinterDlg(wx.Frame):
 		
 	def onEngageZ(self, evt):
 		print "engage z"
+		if self.graphDlg is not None:
+			self.settings.tempposition = self.graphDlg.GetPosition()
+			print "set remembered temp graph position to ", self.settings.tempposition
 		self.zEngaged = not self.zEngaged
 		if self.zEngaged:
 			self.bEngageZ.SetBitmap(self.images.pngDisengagez)
