@@ -67,7 +67,7 @@ class PrtSettings:
 					except:
 						self.tempposition = None
 						
-				elif opt == 'ctrlposition':
+				elif opt == 'tempposition':
 					try:
 						s = None
 						exec("s=%s" % value)

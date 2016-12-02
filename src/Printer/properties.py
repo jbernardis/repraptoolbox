@@ -7,7 +7,7 @@ from propenums import CategoryEnum, PropertyEnum
 catOrder = [CategoryEnum.fileProp, CategoryEnum.layerInfo, CategoryEnum.printStats]
 propertyMap = {
 		CategoryEnum.fileProp : [ 
-			PropertyEnum.fileName, PropertyEnum.slicerCfg, PropertyEnum.filamentSize, PropertyEnum.temperatures, PropertyEnum.sliceTime],
+			PropertyEnum.fileName, PropertyEnum.slicerCfg, PropertyEnum.filamentSize, PropertyEnum.temperatures, PropertyEnum.sliceTime, PropertyEnum.printEstimate],
 		CategoryEnum.layerInfo : [
 			PropertyEnum.layerNum, PropertyEnum.minMaxXY, PropertyEnum.filamentUsed, PropertyEnum.gCodeRange,
 			PropertyEnum.layerPrintTime, PropertyEnum.timeUntil],

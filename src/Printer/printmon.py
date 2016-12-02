@@ -73,6 +73,7 @@ class PrintMonitorDlg(wx.Frame):
 		
 		self.gObj = None
 		self.printLayer = 0
+		self.printPosition = None
 		
 		title = self.buildTitle()
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, title=title)
@@ -452,8 +453,11 @@ class PrintMonitorDlg(wx.Frame):
 	def updateTimeUntil(self):	
 		if self.currentLayer <= self.printLayer:
 			self.propDlg.setProperty(PropertyEnum.timeUntil, "")
+		elif self.printPosition is None:
+			t = sum(self.layerTimes[:self.currentLayer-1])
+			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 		else:
-			t = sum(self.layerTimes[self.printLayer+1:self.currentLayer-1]) + self.partialCurrentLayer(self.printPosition)
+			t = sum(self.layerTimes[self.printLayer+1:self.currentLayer-1]) + self.partialCurrentLayer(self.printPosition)[1]
 			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 
 		
@@ -461,6 +465,8 @@ class PrintMonitorDlg(wx.Frame):
 		if evt.event == PRINT_COMPLETE:
 			self.state = PrintState.idle
 			self.gcf.setPrintPosition(-1)
+			self.printPosition = None
+			self.printLayer = 0
 			self.enableButtonsByState()
 			self.elapsed = time.time() - self.startTime
 			cmpTime = time.time()

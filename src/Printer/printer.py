@@ -46,9 +46,7 @@ class PrinterDlg(wx.Frame):
 		
 		szWindow.Add(szHeaters, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		szWindow.AddSpacer((20, 20))
-		
-		box = wx.StaticBox(self, wx.ID_ANY, " Buttons ")
-		btnvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+
 		btnhsizer = wx.BoxSizer(wx.HORIZONTAL)
 		btnhsizer.AddSpacer((10, 10))
 		
@@ -80,23 +78,15 @@ class PrinterDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onRunMacro, self.bMacros)
 		self.bMacros.SetToolTipString("Run macros")
 		btnhsizer.Add(self.bMacros)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer((200, 10))
 
-		btnvsizer.AddSpacer((10, 10))
-		btnvsizer.Add(btnhsizer)
-		btnvsizer.AddSpacer((10, 10))
-		
-		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		hsz.AddSpacer(10, 10)
-		hsz.Add(btnvsizer)
-		hsz.AddSpacer((50, 10))
-		
 		self.bRemember = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRemember, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onRemember, self.bRemember)
 		self.bRemember.SetToolTipString("Remember %s window positions" % self.printerName)
-		hsz.Add(self.bRemember, 1, wx.TOP, 10)
-		
-		szWindow.Add(hsz)
+		btnhsizer.Add(self.bRemember)
+		btnhsizer.AddSpacer((10, 10))
+
+		szWindow.Add(btnhsizer)
 		szWindow.AddSpacer((10, 10))
 		
 		self.SetSizer(szWindow)
