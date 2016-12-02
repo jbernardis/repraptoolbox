@@ -20,7 +20,7 @@ BUTTONDIM = (48, 48)
 
 class PrinterDlg(wx.Frame):
 	def __init__(self, parent, printerName, reprap):
-		wx.Frame.__init__(self, None, wx.ID_ANY, printerName, size=(100, 100))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "%s manual control" % printerName, size=(100, 100))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 
 		self.parent = parent
@@ -89,6 +89,12 @@ class PrinterDlg(wx.Frame):
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
 		hsz.AddSpacer(10, 10)
 		hsz.Add(btnvsizer)
+		hsz.AddSpacer((50, 10))
+		
+		self.bRemember = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRemember, size=BUTTONDIM)
+		self.Bind(wx.EVT_BUTTON, self.onRemember, self.bRemember)
+		self.bRemember.SetToolTipString("Remember %s window positions" % self.printerName)
+		hsz.Add(self.bRemember, 1, wx.TOP, 10)
 		
 		szWindow.Add(hsz)
 		szWindow.AddSpacer((10, 10))
@@ -97,6 +103,8 @@ class PrinterDlg(wx.Frame):
 		
 		self.Show()
 		self.Fit()
+		if self.settings.ctrlposition is not None:
+			self.SetPosition(self.settings.ctrlposition)
 		
 		self.reprap.registerTempHandler(self.tempHandler)
 		
@@ -151,6 +159,8 @@ class PrinterDlg(wx.Frame):
 		
 	def onPrintMon(self, evt):
 		self.pmonDlg = PrintMonitorDlg(self, self.parent, self.reprap, self.printerName)
+		if not self.settings.monposition is None:
+			self.pmonDlg.SetPosition(self.settings.monposition)
 		self.bPrintMon.Enable(False)
 		
 	def closePrintMon(self):
@@ -159,9 +169,6 @@ class PrinterDlg(wx.Frame):
 		
 	def onEngageZ(self, evt):
 		print "engage z"
-		if self.graphDlg is not None:
-			self.settings.tempposition = self.graphDlg.GetPosition()
-			print "set remembered temp graph position to ", self.settings.tempposition
 		self.zEngaged = not self.zEngaged
 		if self.zEngaged:
 			self.bEngageZ.SetBitmap(self.images.pngDisengagez)
@@ -173,4 +180,13 @@ class PrinterDlg(wx.Frame):
 		
 	def onFirmware(self, evt):
 		print "firmware"
+		
+	def onRemember(self, evt):
+		self.settings.ctrlposition = self.GetPosition()
+		if self.graphDlg is not None:
+			self.settings.tempposition = self.graphDlg.GetPosition()
+		if self.pmonDlg is not None:
+			self.settings.monposition = self.pmonDlg.GetPosition()
+			self.pmonDlg.rememberPositions()
+
 		

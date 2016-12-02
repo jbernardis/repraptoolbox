@@ -160,6 +160,8 @@ class PrintMonitorDlg(wx.Frame):
 		
 		self.propDlg = PropertiesDlg(self, wparent, self.printerName)
 		self.propDlg.Show()
+		if not self.settings.propposition is None:
+			self.propDlg.SetPosition(self.settings.propposition)
 		
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
 		self.reprap.registerEventHandler(self.reprapEvent)
@@ -171,6 +173,9 @@ class PrintMonitorDlg(wx.Frame):
 			t += " - %s" % self.gcodeFile
 			
 		return t
+	
+	def rememberPositions(self):
+		self.settings.propposition = self.propDlg.GetPosition()
 	
 	def isPrinting(self):
 		return self.state == PrintState.printing

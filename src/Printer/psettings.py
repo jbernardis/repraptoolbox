@@ -37,7 +37,10 @@ class PrtSettings:
 		self.buildarea = [200, 200]
 		self.showmoves = False
 		self.showprevious = False
+		self.ctrlposition = None
 		self.tempposition = None
+		self.propposition = None
+		self.monposition = None
 		
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -56,13 +59,37 @@ class PrtSettings:
 						print "invalid value in ini file for buildarea"
 						self.buildarea = (200, 200)
 						
-				if opt == 'tempposition':
+				elif opt == 'ctrlposition':
+					try:
+						s = None
+						exec("s=%s" % value)
+						self.ctrlposition = s
+					except:
+						self.tempposition = None
+						
+				elif opt == 'ctrlposition':
 					try:
 						s = None
 						exec("s=%s" % value)
 						self.tempposition = s
 					except:
 						self.tempposition = None
+						
+				elif opt == 'propposition':
+					try:
+						s = None
+						exec("s=%s" % value)
+						self.propposition = s
+					except:
+						self.propposition = None
+						
+				elif opt == 'monposition':
+					try:
+						s = None
+						exec("s=%s" % value)
+						self.monposition = s
+					except:
+						self.monposition = None
 						
 				elif opt == "lastdirectory":
 					self.lastdirectory = value
@@ -166,7 +193,10 @@ class PrtSettings:
 		self.cfg.set(self.section, "buildarea", str(self.buildarea))
 		self.cfg.set(self.section, "showmoves", str(self.showmoves))
 		self.cfg.set(self.section, "showprevious", str(self.showprevious))
+		self.cfg.set(self.section, "ctrlposition", str(self.ctrlposition))
 		self.cfg.set(self.section, "tempposition", str(self.tempposition))
+		self.cfg.set(self.section, "propposition", str(self.propposition))
+		self.cfg.set(self.section, "monposition", str(self.monposition))
 
 		try:		
 			cfp = open(self.inifile, 'wb')
