@@ -367,7 +367,7 @@ class PrintMonitorDlg(wx.Frame):
 				self.changeLayer(lx)
 			
 			layersSplit = self.sumLayerTimes(lx)
-			layerSplit  = self.partialCurrentLayer(position)
+			layerSplit  = self.partialPrintingLayer()
 			
 			self.elapsed = time.time() - self.startTime
 			expected = layersSplit[0] + layerSplit[0]
@@ -394,15 +394,19 @@ class PrintMonitorDlg(wx.Frame):
 			
 		return 0
 			
-	def partialCurrentLayer(self, pos):
-		if self.layerRange[0] <= pos and pos <= self.layerRange[1]:
-			done = pos - self.layerRange[0]
-			todo = self.layerRange[1] - pos + 1
-			total = self.layerRange[1] - self.layerRange[0] + 1
+	def partialPrintingLayer(self):
+		f, l = self.gObj.getGCodeLines(self.printLayer)
+		print "calc partial layer time based on pos %d, layer range %s, %d" % (self.printPosition, f, l)
+		if f <= self.printPosition and self.printPosition <= l:
+			done = self.printPosition - f
+			todo = l - self.printPosition + 1
+			total = l - f + 1
+			print "done, todo, total = %s, %d, %d" % (done, todo, total)
 			
-			lt = self.layerTimes[self.currentLayer]
+			lt = self.layerTimes[self.printLayer]
 			pctDone = float(done) / float(total)
 			pctToDo = float(todo) / float(total)
+			print "done: %f %f,  todo: %f %f" % (pctDone, pctDone * lt, pctToDo, pctToDo * lt)
 			return (pctDone*lt, pctToDo*lt)
 		else:
 			return (0.0, 0.0)
@@ -454,10 +458,15 @@ class PrintMonitorDlg(wx.Frame):
 		if self.currentLayer <= self.printLayer:
 			self.propDlg.setProperty(PropertyEnum.timeUntil, "")
 		elif self.printPosition is None:
+			print "time until is the sum of layer 0 through layer %d" % (self.currentLayer-1)
 			t = sum(self.layerTimes[:self.currentLayer-1])
+			print "this calculates to ", t
 			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 		else:
-			t = sum(self.layerTimes[self.printLayer+1:self.currentLayer-1]) + self.partialCurrentLayer(self.printPosition)[1]
+			print "time until is the sum of layer %d through layer %d" % (self.printLayer+1, self.currentLayer-1)
+			print "plus the time of the currently printing layer based on position %s" % self.printPosition
+			t = sum(self.layerTimes[self.printLayer+1:self.currentLayer-1]) + self.partialPrintingLayer()[1]
+			print "this calculates to ", t
 			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 
 		
