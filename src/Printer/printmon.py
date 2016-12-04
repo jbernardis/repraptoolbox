@@ -19,6 +19,8 @@ class PrintState:
 	idle = 0
 	printing = 1
 	paused = 2
+	
+RECORD_TIMES = True
 
 class PrintButton(wx.BitmapButton):
 	def __init__(self, parent, images):
@@ -458,14 +460,14 @@ class PrintMonitorDlg(wx.Frame):
 		if self.currentLayer <= self.printLayer:
 			self.propDlg.setProperty(PropertyEnum.timeUntil, "")
 		elif self.printPosition is None:
-			print "time until is the sum of layer 0 through layer %d" % (self.currentLayer-1)
-			t = sum(self.layerTimes[:self.currentLayer-1])
+			print "time until is the sum of layer 0 through layer %d" % (self.currentLayer)
+			t = sum(self.layerTimes[:self.currentLayer])
 			print "this calculates to ", t
 			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 		else:
-			print "time until is the sum of layer %d through layer %d" % (self.printLayer+1, self.currentLayer-1)
+			print "time until is the sum of layer %d through layer %d" % (self.printLayer+1, self.currentLayer)
 			print "plus the time of the currently printing layer based on position %s" % self.printPosition
-			t = sum(self.layerTimes[self.printLayer+1:self.currentLayer-1]) + self.partialPrintingLayer()[1]
+			t = sum(self.layerTimes[self.printLayer+1:self.currentLayer]) + self.partialPrintingLayer()[1]
 			print "this calculates to ", t
 			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 
@@ -498,6 +500,9 @@ class PrintMonitorDlg(wx.Frame):
 				
 	def buildModel(self):
 		cnc = CNC(measure = True)
+		if RECORD_TIMES:
+			print "recording g code times in /tmp/gcodeTimes"
+			fp = open("/tmp/gcodeTimes", "w")
 		
 		ln = -1
 		for gl in self.gcode:
@@ -531,7 +536,12 @@ class PrintMonitorDlg(wx.Frame):
 					if "P" in self.paramStr:
 						params["P"] = self._get_float("P")
 			
-			cnc.execute(p[0], params, ln)
+			t = cnc.execute(p[0], params, ln)
+			if RECORD_TIMES:
+				fp.write("(%s) (%.3f)\n" % (gl, t))
+			
+		if RECORD_TIMES:
+			fp.close()
 			
 		gobj = cnc.getGObject()
 		gobj.setMaxLine(ln)

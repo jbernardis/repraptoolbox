@@ -16,6 +16,7 @@ from GEdit.gedit import GEditDlg
 from Slic3r.Slic3r import Slic3rDlg
 from Printer.printer import PrinterDlg
 from reprap import RepRap
+from log import Logger
 
 	
 
@@ -38,6 +39,8 @@ class MyFrame(wx.Frame):
 		self.dlgViewStl = None
 		self.dlgPlater = None
 		self.dlgGEdit = None
+		
+		self.logger = Logger(self)
 		
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
@@ -215,7 +218,10 @@ class MyFrame(wx.Frame):
 		szVFrame.Add(bvsizer)
 		szVFrame.AddSpacer((20, 20))
 
-
+		self.bLogHideShow = wx.BitmapButton(self, wx.ID_ANY, self.images.pngLoghideshow, size=BUTTONDIM)
+		self.bLogHideShow.SetToolTipString("Toggle the log window off and on")
+		self.Bind(wx.EVT_BUTTON, self.onLog, self.bLogHideShow)
+		szVFrame.Add(self.bLogHideShow)
 		
 		szHFrame.AddSpacer((20, 20))
 		szHFrame.Add(szVFrame)
@@ -225,6 +231,8 @@ class MyFrame(wx.Frame):
 		self.Layout()
 		self.Fit()
 		self.Refresh()
+		
+		self.logger.Show()
 		
 	def createSectionButtons(self, section, handler):
 		buttons = {}
@@ -304,7 +312,8 @@ class MyFrame(wx.Frame):
 			self.dlgGEdit.Destroy()
 		except:
 			pass
-		
+
+		self.logger.Destroy()		
 		self.Destroy()
 
 	def doViewStl(self, evt):
@@ -419,8 +428,14 @@ class MyFrame(wx.Frame):
 	def importGcFile(self):
 		return self.exportedGcFile
 	
+	def onLog(self, evt):
+		if self.logger.IsShown():
+			self.logger.Hide()
+		else:
+			self.logger.Show
+	
 	def log(self, msg):
-		print "LOG: %s" % msg
+		self.logger.LogMessage(msg)
 
 			
 class App(wx.App):

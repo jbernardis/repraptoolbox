@@ -27,6 +27,7 @@ class Heaters(wx.Window):
 		
 		self.bedInfo = HeaterInfo("Bed", None, self.settings.bedinfo)
 		self.hBed = Heater(self, self.bedInfo, self.reprap)
+		szHeaters.AddSpacer((5, 5))
 		szHeaters.Add(self.hBed)
 
 		self.hHEs = []

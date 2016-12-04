@@ -63,7 +63,7 @@ class CNC:
 	def execute(self, cmd, parms, sourceLine):
 		self.sourceLine = sourceLine
 		if cmd in self.dispatch.keys():
-			self.dispatch[cmd](parms, sourceLine)
+			return self.dispatch[cmd](parms, sourceLine)
 		elif cmd.startswith("T"):
 			nt = int(cmd.strip()[1:])
 			if nt > 0 and nt < 4:
@@ -73,14 +73,15 @@ class CNC:
 					self.currentSegment = segment(self.currentSegmentType, self.curTool)
 					if self.curTool > self.maxTool:
 						self.maxTool = self.curTool
+			return 0
 		else:
-			pass
+			return 0
 		
 	def moveFast(self, parms, sourceLine):
-		self.move(parms, sourceLine)
+		return self.move(parms, sourceLine)
 		
 	def moveSlow(self, parms, sourceLine):
-		self.move(parms, sourceLine)
+		return self.move(parms, sourceLine)
 		
 	def move(self, parms, sourceLine):
 		x = self.curX
@@ -141,6 +142,9 @@ class CNC:
 				
 			self.layerTime += calcTime
 			self.totalTime += calcTime
+			return calcTime
+		else:
+			return 0
 	
 	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed):
 		if ht != self.currentHeight:
@@ -194,12 +198,15 @@ class CNC:
 				ct = float(parms['S'])
 			self.layerTime += ct
 			self.totalTime += ct
+			return ct
+		else:
+			return 0
 		
 	def setInches(self, parms, sourceLine):
-		pass
+		return 0
 		
 	def setMillimeters(self, parms, sourceLine):
-		pass
+		return 0
 
 	def home(self, parms, sourceLine):
 		naxes = 0
@@ -219,12 +226,15 @@ class CNC:
 			self.curZ = 0
 			
 		self.recordPoint((self.curX, self.curY), self.curZ, ST_MOVE, sourceLine, self.curE, 0)
+		return 0
 		
 	def setAbsolute(self, parms, sourceLine):
 		self.relative = False
+		return 0
 		
 	def setRelative(self, parms, sourceLine):
 		self.relative = True
+		return 0
 		
 	def tempBed(self, parms, sourceLine):
 		if 'S' in parms.keys():
@@ -233,6 +243,7 @@ class CNC:
 				self.minBedTemp = t
 			if t > self.maxBedTemp:
 				self.maxBedTemp = t
+		return 0
 		
 	def tempHE(self, parms, sourceLine):
 		if 'S' in parms.keys():
@@ -241,6 +252,7 @@ class CNC:
 				self.minHETemp[self.curTool] = t
 			if t > self.maxHETemp[self.curTool]:
 				self.maxHETemp[self.curTool] = t
+		return 0
 		
 	def axisReset(self, parms, sourceLine):
 		if 'X' in parms.keys():
@@ -251,6 +263,7 @@ class CNC:
 			self.curZ = float(parms['Z'])
 		if 'E' in parms.keys():
 			self.curE = float(parms['E'])
+		return 0
 	
 	def checkCoords(self, parms):
 		if self.relative:
