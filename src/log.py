@@ -8,7 +8,7 @@ BUTTONDIM = (48, 48)
 class Logger(wx.Frame):
 	def __init__(self, parent):
 		self.parent = parent
-		wx.Frame.__init__(self, None, wx.ID_ANY, "", size=(400, 250))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "RepRap Log")
 
 		self.parent = parent
 		self.settings = parent.settings
@@ -24,7 +24,7 @@ class Logger(wx.Frame):
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
 		
-		self.t = wx.TextCtrl(self, wx.ID_ANY, size=(300, 600), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
+		self.t = wx.TextCtrl(self, wx.ID_ANY, size=(600, 600), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
 		sz.Add(self.t, flag=wx.EXPAND | wx.ALL, border=10)
 		
 		bsz = wx.BoxSizer(wx.HORIZONTAL)
@@ -77,41 +77,22 @@ class Logger(wx.Frame):
 				
 		dlg.Destroy()
 
-
 	def setTraceLevel(self, l):
 		self.traceLevel = l
-		
-	def LogTrace(self, level, text):
-		if level <= self.traceLevel:
-			self.LogMessage(("Trace[%d] - " % level) +string.rstrip(text)+"\n")
 
-	def LogMessage(self, text):
-		s = time.strftime('%H:%M:%S', time.localtime(time.time()))
+	def LogMessage(self, text, level=None, category=None):
+		pre = time.strftime('%H:%M:%S', time.localtime(time.time()))
+		if not level is None and level <= self.traceLevel:
+			pre += " Trace[%d] - " % level
+		if not category is None:
+			pre += " %s - " % category
+			
+		msg = pre + string.rstrip(text) + "\n"
 		try:
-			msg = s+" - "+string.rstrip(text)
-				
-			self.t.AppendText(msg+"\n")
+			self.t.AppendText(msg)
 			self.nLines += 1
 			if self.maxLines is not None and self.nLines > self.maxLines:
 				self.t.Remove(0L, self.t.XYToPosition(0, self.chunk))
 				self.nLines -= self.chunk
 		except:
 			print "Unable to add (%s) to log" % text
-
-	def LogCMessage(self, text):
-		if self.logCommands:
-			self.LogMessage("(c) - " + text)
-
-	def LogGMessage(self, text):
-		if self.logGCode:
-			self.LogMessage("(g) - " + text)
-
-	def LogMessageCR(self, text):
-		self.LogMessage(text)
-
-	def LogError(self, text):
-		self.LogMessage("Error - " +string.rstrip(text))
-
-	def LogWarning(self, text):
-		self.LogMessage("Warning - " +string.rstrip(text))
-

@@ -368,7 +368,7 @@ class PrintMonitorDlg(wx.Frame):
 			if lx != self.currentLayer:
 				self.changeLayer(lx)
 			
-			layersSplit = self.sumLayerTimes(lx)
+			layersSplit = self.sumLayerTimes(self.printLayer)
 			layerSplit  = self.partialPrintingLayer()
 			
 			self.elapsed = time.time() - self.startTime
