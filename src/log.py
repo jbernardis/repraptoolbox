@@ -12,6 +12,7 @@ class Logger(wx.Frame):
 
 		self.parent = parent
 		self.settings = parent.settings
+		self.images = parent.images
 		
 		self.setTraceLevel(99)
 		
@@ -28,12 +29,12 @@ class Logger(wx.Frame):
 		
 		bsz = wx.BoxSizer(wx.HORIZONTAL)
 				
-		self.bClear = wx.BitmapButton(self, wx.ID_ANY, self.app.images.pngClearlog, size=BUTTONDIM)
+		self.bClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
 		self.bClear.SetToolTipString("Clear the log")
 		bsz.Add(self.bClear, flag=wx.ALL, border=10)
 		self.Bind(wx.EVT_BUTTON, self.doClear, self.bClear)
 				
-		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.app.images.pngSavelog, size=BUTTONDIM)
+		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSavelog, size=BUTTONDIM)
 		self.bSave.SetToolTipString("Save the log to a file")
 		bsz.Add(self.bSave, flag=wx.ALL, border=10)
 		self.Bind(wx.EVT_BUTTON, self.doSave, self.bSave)
@@ -45,6 +46,13 @@ class Logger(wx.Frame):
 		self.SetSizer(sz)
 		self.Layout()
 		self.Fit()
+		self.Show()
+
+	def toggleVisibility(self):
+		if self.IsShown():
+			self.Hide()
+		else:
+			self.Show()
 
 	def doClear(self, evt):
 		self.t.Clear()

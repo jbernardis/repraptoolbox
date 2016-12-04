@@ -40,12 +40,12 @@ class MyFrame(wx.Frame):
 		self.dlgPlater = None
 		self.dlgGEdit = None
 		
-		self.logger = Logger(self)
 		
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
 		self.Bind(wx.EVT_CLOSE, self.onClose)
+		self.logger = Logger(self)
 		
 		self.bStlView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngStlview, size=BUTTONDIM)
 		self.bStlView.SetToolTipString("View an STL file")
@@ -231,8 +231,6 @@ class MyFrame(wx.Frame):
 		self.Layout()
 		self.Fit()
 		self.Refresh()
-		
-		self.logger.Show()
 		
 	def createSectionButtons(self, section, handler):
 		buttons = {}
@@ -429,10 +427,7 @@ class MyFrame(wx.Frame):
 		return self.exportedGcFile
 	
 	def onLog(self, evt):
-		if self.logger.IsShown():
-			self.logger.Hide()
-		else:
-			self.logger.Show
+		self.logger.toggleVisibility()
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)
