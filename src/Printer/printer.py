@@ -15,6 +15,7 @@ from manualctl import ManualCtl
 from heaters import Heaters
 from tempgraph import TempDlg
 from printmon import PrintMonitorDlg
+from macros import MacroDialog
 
 BUTTONDIM = (48, 48)
 
@@ -32,6 +33,7 @@ class PrinterDlg(wx.Frame):
 		
 		self.graphDlg = None
 		self.pmonDlg = None
+		self.macroDlg = None
 		
 		self.zEngaged = False
 		
@@ -166,7 +168,13 @@ class PrinterDlg(wx.Frame):
 			self.bEngageZ.SetBitmap(self.images.pngEngagez)
 		
 	def onRunMacro(self, evt):
-		print "run macro"
+		self.macroDlg = MacroDialog(self, self.parent, self.reprap, self.printerName)
+		self.bMacros.Enable(False)
+		
+	def onMacroExit(self):
+		self.macroDlg.Destroy()
+		self.macroDlg = None
+		self.bMacros.Enable(True)
 		
 	def onFirmware(self, evt):
 		print "firmware"

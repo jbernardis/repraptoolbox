@@ -40,7 +40,6 @@ class MyFrame(wx.Frame):
 		self.dlgPlater = None
 		self.dlgGEdit = None
 		
-		
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
@@ -230,7 +229,11 @@ class MyFrame(wx.Frame):
 		self.SetSizer(szHFrame)
 		self.Layout()
 		self.Fit()
-		self.Refresh()
+		if self.settings.tbposition is not None:
+			self.SetPosition(self.settings.tbposition)
+			
+		if self.settings.logposition is not None:
+			self.logger.SetPosition(self.settings.logposition)
 		
 	def createSectionButtons(self, section, handler):
 		buttons = {}
@@ -287,7 +290,11 @@ class MyFrame(wx.Frame):
 					return
 				else:
 					self.wPrinter[p].terminate()
-				
+					
+		self.settings.tbposition = self.GetPosition()
+		self.settings.logposition = self.logger.GetPosition()
+		self.settings.save()
+						
 		for p in self.reprap.keys():
 			self.reprap[p].terminate()
 			

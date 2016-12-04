@@ -22,6 +22,8 @@ class Settings:
 		self.section = "toolbox"	
 		
 		self.printers = []
+		self.tbposition = None
+		self.logposition = None
 				
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -40,12 +42,28 @@ class Settings:
 						print "invalid value in ini file for printers"
 						self.printers = []
 						
+				elif opt == 'tbposition':
+					try:
+						s = []
+						exec("s=%s" % value)
+						self.tbposition = s
+					except:
+						print "invalid value in ini file for toolbox position"
+						self.tbposition = None
+						
+				elif opt == 'logposition':
+					try:
+						s = []
+						exec("s=%s" % value)
+						self.logposition = s
+					except:
+						print "invalid value in ini file for log position"
+						self.logposition = None
+						
 				else:
 					print("Unknown %s option: %s - ignoring" % (self.section, opt))
 		else:
 			print("Missing %s section - assuming defaults" % self.section)
-			
-		print self.printers
 		
 	def getSection(self, section):
 		if not self.cfg.has_section(section):
@@ -64,6 +82,8 @@ class Settings:
 			pass
 		
 		self.cfg.set(self.section, "printers", str(self.printers))
+		self.cfg.set(self.section, "tbposition", str(self.tbposition))
+		self.cfg.set(self.section, "logposition", str(self.logposition))
 
 		try:		
 			cfp = open(self.inifile, 'wb')
