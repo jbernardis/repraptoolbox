@@ -147,7 +147,6 @@ class ManageMacros(wx.Dialog):
 				mdir = os.path.split(paths[0])[0]
 				if mdir != self.settings.lastmacrodirectory:
 					self.settings.lastmacrodirectory = mdir
-					self.settings.setModified()
 					
 				path = paths[0]
 				if self.lbQueue.addMacro(name, path):

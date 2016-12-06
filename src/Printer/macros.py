@@ -68,7 +68,6 @@ class MacroDialog(wx.Frame):
 		if rc:
 			self.settings.macroOrder = mo
 			self.settings.macroList = mfn
-			self.settings.setModified()
 		
 	def onClose(self, evt):
 		self.parent.onMacroExit()

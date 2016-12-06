@@ -490,7 +490,7 @@ class Slic3rDlg(wx.Frame):
 		
 	def getConfigString(self):
 		cprint = self.chPrint.GetString(self.chPrint.GetSelection())
-		cprinter = self.chPrint.GetString(self.chPrinter.GetSelection())
+		cprinter = self.chPrinter.GetString(self.chPrinter.GetSelection())
 		cfilament = []
 		for ex in range(self.nExtruders):
 			cfilament.append(self.chFilament[ex].GetString(self.chFilament[ex].GetSelection()))

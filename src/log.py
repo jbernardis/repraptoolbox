@@ -81,11 +81,11 @@ class Logger(wx.Frame):
 		self.traceLevel = l
 
 	def LogMessage(self, text, level=None, category=None):
-		pre = time.strftime('%H:%M:%S', time.localtime(time.time()))
+		pre = time.strftime('%H:%M:%S ', time.localtime(time.time()))
 		if not level is None and level <= self.traceLevel:
-			pre += " Trace[%d] - " % level
+			pre += "Trace[%d] - " % level
 		if not category is None:
-			pre += " %s - " % category
+			pre += "%s - " % category
 			
 		msg = pre + string.rstrip(text) + "\n"
 		try:

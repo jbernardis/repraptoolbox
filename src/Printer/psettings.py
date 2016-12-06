@@ -33,6 +33,7 @@ class PrtSettings:
 		defaultHeinfo = [0, 250, 185, 225, 'M104', 'M109']
 		self.heinfo = defaultHeinfo
 		self.lastdirectory = "."
+		self.lastmacrodirectory = "."
 		self.scale = 2
 		self.buildarea = [200, 200]
 		self.showmoves = False
@@ -93,6 +94,9 @@ class PrtSettings:
 						
 				elif opt == "lastdirectory":
 					self.lastdirectory = value
+					
+				elif opt == "lastmacrodirectory":
+					self.lastmacrodirectory = value
 					
 				elif opt == 'nextruders':
 					try:
@@ -169,7 +173,29 @@ class PrtSettings:
 					self.showmoves = parseBoolean(value, False)
 				elif opt == 'showprevious':
 					self.showprevious = parseBoolean(value, False)
+					
+		self.loadMacros()
 
+	def loadMacros(self):	
+		self.macroOrder = []
+		self.macroList = {}				
+		section = "macros"	
+		if self.cfg.has_section(section):
+			i = 0
+			while True:
+				i += 1
+				key = "macro." + str(i)
+				if not self.cfg.has_option(section, key): break
+				
+				try:
+					mkey, mfile = self.cfg.get(section, key).split(',', 1)
+				except:
+					self.showError("Unable to parse config for %s" % key)
+					break
+				
+				mkey = mkey.strip()
+				self.macroOrder.append(mkey)
+				self.macroList[mkey] = mfile.strip()
 			
 	def save(self):
 		try:
@@ -178,6 +204,7 @@ class PrtSettings:
 			pass
 		
 		self.cfg.set(self.section, "lastdirectory", str(self.lastdirectory))
+		self.cfg.set(self.section, "lastmacrodirectory", str(self.lastmacrodirectory))
 		self.cfg.set(self.section, "nextruders", str(self.nextruders))
 		self.cfg.set(self.section, "xyspeed", str(self.xyspeed))
 		self.cfg.set(self.section, "zspeed", str(self.zspeed))
@@ -197,6 +224,8 @@ class PrtSettings:
 		self.cfg.set(self.section, "tempposition", str(self.tempposition))
 		self.cfg.set(self.section, "propposition", str(self.propposition))
 		self.cfg.set(self.section, "monposition", str(self.monposition))
+		
+		self.saveMacros()
 
 		try:		
 			cfp = open(self.inifile, 'wb')
@@ -205,3 +234,16 @@ class PrtSettings:
 			return
 		self.cfg.write(cfp)
 		cfp.close()
+		
+	def saveMacros(self):
+		section = "macros"
+		try:
+			self.cfg.add_section(section)
+		except ConfigParser.DuplicateSectionError:
+			pass
+			
+		for m in range(len(self.macroOrder)):
+			opt = "macro.%d" % (m+1)
+			val = self.macroOrder[m] + "," + self.macroList[self.macroOrder[m]]
+			self.cfg.set(section, opt, val)
+
