@@ -172,6 +172,7 @@ class gobject:
 		self.ymax = -99999
 		self.maxLine = 0
 		self.layers = []
+		self.filamentLayers = None
 		self.eUsed = [0.0, 0.0, 0.0, 0.0]
 		
 	def setMaxLine(self, mxl):
@@ -195,10 +196,22 @@ class gobject:
 		return self.eUsed
 	
 	def getLayerFilament(self, lx):
+		if self.filamentLayers is None:
+			self.filamentLayers = [self.layers[x].getFilament() for x in range(len(self.layers))]
+			
 		if len(self.layers) <= lx:
 			return None
 		
-		return self.layers[lx].getFilament()
+		priorUsed = [0.0, 0.0, 0.0, 0.0]
+		if lx != 0:
+			for fx in range(4):
+				priorUsed[fx] = sum(self.filamentLayers[:lx-1][fx])
+			
+		afterUsed = [0.0, 0.0, 0.0, 0.0]
+		for fx in range(4):
+			afterUsed[fx] = sum(self.filamentLayers[lx+1:][fx])
+		
+		return self.filamentLayers[lx], priorUsed, afterUsed
 		
 	def layerCount(self):
 		return len(self.layers)

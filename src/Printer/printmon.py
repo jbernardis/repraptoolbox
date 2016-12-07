@@ -121,6 +121,14 @@ class PrintMonitorDlg(wx.Frame):
 		self.bPause.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onPause, self.bPause)
 		
+		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp, size=BUTTONDIM)
+		self.bUp.SetToolTipString("Move up one layer")
+		self.Bind(wx.EVT_BUTTON, self.onUp, self.bUp)
+		
+		self.bDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDown, size=BUTTONDIM)
+		self.bDown.SetToolTipString("Move down one layer")
+		self.Bind(wx.EVT_BUTTON, self.onDown, self.bDown)
+		
 		szGcf = wx.BoxSizer(wx.HORIZONTAL)
 		szGcf.AddSpacer((10, 10))
 		szGcf.Add(self.gcf)
@@ -135,6 +143,10 @@ class PrintMonitorDlg(wx.Frame):
 		szOpts.Add(self.cbShowPrevious)
 		szOpts.AddSpacer((10, 10))
 		szOpts.Add(self.cbSyncPrint)
+		szOpts.AddSpacer((80, 10))
+		szOpts.Add(self.bUp)
+		szOpts.AddSpacer((10, 10))
+		szOpts.Add(self.bDown)
 		szOpts.AddSpacer((10, 10))
 		
 		szBtn = wx.BoxSizer(wx.HORIZONTAL)
@@ -219,6 +231,23 @@ class PrintMonitorDlg(wx.Frame):
 		if v == self.currentLayer:
 			return
 		
+		self.gcf.setLayer(v)
+		self.changeLayer(v)
+		
+	def onUp(self, evt):
+		lmax = self.slLayers.GetRange()[1]
+		if self.currentLayer >= lmax:
+			return
+		
+		v = self.currentLayer + 1
+		self.gcf.setLayer(v)
+		self.changeLayer(v)
+	
+	def onDown(self, evt):
+		if self.currentLayer <= 0:
+			return
+		
+		v = self.currentLayer - 1
 		self.gcf.setLayer(v)
 		self.changeLayer(v)
 		
@@ -441,13 +470,13 @@ class PrintMonitorDlg(wx.Frame):
 		else:
 			self.propDlg.setProperty(PropertyEnum.minMaxXY, "(%.2f, %.2f) - (%.2f, %.2f)" % (x0, y0, xn, yn))
 			
-		le = self.gObj.getLayerFilament(lx)
+		le, prior, after = self.gObj.getLayerFilament(lx)
 		
 		s = []
-		for i in range(self.maxTool+1):
-			s.append("%.2f/%.2f" % (le[i], self.eUsed[i]))
+		for i in range(self.settings.nextruders):
+			s.append("%.2f/%.2f  %.2f  %.2f" % (le[i], self.eUsed[i], prior[i], after[i]))
 			
-		self.propDlg.setProperty(PropertyEnum.filamentUsed, ",".join(s))
+		self.propDlg.setProperty(PropertyEnum.filamentUsed, s)
 		
 		self.propDlg.setProperty(PropertyEnum.layerPrintTime, "%s / %s" % (self.layerTimeStr[lx], self.totalTimeStr))
 	
