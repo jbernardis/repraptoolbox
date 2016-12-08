@@ -203,13 +203,14 @@ class gobject:
 			return None
 		
 		priorUsed = [0.0, 0.0, 0.0, 0.0]
-		if lx != 0:
+		for lyx in range(lx):
 			for fx in range(4):
-				priorUsed[fx] = sum(self.filamentLayers[:lx-1][fx])
-			
+				priorUsed[fx] += self.filamentLayers[lyx][fx]
+
 		afterUsed = [0.0, 0.0, 0.0, 0.0]
-		for fx in range(4):
-			afterUsed[fx] = sum(self.filamentLayers[lx+1:][fx])
+		for lyx in range(lx+1, len(self.layers)):
+			for fx in range(4):
+				afterUsed[fx] += self.filamentLayers[lyx][fx]
 		
 		return self.filamentLayers[lx], priorUsed, afterUsed
 		

@@ -79,13 +79,13 @@ class MacroDialog(wx.Frame):
 			return
 	
 		mn = self.macroMap[kid]	
-		self.logger.LogMessage("Running macro \"%s\"" % mn)
+		self.log("Running macro \"%s\"" % mn)
 
 		fn = self.macroList.getFileName(mn)		
 		try:
 			l = list(open(fn))
 		except:
-			self.logger.LogMessage("Unable to open macro file: " + fn)
+			self.log("Unable to open macro file: " + fn)
 			return
 		
 		for ln in l:
