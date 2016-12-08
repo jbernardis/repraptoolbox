@@ -334,12 +334,17 @@ class PrintMonitorDlg(wx.Frame):
 		self.gObj = self.buildModel()
 		self.maxLine = self.gObj.getMaxLine()
 		self.eUsed = self.gObj.getFilament()
+		
 		self.gcodeLoaded = True
 		self.gcodeFile = fn
 		self.propDlg.setProperty(PropertyEnum.fileName, fn)
 		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(fn))) 
 		self.propDlg.setProperty(PropertyEnum.sliceTime, ftime)
 		self.propDlg.setProperty(PropertyEnum.printEstimate, self.totalTimeStr)
+		
+		if self.settings.nextruders < self.maxTool+1:
+			self.log("G Code file uses more tools (%d) than printer is equipped with (%d)" % (self.maxTool+1, self.settings.nextruders))
+			
 		if len(gc) < 10:
 			sx = 0
 		else:
