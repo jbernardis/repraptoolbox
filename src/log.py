@@ -26,22 +26,6 @@ class Logger(wx.Frame):
 		
 		self.t = wx.TextCtrl(self, wx.ID_ANY, size=(600, 600), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
 		sz.Add(self.t, flag=wx.EXPAND | wx.ALL, border=10)
-		
-		bsz = wx.BoxSizer(wx.HORIZONTAL)
-				
-		self.bClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
-		self.bClear.SetToolTipString("Clear the log")
-		bsz.Add(self.bClear, flag=wx.ALL, border=10)
-		self.Bind(wx.EVT_BUTTON, self.doClear, self.bClear)
-				
-		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSavelog, size=BUTTONDIM)
-		self.bSave.SetToolTipString("Save the log to a file")
-		bsz.Add(self.bSave, flag=wx.ALL, border=10)
-		self.Bind(wx.EVT_BUTTON, self.doSave, self.bSave)
-		
-		bsz.AddSpacer((20, 60))
-
-		sz.Add(bsz, flag=wx.EXPAND | wx.ALL, border=10)
 
 		self.SetSizer(sz)
 		self.Layout()
@@ -54,10 +38,10 @@ class Logger(wx.Frame):
 		else:
 			self.Show()
 
-	def doClear(self, evt):
+	def doClear(self):
 		self.t.Clear()
 		
-	def doSave(self, evt):
+	def doSave(self):
 		wildcard = "Log File |*.log"
 		dlg = wx.FileDialog(
 			self, message="Save as ...", defaultDir=self.settings.lastlogdirectory, 

@@ -62,6 +62,18 @@ class MyFrame(wx.Frame):
 		self.bGEdit.SetToolTipString("Analyze/edit a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doGEdit, self.bGEdit)
 
+		self.bLogHideShow = wx.BitmapButton(self, wx.ID_ANY, self.images.pngLoghideshow, size=BUTTONDIM)
+		self.bLogHideShow.SetToolTipString("Toggle the log window off and on")
+		self.Bind(wx.EVT_BUTTON, self.onLogHideShow, self.bLogHideShow)
+
+		self.bLogClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearLog, size=BUTTONDIM)
+		self.bLogClear.SetToolTipString("Erase the log contents")
+		self.Bind(wx.EVT_BUTTON, self.onLogClear, self.bLogClear)
+
+		self.bLogSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSavelog, size=BUTTONDIM)
+		self.bLogSave.SetToolTipString("Save log contents to a file")
+		self.Bind(wx.EVT_BUTTON, self.onLogSave, self.bLogSave)
+
 		(self.tDesignButtons,
 			self.tDesignIds,
 			self.tDesignCommands,
@@ -151,6 +163,21 @@ class MyFrame(wx.Frame):
 		bvsizer.Add(bhsizer)
 		bvsizer.AddSpacer((10, 10))
 		szButtonRow.Add(bvsizer)
+		szButtonRow.AddSpacer((20, 20))
+		
+		box = wx.StaticBox(self, wx.ID_ANY, " Log ")
+		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
+		bhsizer.AddSpacer((10, 10))
+		bhsizer.Add(self.bLogHideShow)
+		bhsizer.AddSpacer((10, 10))
+		bhsizer.Add(self.bLogClear)
+		bhsizer.AddSpacer((10, 10))
+		bhsizer.Add(self.bLogSave)
+		bvsizer.AddSpacer((10, 10))
+		bvsizer.Add(bhsizer)
+		bvsizer.AddSpacer((10, 10))
+		szButtonRow.Add(bvsizer)
 		
 		szVFrame.Add(szButtonRow)
 		szVFrame.AddSpacer((30, 30))
@@ -216,11 +243,6 @@ class MyFrame(wx.Frame):
 		bvsizer.AddSpacer((10, 10))
 		szVFrame.Add(bvsizer)
 		szVFrame.AddSpacer((20, 20))
-
-		self.bLogHideShow = wx.BitmapButton(self, wx.ID_ANY, self.images.pngLoghideshow, size=BUTTONDIM)
-		self.bLogHideShow.SetToolTipString("Toggle the log window off and on")
-		self.Bind(wx.EVT_BUTTON, self.onLog, self.bLogHideShow)
-		szVFrame.Add(self.bLogHideShow)
 		
 		szHFrame.AddSpacer((20, 20))
 		szHFrame.Add(szVFrame)
@@ -433,8 +455,14 @@ class MyFrame(wx.Frame):
 	def importGcFile(self):
 		return self.exportedGcFile
 	
-	def onLog(self, evt):
+	def onLogHideShow(self, evt):
 		self.logger.toggleVisibility()
+		
+	def onLogClear(self, evt):
+		self.logger.doClear()
+		
+	def onLogSave(self, evt):
+		self.logger.doSave()
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)
