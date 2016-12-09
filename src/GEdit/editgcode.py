@@ -16,7 +16,6 @@ def findallpos(regexp, mstr):
 	lim = len(mpos)
 	
 	if len(m) != len(mpos):
-		print "bad assertion, array lengths not equal"
 		if len(m) < lim:
 			lim = len(m)
 		

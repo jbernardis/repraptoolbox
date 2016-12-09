@@ -16,6 +16,7 @@ from editgcode import EditGCodeDlg
 from filamentchange import FilamentChangeDlg
 from savelayer import SaveLayerDlg
 from images import Images
+from tools import formatElapsed
 
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 BUTTONDIM = (48, 48)
@@ -52,7 +53,7 @@ class GEditDlg(wx.Frame):
 		self.gcFrame = GcFrame(self, self.gObj, self.settings)
 		self.stLayerText = wx.StaticText(self, wx.ID_ANY, "Layer Height:   0.00")
 
-		ht = self.gcFrame.GetSize().Get()[1]
+		ht = self.gcFrame.GetSize().Get()[1] - 2*BUTTONDIM[1] - 20
 		
 		if self.gObj is None:
 			lmax = 1
@@ -97,6 +98,21 @@ class GEditDlg(wx.Frame):
 		self.bEdit.SetToolTipString("Free edit G Code")
 		self.Bind(wx.EVT_BUTTON, self.onEditGCode, self.bEdit)
 		self.bEdit.Enable(False)
+		
+		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp, size=BUTTONDIM)
+		self.bUp.SetToolTipString("Move up one layer")
+		self.Bind(wx.EVT_BUTTON, self.onUp, self.bUp)
+		self.bUp.Enable(False)
+		
+		self.bDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDown, size=BUTTONDIM)
+		self.bDown.SetToolTipString("Move down one layer")
+		self.Bind(wx.EVT_BUTTON, self.onDown, self.bDown)
+		self.bDown.Enable(False)
+		
+		self.bInfo = wx.BitmapButton(self, wx.ID_ANY, self.images.pngInfo, size=BUTTONDIM)
+		self.bInfo.SetToolTipString("Information")
+		self.Bind(wx.EVT_BUTTON, self.onInfo, self.bInfo)
+		self.bInfo.Enable(False)
 		
 		self.bSaveLayers = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSavelayers, size=BUTTONDIM)
 		self.bSaveLayers.SetToolTipString("Save specific layers to a file")
@@ -168,6 +184,8 @@ class GEditDlg(wx.Frame):
 		btnszr.Add(self.bFilChange)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bEdit)
+		btnszr.AddSpacer((10, 10))
+		btnszr.Add(self.bInfo)
 		btnszr.AddSpacer((70, 10))
 		
 		optszr = wx.BoxSizer(wx.VERTICAL)
@@ -196,7 +214,15 @@ class GEditDlg(wx.Frame):
 		vszr.Add(self.gcFrame)
 		vszr.Add(self.stLayerText, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		hszr.Add(vszr)
-		hszr.Add(self.slLayers)
+
+		szNav = wx.BoxSizer(wx.VERTICAL)
+		szNav.Add(self.bUp, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		szNav.AddSpacer((10, 10))
+		szNav.Add(self.slLayers)
+		szNav.AddSpacer((10, 10))
+		szNav.Add(self.bDown, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+
+		hszr.Add(szNav)
 		hszr.AddSpacer((20,20))
 		
 		listszr = wx.BoxSizer(wx.VERTICAL)
@@ -318,7 +344,16 @@ class GEditDlg(wx.Frame):
 				return
 
 		self.gcodeFileDialog()
-			
+		
+	def onInfo(self, evt):
+		print "Filament: ", self.gObj.getFilament()
+		print "current layer: ", self.currentLayer
+		print "layer filament: ", self.gObj.getLayerFilament(self.currentLayer)
+		print "estimated print time", self.totalTimeStr
+		print "estimated time for current layer " , self.layerTimeStr[self.currentLayer]
+		print "all file info - fila name, mod date"
+		print "info from suffix: filament, temperatures"
+		
 	def gcodeFileDialog(self):
 		wildcard = "GCode (*.gcode)|*.gcode|"	 \
 			"All files (*.*)|*.*"
@@ -346,10 +381,14 @@ class GEditDlg(wx.Frame):
 		if self.gObj is None:
 			lmax = 1
 			self.slLayers.Enable(False)
+			self.bUp.Enable(False)
+			self.bDown.Enable(False)
 			self.filename = None
 		else:
 			lmax = self.gObj.layerCount()-1
 			self.slLayers.Enable(True)
+			self.bUp.Enable(True)
+			self.bDown.Enable(True)
 			self.filename = path
 			
 		self.updateTitle()
@@ -375,6 +414,7 @@ class GEditDlg(wx.Frame):
 		self.bModTemp.Enable(flag)
 		self.bModSpeed.Enable(flag)
 		self.bEdit.Enable(flag)
+		self.bInfo.Enable(flag)
 		self.bSaveLayers.Enable(flag)
 		self.bSave.Enable(flag)
 		self.bSaveAs.Enable(flag)
@@ -629,6 +669,25 @@ class GEditDlg(wx.Frame):
 		self.setLayerText()
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(v))
 		
+	def onUp(self, evt):
+		lmax = self.slLayers.GetRange()[1]
+		if self.currentLayer >= lmax:
+			return
+		
+		self.currentLayer += 1
+		self.gcFrame.setLayer(self.currentLayer)
+		self.setLayerText()
+		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(self.currentLayer))
+	
+	def onDown(self, evt):
+		if self.currentLayer <= 0:
+			return
+		
+		self.currentLayer -= 1
+		self.gcFrame.setLayer(self.currentLayer)
+		self.setLayerText()
+		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(self.currentLayer))
+		
 	def setLayerText(self):
 		if self.gObj is None:
 			ht = 0.0
@@ -710,6 +769,11 @@ class GEditDlg(wx.Frame):
 			
 		gobj = cnc.getGObject()
 		gobj.setMaxLine(ln)
+		self.totalTime, self.layerTimes = cnc.getTimes()
+
+		self.totalTimeStr = formatElapsed(self.totalTime)
+		self.layerTimeStr = [formatElapsed(s) for s in self.layerTimes]
+
 		return gobj
 				
 	def _get_float(self,which):

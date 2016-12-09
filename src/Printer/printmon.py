@@ -83,7 +83,7 @@ class PrintMonitorDlg(wx.Frame):
 		
 		self.gcf = GcFrame(self, self.gObj, self.settings)
 		
-		ht = self.gcf.GetSize().Get()[1]
+		ht = self.gcf.GetSize().Get()[1] - BUTTONDIM[1]*2 - 20
 		
 		self.slLayers = wx.Slider(
 			self, wx.ID_ANY, 0, 0, 1000, size=(-1, ht), 
@@ -124,16 +124,26 @@ class PrintMonitorDlg(wx.Frame):
 		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp, size=BUTTONDIM)
 		self.bUp.SetToolTipString("Move up one layer")
 		self.Bind(wx.EVT_BUTTON, self.onUp, self.bUp)
+		self.bUp.Enable(False)
 		
 		self.bDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDown, size=BUTTONDIM)
 		self.bDown.SetToolTipString("Move down one layer")
 		self.Bind(wx.EVT_BUTTON, self.onDown, self.bDown)
+		self.bDown.Enable(False)
 		
 		szGcf = wx.BoxSizer(wx.HORIZONTAL)
 		szGcf.AddSpacer((10, 10))
 		szGcf.Add(self.gcf)
 		szGcf.AddSpacer((10, 10))
-		szGcf.Add(self.slLayers)
+
+		szNav = wx.BoxSizer(wx.VERTICAL)
+		szNav.Add(self.bUp, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		szNav.AddSpacer((10, 10))
+		szNav.Add(self.slLayers)
+		szNav.AddSpacer((10, 10))
+		szNav.Add(self.bDown, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+
+		szGcf.Add(szNav)
 		szGcf.AddSpacer((10, 10))
 		
 		szOpts = wx.BoxSizer(wx.HORIZONTAL)
@@ -143,10 +153,6 @@ class PrintMonitorDlg(wx.Frame):
 		szOpts.Add(self.cbShowPrevious)
 		szOpts.AddSpacer((10, 10))
 		szOpts.Add(self.cbSyncPrint)
-		szOpts.AddSpacer((80, 10))
-		szOpts.Add(self.bUp)
-		szOpts.AddSpacer((10, 10))
-		szOpts.Add(self.bDown)
 		szOpts.AddSpacer((10, 10))
 		
 		szBtn = wx.BoxSizer(wx.HORIZONTAL)
@@ -286,9 +292,13 @@ class PrintMonitorDlg(wx.Frame):
 		if self.gObj is None:
 			lmax = 1
 			self.slLayers.Enable(False)
+			self.bUp.Enable(False)
+			self.bDown.Enable(False)
 		else:
 			lmax = self.gObj.layerCount()-1
 			self.slLayers.Enable(True)
+			self.bUp.Enable(True)
+			self.bDown.Enable(True)
 			
 		self.slLayers.SetRange(0, lmax)
 		self.slLayers.SetPageSize(int(lmax/10))
@@ -407,7 +417,7 @@ class PrintMonitorDlg(wx.Frame):
 			
 			self.elapsed = time.time() - self.startTime
 			expected = layersSplit[0] + layerSplit[0]
-			elapsedStr = "%s (%s)" % (formatElapsed(self.elapsed), formatElapsed(expected))
+			elapsedStr = "%s (expected: %s)" % (formatElapsed(self.elapsed), formatElapsed(expected))
 			self.propDlg.setProperty(PropertyEnum.elapsed, elapsedStr)
 			
 			self.remaining = layersSplit[1] + layerSplit[1]
@@ -479,7 +489,7 @@ class PrintMonitorDlg(wx.Frame):
 		
 		s = []
 		for i in range(self.settings.nextruders):
-			s.append("%.2f/%.2f  %.2f  %.2f" % (le[i], self.eUsed[i], prior[i], after[i]))
+			s.append("%.2f/%.2f    <: %.2f    >: %.2f" % (le[i], self.eUsed[i], prior[i], after[i]))
 			
 		self.propDlg.setProperty(PropertyEnum.filamentUsed, s)
 		
@@ -512,9 +522,11 @@ class PrintMonitorDlg(wx.Frame):
 			self.log("Print completed at %s" % (cmpTimeStr))
 			self.log("Total print time of %s - expected print time %s" %
 					(formatElapsed(self.elapsed), formatElapsed(expCmpTime)))
+			self.reprap.printComplete()
 		elif evt.event == PRINT_STOPPED:
 			self.state = PrintState.paused
 			self.enableButtonsByState()
+			self.reprap.printStopped()
 		elif evt.event == PRINT_STARTED:
 			pass
 		elif evt.event == PRINT_RESUMED:
@@ -613,8 +625,6 @@ class PrintMonitorDlg(wx.Frame):
 			self.bPrint.setRestart()
 			self.bPause.Enable(True);
 			self.bPause.setResume()
-		else:
-			print "Exception: unknown print state: ", self.state
 			
 	def onPrint(self, evt):
 		oldState = self.state

@@ -285,8 +285,6 @@ class ManualCtl(wx.Window):
 						self.reprap.sendNow("G90")
 			else:
 				self.reprap.sendNow(cmd)
-		else:
-			print "unknown label: (%s)" % label
 			
 	def evtXYSpeedKillFocus(self, evt):
 		try:

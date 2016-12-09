@@ -2,13 +2,11 @@ import math
 from gobject import gobject, layer, segment, ST_MOVE, ST_PRINT, ST_RETRACTION, ST_REV_RETRACTION;
 
 class CNC:
-	def __init__(self, measure=False):
+	def __init__(self):
 		self.curX = 0
 		self.curY = 0
 		self.curZ = 0
 		self.curE = 0
-		
-		self.measure = measure
 		
 		self.gObject = gobject()
 		self.currentLayer = layer(0, 0)
@@ -115,36 +113,33 @@ class CNC:
 			
 		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed)
 
-		if self.measure:
-			if dx * self.lastDx + dy * self.lastDy <= 0:
-				self.lastSpeed = 0
-					
-			de = self.curE - e
+		if dx * self.lastDx + dy * self.lastDy <= 0:
+			self.lastSpeed = 0
 				
-			if dist == 0:
-				if dz > 0:
-					dist = dz
-				else:
-					dist = de
-					
-			if self.speed == self.lastSpeed:
-				calcTime = dist / self.speed if self.speed != 0 else 0
+		de = self.curE - e
+			
+		if dist == 0:
+			if dz > 0:
+				dist = dz
 			else:
-				d = 2 * abs(((self.speed + self.lastSpeed) * (self.speed - self.lastSpeed) * 0.5) / self.acceleration)
-				if d <= dist and self.lastSpeed + self.speed != 0 and self.speed != 0:
-					calcTime = 2 * d / (self.lastSpeed + self.speed)
-					calcTime += (dist - d) / self.speed
-				else:
-					calcTime = 2 * dist / (self.lastSpeed + self.speed)  
-	
-			self.lastDx = dx
-			self.lastDy = dy
+				dist = de
 				
-			self.layerTime += calcTime
-			self.totalTime += calcTime
-			return calcTime
+		if self.speed == self.lastSpeed:
+			calcTime = dist / self.speed if self.speed != 0 else 0
 		else:
-			return 0
+			d = 2 * abs(((self.speed + self.lastSpeed) * (self.speed - self.lastSpeed) * 0.5) / self.acceleration)
+			if d <= dist and self.lastSpeed + self.speed != 0 and self.speed != 0:
+				calcTime = 2 * d / (self.lastSpeed + self.speed)
+				calcTime += (dist - d) / self.speed
+			else:
+				calcTime = 2 * dist / (self.lastSpeed + self.speed)  
+
+		self.lastDx = dx
+		self.lastDy = dy
+			
+		self.layerTime += calcTime
+		self.totalTime += calcTime
+		return calcTime
 	
 	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed):
 		if ht != self.currentHeight:
@@ -190,17 +185,14 @@ class CNC:
 		return self.totalTime, self.layerTimes
 	
 	def dwell(self, parms, sourceLine):
-		if self.measure:
-			ct = 0
-			if 'P' in parms.keys():
-				ct = float(parms['P'])/1000.0
-			elif 'S' in parms.keys():
-				ct = float(parms['S'])
-			self.layerTime += ct
-			self.totalTime += ct
-			return ct
-		else:
-			return 0
+		ct = 0
+		if 'P' in parms.keys():
+			ct = float(parms['P'])/1000.0
+		elif 'S' in parms.keys():
+			ct = float(parms['S'])
+		self.layerTime += ct
+		self.totalTime += ct
+		return ct
 		
 	def setInches(self, parms, sourceLine):
 		return 0
