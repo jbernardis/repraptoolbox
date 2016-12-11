@@ -3,7 +3,7 @@ Created on Oct 28, 2016
 
 @author: Jeff
 '''
-import os, sys, inspect
+import os, inspect
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
@@ -16,6 +16,7 @@ import tempfile
 
 from settings import Settings
 from images import Images
+from gcsuffix import buildGCSuffix
 
 (SlicerEvent, EVT_SLIC3R_UPDATE) = wx.lib.newevent.NewEvent()
 SLIC3R_MESSAGE = 1
@@ -24,8 +25,6 @@ SLIC3R_CANCELLED = 3
 
 FILAMENT_BASE = 1000
 BUTTONDIM = (48, 48)
-
-PREFIX = ";@#@# "
 
 filamentMergeKeys = ['extrusion_multiplier', 'filament_diameter', 'first_layer_temperature', 'temperature']
 
@@ -386,23 +385,26 @@ class Slic3rDlg(wx.Frame):
 		self.enableButtons()
 		
 	def buildSuffix(self, cfg):
-		s = []
-		s.append("%s CFG:%s" % (PREFIX, self.getConfigString()))
-		
+		slCfg = self.getConfigString()
+
+		filSiz = None
 		if "filament_diameter" in cfg.keys():
-			s.append("%s FIL:%s " % (PREFIX, cfg["filament_diameter"]))
-			
+			filSiz = cfg["filament_diameter"]
+
+		tempsHE = None			
 		if "first_layer_temperature" in cfg.keys():
-			s.append("%s THE:%s " % (PREFIX, cfg["first_layer_temperature"]))
+			tempsHE = cfg["first_layer_temperature"]
 		elif "temperature" in cfg.keys():
-			s.append("%s THE:%s " % (PREFIX, cfg["temperature"]))
+			tempsHE = cfg["temperature"]
 			
+		tempsBed = None
 		if "first_layer_bed_temperature" in cfg.keys():
-			s.append("%s TBED:%s " % (PREFIX, cfg["first_layer_bed_temperature"]))
+			tempsBed = cfg["first_layer_bed_temperature"]
 		elif "bed_temperature" in cfg.keys():
-			s.append("%s TBED:%s " % (PREFIX, cfg["bed_temperature"]))
+			tempsBed = cfg["bed_temperature"]
 		
-		return s
+		return buildGCSuffix(slCfg, filSiz, tempsHE, tempsBed)
+
 		
 	def onBImport(self, evt):
 		self.stlFn = self.parent.importStlFile()

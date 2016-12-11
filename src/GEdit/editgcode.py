@@ -186,9 +186,10 @@ class myEditor(editor.Editor):
 DLGWIDTH = 800
 		
 class EditGCodeDlg(wx.Dialog):
-	def __init__(self, parent, gcode, title):
+	def __init__(self, parent, gcode, title, cbClose):
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Edit GCode: "+title, size=(DLGWIDTH, 804))
-		self.startGCode = gcode		
+		self.startGCode = gcode	
+		self.cbCLose = cbClose	
 		
 		wx.CallAfter(self.finishInit)
 
@@ -233,7 +234,7 @@ class EditGCodeDlg(wx.Dialog):
 			pass
 
 	def doSave(self, evt):
-		self.EndModal(wx.ID_OK)
+		self.cbClose(wx.ID_OK)
 		
 	def doCancel(self, evt):
 		if self.hasChanged():
@@ -246,7 +247,7 @@ class EditGCodeDlg(wx.Dialog):
 			if rc != wx.ID_YES:
 				return
 
-		self.EndModal(wx.ID_CANCEL)
+		self.cbClose(wx.ID_CANCEL)
 		
 	def getData(self):
 		return self.ed.GetText()

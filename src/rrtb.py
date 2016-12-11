@@ -314,6 +314,9 @@ class MyFrame(wx.Frame):
 		for p in self.statusReportCB.keys():
 			if self.statusReportCB[p] is not None:
 				report[p] = self.statusReportCB[p].getStatusReport()
+		print "========================="
+		print report
+		print "========================="
 		return report
 		
 	def onClose(self, evt):

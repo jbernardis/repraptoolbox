@@ -11,8 +11,8 @@ from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
 from tools import formatElapsed
+from gcsuffix import parseGCSuffix
 
-PREFIX = ";@#@# "
 BUTTONDIM = (48, 48)
 
 class PrintState:
@@ -368,26 +368,8 @@ class PrintMonitorDlg(wx.Frame):
 		if self.settings.nextruders < self.maxTool+1:
 			self.log("G Code file uses more tools (%d) than printer is equipped with (%d)" % (self.maxTool+1, self.settings.nextruders))
 			
-		if len(gc) < 10:
-			sx = 0
-		else:
-			sx = -9
-		suffix = [s for s in gc[sx:] if s.startswith(PREFIX)]
-		slCfg = "??"
-		filSiz = "??"
-		tempsHE = "??"
-		tempsBed = "??"
+		slCfg, filSiz, tempsHE, tempsBed = parseGCSuffix(gc)
 		
-		for s in suffix:
-			if "CFG:" in s:
-				slCfg = s.split("CFG:")[1].strip()
-			elif "FIL:" in s:
-				filSiz = s.split("FIL:")[1].strip()
-			elif "THE:" in s:
-				tempsHE = s.split("THE:")[1].strip()
-			elif "TBED:" in s:
-				tempsBed = s.split("TBED:")[1].strip()
-				
 		if tempsBed == "??":
 			tBed = 0
 		else:

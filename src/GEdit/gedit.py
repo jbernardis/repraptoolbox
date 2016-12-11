@@ -1,7 +1,8 @@
 import wx
 import os
 import re
-import sys, inspect
+import time
+import inspect
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
@@ -17,6 +18,7 @@ from filamentchange import FilamentChangeDlg
 from savelayer import SaveLayerDlg
 from images import Images
 from tools import formatElapsed
+from gcsuffix import parseGCSuffix
 
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 BUTTONDIM = (48, 48)
@@ -351,8 +353,14 @@ class GEditDlg(wx.Frame):
 		print "layer filament: ", self.gObj.getLayerFilament(self.currentLayer)
 		print "estimated print time", self.totalTimeStr
 		print "estimated time for current layer " , self.layerTimeStr[self.currentLayer]
-		print "all file info - fila name, mod date"
-		print "info from suffix: filament, temperatures"
+		print "filename ", self.filename
+		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(self.filename)))
+		print "mod time: ", ftime
+		slCfg, filSiz, tempsHE, tempsBed = parseGCSuffix(self.gcode)
+		print "slicer config: ", slCfg
+		print "filament info: ", filSiz
+		print "HE Temps: ", tempsHE
+		print "Bed Temps: ", tempsBed
 		
 	def gcodeFileDialog(self):
 		wildcard = "GCode (*.gcode)|*.gcode|"	 \
@@ -623,14 +631,16 @@ class GEditDlg(wx.Frame):
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(self.currentLayer))
 	
 	def onEditGCode(self, evt):
-		dlg = EditGCodeDlg(self, self.gcode, "<live buffer>")
-		dlg.CenterOnScreen()
-		rc = dlg.ShowModal()
-			
+		self.editDlg = EditGCodeDlg(self, self.gcode, "<live buffer>", self.editClosed)
+		self.editDg.CenterOnScreen()
+		self.editDlg.Show()
+		self.enableButtons(False)
+		
+	def editClosed(self, rc):
 		if rc == wx.ID_OK:
-			data = dlg.getData()
+			data = self.editDlg.getData()
 			
-		dlg.Destroy()
+		self.editDlg.Destroy()
 		if rc != wx.ID_OK:
 			return
 
@@ -684,7 +694,7 @@ class GEditDlg(wx.Frame):
 	def changeLayer(self, v):
 		self.currentLayer = v
 		self.gcFrame.setLayer(v)
-		self.slLayer.SetValue(v)
+		self.slLayers.SetValue(v)
 		self.setLayerText()
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(v))
 		
