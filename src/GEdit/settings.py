@@ -30,6 +30,7 @@ class Settings:
 		self.lastdirectory = "C:\\"
 		self.platemps = [60, 185]
 		self.abstemps = [110, 225]
+		self.acceleration = 1500
 		
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -73,6 +74,13 @@ class Settings:
 						print("Non-integer value in ini file for scale")
 						self.scale = 3
 						
+				elif opt == 'acceleration':
+					try:
+						self.acceleration = int(value)
+					except:
+						print("Non-integer value in ini file for acceleration")
+						self.acceleration = 1500
+						
 				elif opt == 'lastdirectory':
 					self.lastdirectory = value
 						
@@ -108,6 +116,7 @@ class Settings:
 		self.cfg.set(self.section, "lastdirectory", str(self.lastdirectory))
 		self.cfg.set(self.section, "platemps", str(self.platemps))
 		self.cfg.set(self.section, "abstemps", str(self.abstemps))
+		self.cfg.set(self.section, "acceleration", str(self.acceleration))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

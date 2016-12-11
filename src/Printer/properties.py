@@ -106,6 +106,12 @@ class PropertiesDlg(wx.Frame):
 			self.fileName = value
 			self.setTitle()
 			
+	def getStatusReport(self):
+		results = {}
+		for k in self.properties.keys():
+			results[PropertyEnum.label[k]] = self.properties[k].GetValue()
+		return results
+			
 	def clearAllProperties(self):
 		for cat in propertyMap.keys():
 			for prop in propertyMap[cat]:

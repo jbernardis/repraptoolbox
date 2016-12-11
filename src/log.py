@@ -55,7 +55,6 @@ class Logger(wx.Frame):
 			if self.t.SaveFile(path):
 				self.LogMessage("Log successfully saved to %s" % path)
 				self.settings.lastlogdirectory = os.path.dirname(path)
-				self.settings.setModified()
 			else:
 				self.LogError("Save of log to %s failed" % path)
 				

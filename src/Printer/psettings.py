@@ -23,6 +23,7 @@ class PrtSettings:
 		self.xyspeed = 2000
 		self.zspeed = 2000
 		self.espeed = 300
+		self.acceleration = 1500
 		self.edistance = 5
 		self.moveabsolute = True
 		self.extrudeabsolute = True
@@ -135,24 +136,37 @@ class PrtSettings:
 						self.espeed = int(value)
 					except:
 						print "Non-integer value in ini file for espeed"
-						self.zspeed = 300
+						self.espeed = 300
+				
+				elif opt == 'acceleration':
+					try:
+						self.acceleration = int(value)
+					except:
+						print "Non-integer value in ini file for acceleration"
+						self.acceleration = 1500
+
 				elif opt == 'edistance':
 					try:
 						self.edistance = int(value)
 					except:
 						print "Non-integer value in ini file for edistance"
 						self.edistance = 5
+						
 				elif opt == 'speedquery':
 					if value == "None":
 						self.speedquery = None
 					else:
 						self.speedquery = value
+						
 				elif opt == 'moveabsolute':
 					self.moveabsolute = parseBoolean(value, True)
+					
 				elif opt == 'extrudeabsolute':
 					self.extrudeabsolute = parseBoolean(value, True)
+					
 				elif opt == 'usem82':
 					self.useM82 = parseBoolean(value, False)
+					
 				elif opt == 'bedinfo':
 					try:
 						s = defaultBedinfo
@@ -161,6 +175,7 @@ class PrtSettings:
 					except:
 						print "invalid value in ini file for bedinfo"
 						self.bedinfo = defaultBedinfo
+						
 				elif opt == 'heinfo':
 					try:
 						s = defaultHeinfo
@@ -169,8 +184,10 @@ class PrtSettings:
 					except:
 						print "invalid value in ini file for heinfo"
 						self.heinfo = defaultHeinfo
+						
 				elif opt == 'showmoves':
 					self.showmoves = parseBoolean(value, False)
+					
 				elif opt == 'showprevious':
 					self.showprevious = parseBoolean(value, False)
 					
@@ -209,6 +226,7 @@ class PrtSettings:
 		self.cfg.set(self.section, "xyspeed", str(self.xyspeed))
 		self.cfg.set(self.section, "zspeed", str(self.zspeed))
 		self.cfg.set(self.section, "espeed", str(self.espeed))
+		self.cfg.set(self.section, "acceleration", str(self.acceleration))
 		self.cfg.set(self.section, "edistance", str(self.edistance))
 		self.cfg.set(self.section, "moveabsolute", str(self.moveabsolute))
 		self.cfg.set(self.section, "extrudeabsolute", str(self.extrudeabsolute))

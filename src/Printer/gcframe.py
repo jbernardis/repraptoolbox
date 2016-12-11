@@ -163,6 +163,7 @@ class GcFrame (wx.Window):
 			for lx in range(len(self.model)):
 				self.layerMap.append(self.model.getGCodeLines(lx))
 
+		self.printPosition = 0
 		self.redrawCurrentLayer()
 		
 	def initBuffer(self):

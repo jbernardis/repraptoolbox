@@ -2,7 +2,7 @@ import math
 from gobject import gobject, layer, segment, ST_MOVE, ST_PRINT, ST_RETRACTION, ST_REV_RETRACTION;
 
 class CNC:
-	def __init__(self):
+	def __init__(self, acceleration):
 		self.curX = 0
 		self.curY = 0
 		self.curZ = 0
@@ -40,7 +40,7 @@ class CNC:
 		self.lastDx = 0.0
 		self.lastDy = 0.0
 		
-		self.acceleration = 1500
+		self.acceleration = acceleration
 
 		self.dispatch = {
 			"G0": self.moveFast,

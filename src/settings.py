@@ -21,9 +21,11 @@ class Settings:
 		self.inifile = os.path.join(folder, INIFILE)
 		self.section = "toolbox"	
 		
+		self.port = 8980
 		self.printers = []
 		self.tbposition = None
 		self.logposition = None
+		self.lastlogdirectory = "."
 				
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -41,6 +43,16 @@ class Settings:
 					except:
 						print "invalid value in ini file for printers"
 						self.printers = []
+						
+				elif opt == 'lastlogdirectory':
+					self.lastlogdirectory = value
+					
+				elif opt == 'port':
+					try:
+						self.port = int(value)
+					except:
+						print("Non-integer value in ini file for post")
+						self.port = 8980
 						
 				elif opt == 'tbposition':
 					try:
@@ -84,6 +96,8 @@ class Settings:
 		self.cfg.set(self.section, "printers", str(self.printers))
 		self.cfg.set(self.section, "tbposition", str(self.tbposition))
 		self.cfg.set(self.section, "logposition", str(self.logposition))
+		self.cfg.set(self.section, "lastlogdirectory", str(self.lastlogdirectory))
+		self.cfg.set(self.section, "port", str(self.port))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

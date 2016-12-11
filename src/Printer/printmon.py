@@ -19,6 +19,7 @@ class PrintState:
 	idle = 0
 	printing = 1
 	paused = 2
+	label = { idle: "Idle", printing: "Printing", paused: "Paused" }
 	
 RECORD_TIMES = True
 
@@ -186,12 +187,21 @@ class PrintMonitorDlg(wx.Frame):
 		
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
 		self.reprap.registerEventHandler(self.reprapEvent)
+		self.wparent.registerPrinterStatusReporter(self.printerName, self)
+		
+	def getStatusReport(self):
+		r = self.propDlg.getStatusReport()
+		r["PrintStatus"] = PrintState.label[self.state]
+		return r
 
 	def buildTitle(self):		
 		t = "%s print monitor" % self.printerName
 		
 		if self.gcodeLoaded:
-			t += " - %s" % self.gcodeFile
+			if len(self.gcodeFile) > 45:
+				t += " - %s" % os.path.basename(self.gcodeFile)
+			else:
+				t += " - %s" % self.gcodeFile
 			
 		return t
 	
@@ -214,6 +224,7 @@ class PrintMonitorDlg(wx.Frame):
 	def terminate(self):
 		self.reprap.registerPositionHandler(None)
 		self.reprap.registerEventHandler(None)
+		self.wparent.registerPrinterStatusReporter(self.printerName, None)
 		self.parent.closePrintMon()
 		self.propDlg.Destroy()
 		self.Destroy()
@@ -346,8 +357,10 @@ class PrintMonitorDlg(wx.Frame):
 		self.eUsed = self.gObj.getFilament()
 		
 		self.gcodeLoaded = True
-		self.gcodeFile = fn
-		self.propDlg.setProperty(PropertyEnum.fileName, fn)
+		self.gcodeFile = pfn = fn
+		if len(pfn) > 45:
+			pfn = os.path.basename(fn)
+		self.propDlg.setProperty(PropertyEnum.fileName, pfn)
 		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(fn))) 
 		self.propDlg.setProperty(PropertyEnum.sliceTime, ftime)
 		self.propDlg.setProperty(PropertyEnum.printEstimate, self.totalTimeStr)
@@ -537,7 +550,7 @@ class PrintMonitorDlg(wx.Frame):
 			print "unknown reprap event: ", evt.event
 				
 	def buildModel(self):
-		cnc = CNC(measure = True)
+		cnc = CNC(self.settings.acceleration)
 		if RECORD_TIMES:
 			print "recording g code times in /tmp/gcodeTimes"
 			fp = open("/tmp/gcodeTimes", "w")

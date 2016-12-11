@@ -17,7 +17,7 @@ from Slic3r.Slic3r import Slic3rDlg
 from Printer.printer import PrinterDlg
 from reprap import RepRap
 from log import Logger
-
+from HTTPServer import RepRapServer
 	
 
 
@@ -46,6 +46,8 @@ class MyFrame(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.logger = Logger(self)
 		
+		self.statusReportCB = {}
+		
 		self.bStlView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngStlview, size=BUTTONDIM)
 		self.bStlView.SetToolTipString("View an STL file")
 		self.Bind(wx.EVT_BUTTON, self.doViewStl, self.bStlView)
@@ -66,7 +68,7 @@ class MyFrame(wx.Frame):
 		self.bLogHideShow.SetToolTipString("Toggle the log window off and on")
 		self.Bind(wx.EVT_BUTTON, self.onLogHideShow, self.bLogHideShow)
 
-		self.bLogClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearLog, size=BUTTONDIM)
+		self.bLogClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
 		self.bLogClear.SetToolTipString("Erase the log contents")
 		self.Bind(wx.EVT_BUTTON, self.onLogClear, self.bLogClear)
 
@@ -256,6 +258,10 @@ class MyFrame(wx.Frame):
 			
 		if self.settings.logposition is not None:
 			self.logger.SetPosition(self.settings.logposition)
+			
+		if self.settings.port != 0:
+			self.httpServer = RepRapServer(self, port=self.settings.port)
+
 		
 	def createSectionButtons(self, section, handler):
 		buttons = {}
@@ -300,6 +306,16 @@ class MyFrame(wx.Frame):
 				self.wPrinter[pName] = None
 		self.bPrinter[pName].Enable(flag)
 		
+	def registerPrinterStatusReporter(self, printerName, cb):
+		self.statusReportCB[printerName] = cb
+		
+	def getStatusReport(self):
+		report = {}
+		for p in self.statusReportCB.keys():
+			if self.statusReportCB[p] is not None:
+				report[p] = self.statusReportCB[p].getStatusReport()
+		return report
+		
 	def onClose(self, evt):
 		for p in self.wPrinter.keys():
 			if self.wPrinter[p] is not None:
@@ -339,6 +355,9 @@ class MyFrame(wx.Frame):
 			self.dlgGEdit.Destroy()
 		except:
 			pass
+		
+		if self.settings.port != 0:
+			self.httpServer.close()
 
 		self.logger.Destroy()		
 		self.Destroy()

@@ -664,29 +664,29 @@ class GEditDlg(wx.Frame):
 		if v == self.currentLayer:
 			return
 		
-		self.gcFrame.setLayer(v)
-		self.currentLayer = v
-		self.setLayerText()
-		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(v))
+		self.changeLayer(v)
 		
 	def onUp(self, evt):
 		lmax = self.slLayers.GetRange()[1]
 		if self.currentLayer >= lmax:
 			return
 		
-		self.currentLayer += 1
-		self.gcFrame.setLayer(self.currentLayer)
-		self.setLayerText()
-		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(self.currentLayer))
+		v = self.currentLayer + 1
+		self.changeLayer(v)
 	
 	def onDown(self, evt):
 		if self.currentLayer <= 0:
 			return
 		
-		self.currentLayer -= 1
-		self.gcFrame.setLayer(self.currentLayer)
+		v = self.currentLayer - 1
+		self.changeLayer(v)
+		
+	def changeLayer(self, v):
+		self.currentLayer = v
+		self.gcFrame.setLayer(v)
+		self.slLayer.SetValue(v)
 		self.setLayerText()
-		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(self.currentLayer))
+		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(v))
 		
 	def setLayerText(self):
 		if self.gObj is None:
@@ -730,7 +730,7 @@ class GEditDlg(wx.Frame):
 	def buildModel(self):
 		rgcode = [s.rstrip() for s in self.gcode]
 		
-		cnc = CNC()
+		cnc = CNC(self.settings.acceleration)
 		
 		ln = -1
 		for gl in rgcode:
