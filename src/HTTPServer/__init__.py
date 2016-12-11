@@ -13,14 +13,17 @@ def quote(s):
 
 def makeXML(d):
 	xml = ''
-	for k in d.keys():
-		if type(d[k]) is dict:
-			xml+='<'+k+'>'+makeXML(d[k])+'</'+k+'>'
-		elif type(d[k]) is list:
-			for i in d[k]:
-				xml += '<'+k+'>'+makeXML(i)+'</'+k+'>'
+	if type(d) is dict:
+		for k in d.keys():
+			if type(d[k]) is dict:
+				xml+='<'+k+'>'+makeXML(d[k])+'</'+k+'>'
+			elif type(d[k]) is list:
+				for i in d[k]:
+					xml += '<'+k+'>'+makeXML(i)+'</'+k+'>'
+			else:
+				xml+='<'+k+'>'+quote(str(d[k]))+'</'+k+'>'
 		else:
-			xml+='<'+k+'>'+quote(str(d[k]))+'</'+k+'>'
+			xml = quote(str(d))
 	
 	return xml
 

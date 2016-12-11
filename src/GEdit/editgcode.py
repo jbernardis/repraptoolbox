@@ -189,7 +189,7 @@ class EditGCodeDlg(wx.Dialog):
 	def __init__(self, parent, gcode, title, cbClose):
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Edit GCode: "+title, size=(DLGWIDTH, 804))
 		self.startGCode = gcode	
-		self.cbCLose = cbClose	
+		self.cbClose = cbClose	
 		
 		wx.CallAfter(self.finishInit)
 

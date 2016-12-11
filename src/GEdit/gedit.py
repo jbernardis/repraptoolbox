@@ -417,12 +417,14 @@ class GEditDlg(wx.Frame):
 		else:
 			self.enableButtons(False)
 			
-	def enableButtons(self, flag=True):
+	def enableButtons(self, flag=True, openButtons=False):
 		self.bShift.Enable(flag)
 		self.bModTemp.Enable(flag)
 		self.bModSpeed.Enable(flag)
 		self.bEdit.Enable(flag)
 		self.bInfo.Enable(flag)
+		self.bUp.Enable(flag)
+		self.bDown.Enable(flag)
 		self.bSaveLayers.Enable(flag)
 		self.bSave.Enable(flag)
 		self.bSaveAs.Enable(flag)
@@ -431,6 +433,9 @@ class GEditDlg(wx.Frame):
 		self.bBracketStart.Enable(flag)
 		self.bBracketEnd.Enable(flag)
 		self.enableBracketDel()
+		if openButtons:
+			self.bImport.Enable(flag)
+			self.bOpen.Enable(flag)
 			
 	def doShiftModel(self, evt):
 		dlg = ShiftModelDlg(self, self.gObj, self.settings.buildarea)
@@ -632,11 +637,12 @@ class GEditDlg(wx.Frame):
 	
 	def onEditGCode(self, evt):
 		self.editDlg = EditGCodeDlg(self, self.gcode, "<live buffer>", self.editClosed)
-		self.editDg.CenterOnScreen()
+		self.editDlg.CenterOnScreen()
 		self.editDlg.Show()
-		self.enableButtons(False)
+		self.enableButtons(flag=False, openButtons=True)
 		
 	def editClosed(self, rc):
+		self.enableButtons(flag=True, openButtons=True)
 		if rc == wx.ID_OK:
 			data = self.editDlg.getData()
 			
@@ -646,7 +652,6 @@ class GEditDlg(wx.Frame):
 
 		self.gcode = data[:]
 		self.setModified(True)
-		self.enableButtons()
 		self.gObj = self.buildModel()
 		self.modifyGcSuffix(self.gObj.getTemps())
 		self.gcFrame.loadModel(self.gObj, 0, 1)
