@@ -22,8 +22,8 @@ def makeXML(d):
 					xml += '<'+k+'>'+makeXML(i)+'</'+k+'>'
 			else:
 				xml+='<'+k+'>'+quote(str(d[k]))+'</'+k+'>'
-		else:
-			xml = quote(str(d))
+	else:
+		xml = quote(str(d))
 	
 	return xml
 

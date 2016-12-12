@@ -24,6 +24,24 @@ from HTTPServer import RepRapServer
 BUTTONDIM = (48, 48)
 PBUTTONDIM = (96, 96)
 
+class ToolButton:
+	def __init__(self, btn, bid, cmd, shell):
+		self.button = btn
+		self.bid = bid
+		self.command = cmd
+		self.shell = shell
+		
+	def getButton(self):
+		return self.button
+	
+	def getBid(self):
+		return self.bid
+	
+	def getCommand(self):
+		return self.command
+	
+	def needsShell(self):
+		return self.shell
 
 class MyFrame(wx.Frame):
 	def __init__(self):
@@ -76,22 +94,10 @@ class MyFrame(wx.Frame):
 		self.bLogSave.SetToolTipString("Save log contents to a file")
 		self.Bind(wx.EVT_BUTTON, self.onLogSave, self.bLogSave)
 
-		(self.tDesignButtons,
-			self.tDesignIds,
-			self.tDesignCommands,
-			self.tDesignOrder) = self.createSectionButtons("design", self.doDesignButton)
-		(self.tMeshButtons,
-			self.tMeshIds,
-			self.tMeshCommands,
-			self.tMeshOrder) = self.createSectionButtons("mesh", self.doMeshButton)
-		(self.tSliceButtons,
-			self.tSliceIds,
-			self.tSliceCommands,
-			self.tSliceOrder) = self.createSectionButtons("slicer", self.doSliceButton)
-		(self.tGCodeButtons,
-			self.tGCodeIds,
-			self.tGCodeCommands,
-			self.tGCodeOrder) = self.createSectionButtons("gcode", self.doGCodeButton)
+		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
+		self.meshButtons = self.createSectionButtons("mesh", self.doMeshButton)
+		self.sliceButtons = self.createSectionButtons("slicer", self.doSliceButton)
+		self.gCodeButtons = self.createSectionButtons("gcode", self.doGCodeButton)
 		
 		szHFrame = wx.BoxSizer(wx.HORIZONTAL)
 		szVFrame = wx.BoxSizer(wx.VERTICAL)
@@ -103,8 +109,8 @@ class MyFrame(wx.Frame):
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
 		bhsizer.AddSpacer((10, 10))
-		for n in self.tDesignOrder:
-			bhsizer.Add(self.tDesignButtons[n])
+		for b in self.designButtons:
+			bhsizer.Add(b.getButton())
 			bhsizer.AddSpacer((10, 10))
 		
 		bvsizer.AddSpacer((10, 10))
@@ -121,8 +127,8 @@ class MyFrame(wx.Frame):
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bPlater)
 		bhsizer.AddSpacer((10, 10))
-		for n in self.tMeshOrder:
-			bhsizer.Add(self.tMeshButtons[n])
+		for b in self.meshButtons:
+			bhsizer.Add(b.getButton())
 			bhsizer.AddSpacer((10, 10))
 			
 		bvsizer.AddSpacer((10, 10))
@@ -141,8 +147,8 @@ class MyFrame(wx.Frame):
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bSlic3r)
 		bhsizer.AddSpacer((10, 10))
-		for n in self.tSliceOrder:
-			bhsizer.Add(self.tSliceButtons[n])
+		for b in self.sliceButtons:
+			bhsizer.Add(b.getButton())
 			bhsizer.AddSpacer((10, 10))
 		
 		bvsizer.AddSpacer((10, 10))
@@ -157,8 +163,8 @@ class MyFrame(wx.Frame):
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bGEdit)
 		bhsizer.AddSpacer((10, 10))
-		for n in self.tGCodeOrder:
-			bhsizer.Add(self.tGCodeButtons[n])
+		for b in self.gCodeButtons:
+			bhsizer.Add(b.getButton())
 			bhsizer.AddSpacer((10, 10))
 
 		bvsizer.AddSpacer((10, 10))
@@ -264,40 +270,48 @@ class MyFrame(wx.Frame):
 
 		
 	def createSectionButtons(self, section, handler):
-		buttons = {}
-		bids = {}
+		buttons = []
 		sectionInfo = self.settings.getSection(section)
-		cmds = {}
-		order = []
 		if sectionInfo is not None:
-			for n in sectionInfo.keys():
-				if n == "order":
-					order = sectionInfo[n].split(",")
-				else:
-					v = sectionInfo[n].split(",")
-					if len(v) >= 2:
-						cmd = v[0]
-						helptext = v[1]
-					elif len(v) == 1:
-						cmd = v[0]
-						helptext = ""
-					else:
-						print "invalid entry for (%s)" % n
-						cmd == None
-					if cmd is not None:
-						cmds[n] = cmd
-						b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
-						b.SetToolTipString(helptext)
-						buttons[n] = b
-						bids[n] = b.GetId()
-						self.Bind(wx.EVT_BUTTON, handler, b)
-					
-		if len(order) != len(buttons.keys()):
-			print "number of items in %s order list (%d) != number of tools (%d).  Using alpha order" % (section, len(order), len(buttons.keys()))
-			order = sorted(buttons.keys())
+			if "order" not in sectionInfo.keys():
+				print "Button order spec is missing for section %s" % section
+				return []
 			
-		return buttons, bids, cmds, order
-
+			order = sectionInfo["order"].split(",")
+			for n in order:
+				if n not in sectionInfo.keys():
+					print "key in order listing has no data line: %s" % n
+					return []
+				
+				v = sectionInfo[n].split(",")
+				if len(v) >= 3:
+					cmd = v[0]
+					helptext = v[1]
+					if v[2].lower == "true":
+						shell = True
+					else:
+						shell = False
+				elif len(v) == 2:
+					cmd = v[0]
+					helptext = [1]
+					shell = False
+				elif len(v) == 1:
+					cmd = v[0]
+					helptext = ""
+					shell = False
+				else:
+					print "invalid entry for (%s)" % n
+					cmd == None
+					
+				if cmd is not None:
+					b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
+					b.SetToolTipString(helptext)
+					buttons[n] = b
+					bid = b.GetId()
+					self.Bind(wx.EVT_BUTTON, handler, b)
+					buttons.append(ToolButton(b, bid, cmd, shell))
+			
+		return buttons
 		
 	def reportConnection(self, flag, pName):
 		if not flag:
@@ -314,9 +328,6 @@ class MyFrame(wx.Frame):
 		for p in self.statusReportCB.keys():
 			if self.statusReportCB[p] is not None:
 				report[p] = self.statusReportCB[p].getStatusReport()
-		print "========================="
-		print report
-		print "========================="
 		return report
 		
 	def onClose(self, evt):
@@ -425,36 +436,27 @@ class MyFrame(wx.Frame):
 		self.wPrinter[pName] = None
 		
 	def doDesignButton(self, evt):
-		bid = evt.GetId()
-		for n in self.tDesignIds.keys():
-			if bid == self.tDesignIds[n]:
-				print "Pressed button for (%s) invoking command (%s)" % (n, self.tDesignCommands[n])
-				args = shlex.split(str(self.tDesignCommands[n]))
-				try:
-					subprocess.Popen(args, shell=False, stdin=None, stdout=None, stderr=None, close_fds=True)
-				except:
-					print "Exception occurred trying to spawn tool process"
-				return
+		self.doToolButton(evt, self.designButtons)
 		
 	def doMeshButton(self, evt):
-		bid = evt.GetId()
-		for n in self.tMeshIds.keys():
-			if bid == self.tMeshIds[n]:
-				print "Pressed button for (%s) invoking command (%s)" % (n, self.tMeshCommands[n])
-				return
+		self.doToolButton(evt, self.meshButtons)
 		
 	def doSliceButton(self, evt):
-		bid = evt.GetId()
-		for n in self.tSliceIds.keys():
-			if bid == self.tSliceIds[n]:
-				print "Pressed button for (%s) invoking command (%s)" % (n, self.tSliceCommands[n])
-				return
+		self.doToolButton(evt, self.sliceButtons)
 		
 	def doGCodeButton(self, evt):
+		self.doToolButton(evt, self.gCodeButtons)
+		
+	def doToolButton(self, evt, buttons):
 		bid = evt.GetId()
-		for n in self.tGCodeIds.keys():
-			if bid == self.tGCodeIds[n]:
-				print "Pressed button for (%s) invoking command (%s)" % (n, self.tGCodeCommands[n])
+		for b in buttons:
+			if bid == b.getBid():
+				args = shlex.split(str(b.getCommand))
+				shell = b.needsShell()
+				try:
+					subprocess.Popen(args, shell=shell, stdin=None, stdout=None, stderr=None, close_fds=True)
+				except:
+					print "Exception occurred trying to spawn tool process"
 				return
 		
 	def exportStlFile(self, fn):

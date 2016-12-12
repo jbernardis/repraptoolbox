@@ -422,9 +422,9 @@ class PrintMonitorDlg(wx.Frame):
 			revisedStr = time.strftime('%H:%M:%S', time.localtime(newEta))
 			tdiff = newEta - self.origEta
 			if tdiff < 0:
-				revisedStr += "  (%s) ahead of schedule" % formatElapsed(-tdiff)
+				revisedStr += "  (%s ahead of estimate)" % formatElapsed(-tdiff)
 			elif tdiff > 0:
-				revisedStr += "  (%s) behind schedule" % formatElapsed(tdiff)
+				revisedStr += "  (%s behind estimate)" % formatElapsed(tdiff)
 			self.propDlg.setProperty(PropertyEnum.revisedEta, revisedStr)
 			self.updateTimeUntil()
 

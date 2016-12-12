@@ -374,9 +374,6 @@ class StlViewDlg(wx.Frame):
 			path = dlg.GetPath().encode('ascii','ignore')
 		dlg.Destroy()
 		if rc != wx.ID_OK:
-			self.gl.Destroy()
-			#self.EndModal(wx.ID_OK)
-			self.Destroy()
 			return
 		
 		self.loadStlFile(path)

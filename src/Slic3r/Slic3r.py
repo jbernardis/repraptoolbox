@@ -136,28 +136,28 @@ class Slic3rDlg(wx.Frame):
 		self.Show()
 		
 		self.lblStl = wx.StaticText(self, wx.ID_ANY, "STL File:", size=(70, -1))
-		self.tcStl = wx.TextCtrl(self, wx.ID_ANY, "", size=(300, -1), style=wx.TE_READONLY)
+		self.tcStl = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.cbGcDir = wx.CheckBox(self, wx.ID_ANY, "Use STL directory for G Code file")
 		self.cbGcDir.SetToolTipString("Use the directory from the STL file for the resulting G Code file")
 		self.cbGcDir.SetValue(self.settings.usestldir)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbGcDir, self.cbGcDir)
 
-		self.tcGcDir = wx.TextCtrl(self, wx.ID_ANY, "", size=(220, -1), style=wx.TE_READONLY)
+		self.tcGcDir = wx.TextCtrl(self, wx.ID_ANY, "", size=(330, -1), style=wx.TE_READONLY)
 		self.bGcDir = wx.Button(self, wx.ID_ANY, "...", size=(30, 22))
 		self.bGcDir.Enable(not self.settings.usestldir)
 		self.bGcDir.SetToolTipString("Choose G Code directory")
 		self.Bind(wx.EVT_BUTTON, self.onBGcDir, self.bGcDir)
 		
 		self.lblGc = wx.StaticText(self, wx.ID_ANY, "G Code File:", size=(70, -1))
-		self.tcGc = wx.TextCtrl(self, wx.ID_ANY, "", size=(300, -1), style=wx.TE_READONLY)
+		self.tcGc = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.lCfgPrint = self.getCfgFiles("print")
 		self.lCfgPrinter = self.getCfgFiles("printer")
 		self.lCfgFilament = self.getCfgFiles("filament")
 		
 		self.choicesPrint    = sorted(self.lCfgPrint.keys())
-		self.chPrint = wx.Choice(self, wx.ID_ANY, size = (150,-1), choices = self.choicesPrint)
+		self.chPrint = wx.Choice(self, wx.ID_ANY, size = (225,-1), choices = self.choicesPrint)
 		self.Bind(wx.EVT_CHOICE, self.onChoicePrint, self.chPrint)
 		cxPrint = 0
 		if self.settings.printchoice in self.choicesPrint:
@@ -165,7 +165,7 @@ class Slic3rDlg(wx.Frame):
 		self.chPrint.SetSelection(cxPrint)
 		
 		self.choicesPrinter  = sorted(self.lCfgPrinter.keys())
-		self.chPrinter = wx.Choice(self, wx.ID_ANY, size = (150, -1), choices = self.choicesPrinter)
+		self.chPrinter = wx.Choice(self, wx.ID_ANY, size = (225, -1), choices = self.choicesPrinter)
 		self.Bind(wx.EVT_CHOICE, self.onChoicePrinter, self.chPrinter)
 		cxPrinter = 0
 		if self.settings.printerchoice in self.choicesPrinter:
@@ -178,7 +178,7 @@ class Slic3rDlg(wx.Frame):
 		self.chFilament = [None, None, None, None]
 		cxFilament = [0, 0, 0, 0]
 		for ex in range(len(self.chFilament)):
-			self.chFilament[ex] = wx.Choice(self, FILAMENT_BASE + ex, size = (150, -1), choices = self.choicesFilament)
+			self.chFilament[ex] = wx.Choice(self, FILAMENT_BASE + ex, size = (225, -1), choices = self.choicesFilament)
 			self.Bind(wx.EVT_CHOICE, self.onChoiceFilament, self.chFilament[ex])
 			if self.settings.filamentchoice[ex] in self.choicesFilament:
 				cxFilament[ex] = self.choicesFilament.index(self.settings.filamentchoice[ex])
@@ -227,7 +227,7 @@ class Slic3rDlg(wx.Frame):
 		szCfg.AddSpacer((50, 20))
 		szCfg.Add(szCfgR)
 		
-		self.tcLog = wx.TextCtrl(self, wx.ID_ANY, size=(400, 200), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
+		self.tcLog = wx.TextCtrl(self, wx.ID_ANY, size=(600, 200), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
 		
 		szButton = wx.BoxSizer(wx.HORIZONTAL)
 		
@@ -264,7 +264,7 @@ class Slic3rDlg(wx.Frame):
 		sizer.Add(szStl)
 		sizer.AddSpacer((10, 20))
 		
-		box = wx.StaticBox(self, -1, "G Code Directory")
+		box = wx.StaticBox(self, wx.ID_ANY, "G Code Directory")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 
 		bsizer.AddSpacer((10, 10))

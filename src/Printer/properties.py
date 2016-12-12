@@ -108,8 +108,12 @@ class PropertiesDlg(wx.Frame):
 			
 	def getStatusReport(self):
 		results = {}
-		for k in self.properties.keys():
-			results[PropertyEnum.xmlLabel[k]] = self.properties[k].GetValue()
+		for cat in catOrder:
+			catvals = {}
+			for k in propertyMap[cat]:
+				catvals[PropertyEnum.xmlLabel[k]] = self.properties[k].GetValue()
+			results[CategoryEnum.xmlLabel[cat]] = catvals
+
 		return results
 			
 	def clearAllProperties(self):
