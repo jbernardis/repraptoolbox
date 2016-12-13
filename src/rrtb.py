@@ -271,10 +271,7 @@ class MyFrame(wx.Frame):
 		if self.settings.port != 0:
 			self.httpServer = RepRapServer(self, port=self.settings.port)
 			
-		self.pendant = Pendant(self.log, self.pendantCommand, self.pendantMessage, self.settings.pendantport, self.settings.pendantbaud)
-		
-	def pendantMessage(self, msg):
-		self.log(msg)
+		self.pendant = Pendant(self.log, self.pendantCommand, self.settings.pendantport, self.settings.pendantbaud)
 		
 	def pendantCommand(self, cmd):
 		if self.pendantAssignment is not None:

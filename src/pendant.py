@@ -128,10 +128,9 @@ def pendantCommand(cmd, printer, log):
 		return None  # command not handled
 
 class Pendant:
-	def __init__(self, log, cbCmd, cbMsg, port, baud=9600):
+	def __init__(self, log, cbCmd, port, baud=9600):
 		self.log = log
 		self.cbCmd = cbCmd
-		self.cbMsg = cbMsg
 		self.assignedPrinter = None
 		self.port = port
 		self.baud = baud
@@ -152,7 +151,7 @@ class Pendant:
 		while self.isRunning:
 			self.connect()
 			if self.pendant is not None:
-				self.cbMsg("pendant connected")
+				self.log("pendant connected")
 			while self.pendant is not None:
 				try:
 					line=self.pendant.readline()
@@ -165,7 +164,7 @@ class Pendant:
 					time.sleep(1);
 					
 				except:
-					self.cbMsg("pendant disconnected")
+					self.log("pendant disconnected")
 					self.disconnect()
 					line = ""
 
