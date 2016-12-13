@@ -26,6 +26,8 @@ class Settings:
 		self.tbposition = None
 		self.logposition = None
 		self.lastlogdirectory = "."
+		self.pendantbaud = 9600
+		self.pendantport = "/dev/pendant"
 				
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -47,11 +49,21 @@ class Settings:
 				elif opt == 'lastlogdirectory':
 					self.lastlogdirectory = value
 					
+				elif opt == 'pendantport':
+					self.pendantport = value
+					
+				elif opt == 'pendantbaud':
+					try:
+						self.pendantbaud = int(value)
+					except:
+						print "Non-integer value in ini file for pendant baud rate"
+						self.pendantbaud = 9600
+					
 				elif opt == 'port':
 					try:
 						self.port = int(value)
 					except:
-						print("Non-integer value in ini file for post")
+						print "Non-integer value in ini file for port"
 						self.port = 8980
 						
 				elif opt == 'tbposition':
@@ -98,6 +110,8 @@ class Settings:
 		self.cfg.set(self.section, "logposition", str(self.logposition))
 		self.cfg.set(self.section, "lastlogdirectory", str(self.lastlogdirectory))
 		self.cfg.set(self.section, "port", str(self.port))
+		self.cfg.set(self.section, "pendantport", str(self.pendantport))
+		self.cfg.set(self.section, "pendantbaud", str(self.pendantbaud))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

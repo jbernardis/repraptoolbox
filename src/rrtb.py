@@ -18,6 +18,7 @@ from Printer.printer import PrinterDlg
 from reprap import RepRap
 from log import Logger
 from HTTPServer import RepRapServer
+from pendant import Pendant
 	
 
 
@@ -57,6 +58,8 @@ class MyFrame(wx.Frame):
 		self.dlgViewStl = None
 		self.dlgPlater = None
 		self.dlgGEdit = None
+		
+		self.pendantAssignment = None
 		
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
@@ -267,17 +270,26 @@ class MyFrame(wx.Frame):
 			
 		if self.settings.port != 0:
 			self.httpServer = RepRapServer(self, port=self.settings.port)
-
+			
+		self.pendant = Pendant(self.pendantCommand, self.pendantMessage, self.settings.pendantport, self.settings.pendantbaud)
+		
+	def pendantMessage(self, msg):
+		print "Pendant Message: (%s)" % msg
+		
+	def pendantCommand(self, cmd):
+		print "Pendant Command: (%s)" % cmd
+		if self.pendantAssignment is not None:
+			self.wPrinter[self.pendantAssignment].doPendantCommand(cmd)
 		
 	def createSectionButtons(self, section, handler):
 		buttons = []
 		sectionInfo = self.settings.getSection(section)
 		if sectionInfo is not None:
-			if "order" not in sectionInfo.keys():
-				print "Button order spec is missing for section %s" % section
-				return []
-			
-			order = sectionInfo["order"].split(",")
+			if "order" in sectionInfo.keys():
+				order = sectionInfo["order"].split(",")
+			else:
+				order = sectionInfo.keys()
+
 			for n in order:
 				if n not in sectionInfo.keys():
 					print "key in order listing has no data line: %s" % n
@@ -287,13 +299,13 @@ class MyFrame(wx.Frame):
 				if len(v) >= 3:
 					cmd = v[0]
 					helptext = v[1]
-					if v[2].lower == "true":
+					if v[2].lower() == "true":
 						shell = True
 					else:
 						shell = False
 				elif len(v) == 2:
 					cmd = v[0]
-					helptext = [1]
+					helptext = v[1]
 					shell = False
 				elif len(v) == 1:
 					cmd = v[0]
@@ -306,7 +318,6 @@ class MyFrame(wx.Frame):
 				if cmd is not None:
 					b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
 					b.SetToolTipString(helptext)
-					buttons[n] = b
 					bid = b.GetId()
 					self.Bind(wx.EVT_BUTTON, handler, b)
 					buttons.append(ToolButton(b, bid, cmd, shell))
@@ -328,7 +339,7 @@ class MyFrame(wx.Frame):
 		for p in self.statusReportCB.keys():
 			if self.statusReportCB[p] is not None:
 				report[p] = self.statusReportCB[p].getStatusReport()
-		return report
+		return {"status": report}
 		
 	def onClose(self, evt):
 		for p in self.wPrinter.keys():
@@ -373,7 +384,8 @@ class MyFrame(wx.Frame):
 		if self.settings.port != 0:
 			self.httpServer.close()
 
-		self.logger.Destroy()		
+		self.logger.Destroy()
+		self.pendant.kill()		
 		self.Destroy()
 
 	def doViewStl(self, evt):
@@ -430,10 +442,29 @@ class MyFrame(wx.Frame):
 		
 		self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
 		self.bPrinter[pName].Enable(False)
+		if self.pendantAssignment is None:
+			self.assignPendant(pName)
 	
 	def PrinterClosed(self, pName):
 		self.bPrinter[pName].Enable()
 		self.wPrinter[pName] = None
+		self.assignPendant(None)
+		
+	def assignPendant(self, pName):
+		if self.pendantAssignment is not None:
+			self.wPrinter[self.pendantAssignment].removePendant()
+		self.pendantAssignment = pName
+		if self.pendantAssignment is None:
+			for p in self.wPrinter.keys():
+				if self.wPrinter[p] is not None:
+					self.pendantAssignment = p
+					
+		if self.pendantAssignment is None:
+			print "pendant is unassigned"
+		else:
+			print "pendant is assigned to (%s)" % self.pendantAssignment
+			self.wPrinter[self.pendantAssignment].addPendant()
+
 		
 	def doDesignButton(self, evt):
 		self.doToolButton(evt, self.designButtons)
@@ -451,7 +482,7 @@ class MyFrame(wx.Frame):
 		bid = evt.GetId()
 		for b in buttons:
 			if bid == b.getBid():
-				args = shlex.split(str(b.getCommand))
+				args = shlex.split(str(b.getCommand()))
 				shell = b.needsShell()
 				try:
 					subprocess.Popen(args, shell=shell, stdin=None, stdout=None, stderr=None, close_fds=True)

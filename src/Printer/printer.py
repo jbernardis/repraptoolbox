@@ -186,5 +186,14 @@ class PrinterDlg(wx.Frame):
 		if self.pmonDlg is not None:
 			self.settings.monposition = self.pmonDlg.GetPosition()
 			self.pmonDlg.rememberPositions()
+			
+	def addPendant(self):
+		print "Pendant has been added to %s" % self.printerName
+			
+	def removePendant(self):
+		print "Pendant has been removed from %s" % self.printerName
+		
+	def doPendantCommand(self, cmd):
+		print "Printer %s to do pendant command (%s)" % (self.printerName, cmd)
 
 		
