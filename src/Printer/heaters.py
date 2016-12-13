@@ -66,6 +66,15 @@ class Heaters(wx.Window):
 			else:
 				ix = tool
 			self.hHEs[ix].setTemperature(actualOrTarget, value)
+			
+	def getBedInfo(self):
+		return self.bedInfo
+	
+	def getHEInfo(self, tx):
+		if tx >= self.settings.nextruders:
+			return None
+		else:
+			return self.hHEInfo[tx]
 
 class Heater(wx.Window):
 	def __init__(self, parent, hi, reprap):

@@ -271,13 +271,12 @@ class MyFrame(wx.Frame):
 		if self.settings.port != 0:
 			self.httpServer = RepRapServer(self, port=self.settings.port)
 			
-		self.pendant = Pendant(self.pendantCommand, self.pendantMessage, self.settings.pendantport, self.settings.pendantbaud)
+		self.pendant = Pendant(self.log, self.pendantCommand, self.pendantMessage, self.settings.pendantport, self.settings.pendantbaud)
 		
 	def pendantMessage(self, msg):
-		print "Pendant Message: (%s)" % msg
+		self.log(msg)
 		
 	def pendantCommand(self, cmd):
-		print "Pendant Command: (%s)" % cmd
 		if self.pendantAssignment is not None:
 			self.wPrinter[self.pendantAssignment].doPendantCommand(cmd)
 		
@@ -451,7 +450,7 @@ class MyFrame(wx.Frame):
 		self.assignPendant(None)
 		
 	def assignPendant(self, pName):
-		if self.pendantAssignment is not None:
+		if self.pendantAssignment is not None and self.wPrinter[self.pendantAssignment] is not None:
 			self.wPrinter[self.pendantAssignment].removePendant()
 		self.pendantAssignment = pName
 		if self.pendantAssignment is None:
@@ -460,10 +459,12 @@ class MyFrame(wx.Frame):
 					self.pendantAssignment = p
 					
 		if self.pendantAssignment is None:
-			print "pendant is unassigned"
+			self.log("pendant is unassigned")
+			self.pendant.assignPrinter(None)
 		else:
-			print "pendant is assigned to (%s)" % self.pendantAssignment
+			self.log("pendant is assigned to (%s)" % self.pendantAssignment)
 			self.wPrinter[self.pendantAssignment].addPendant()
+			self.pendant.assignPrinter(self.wPrinter[self.pendantAssignment])
 
 		
 	def doDesignButton(self, evt):

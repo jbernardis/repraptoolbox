@@ -195,5 +195,44 @@ class PrinterDlg(wx.Frame):
 		
 	def doPendantCommand(self, cmd):
 		print "Printer %s to do pendant command (%s)" % (self.printerName, cmd)
+		
+	def getXYSpeed(self):
+		return self.settings.xyspeed
+	
+	def getZSpeed(self):
+		return self.settings.zspeed
+	
+	def getESpeed(self):
+		return self.settings.espeed
+	
+	def getEDistance(self):
+		return self.settings.edistance
+	
+	def getBedCommand(self, temp):
+		bi = self.heaters.getBedInfo()
+		if temp == 2:
+			t = bi.highpreset
+		elif temp == 1:
+			t = bi.lowpreset
+		else:
+			t = 0
+		return ["%s S%d" % (bi.setcmd, t)]
+	
+	def getHECommand(self, tool, temp):
+		hi = self.heaters.getHEInfo(tool)
+		if hi is None:
+			return None
+		
+		if temp == 2:
+			t = hi.highpreset
+		elif temp == 1:
+			t = hi.lowpreset
+		else:
+			t = 0
+			
+		if self.settings.nextruders == 1:
+			return ["%s S%s" % (hi.setcmd, t)]
+		else:
+			return ["%s T %d S%s" % (hi.setcmd, tool, t)]
 
 		
