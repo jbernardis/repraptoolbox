@@ -194,7 +194,7 @@ class PrinterDlg(wx.Frame):
 		print "Pendant has been removed from %s" % self.printerName
 		
 	def doPendantCommand(self, cmd):
-		print "Printer %s to do pendant command (%s)" % (self.printerName, cmd)
+		self.reprap.sendNow(cmd)
 		
 	def getXYSpeed(self):
 		return self.settings.xyspeed

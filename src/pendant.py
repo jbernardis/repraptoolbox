@@ -71,8 +71,8 @@ def pendantCommand(cmd, printer, log):
 		return [pendantHomes[c]]
 		
 	elif c == "extrude":
-		dst = str(printer.getEDistance())
-		sp = str(printer.getESpeed())
+		dst = printer.getEDistance()
+		sp = printer.getESpeed()
 		
 		s = []
 		s.append("G91")
@@ -81,8 +81,8 @@ def pendantCommand(cmd, printer, log):
 		return s
 		
 	elif c == "retract":
-		dst = str(printer.getEDistance())
-		sp = str(printer.getESpeed())
+		dst = printer.getEDistance()
+		sp = printer.getESpeed()
 		
 		s = []
 		s.append("G91")
@@ -92,8 +92,6 @@ def pendantCommand(cmd, printer, log):
 		
 	elif c.startswith("temp"):
 		target = c[4:7]
-		print c
-		return []
 		try:
 			temp = int(c[7])
 			if temp < 0 or temp > 2:
@@ -125,6 +123,7 @@ def pendantCommand(cmd, printer, log):
 			log("Pendant temp command has invalid temp index: " + cmd)
 			return None
 	else:
+		print "unexpected pendant command: (%s)" % c
 		return None  # command not handled
 
 class Pendant:
