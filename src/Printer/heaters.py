@@ -231,5 +231,12 @@ class Heater(wx.Window):
 	def setTemperature(self, actualOrTarget, value):
 		if actualOrTarget == "target":
 			self.updateSetting(value)
+			if value == 0:
+				self.heaterOn = False
+				self.bPower.SetBitmap(self.images.pngHeatoff)
+			else:
+				self.heaterOn = True
+				self.bPower.SetBitmap(self.images.pngHeaton)
+
 		elif actualOrTarget == "actual":
 			self.updateActual(value)

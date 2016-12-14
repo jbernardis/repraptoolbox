@@ -80,7 +80,14 @@ class PrinterDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onRunMacro, self.bMacros)
 		self.bMacros.SetToolTipString("Run macros")
 		btnhsizer.Add(self.bMacros)
+		btnhsizer.AddSpacer((10, 10))
+		
+		self.bPendant = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPendantoff, size=BUTTONDIM, style = wx.NO_BORDER)
+		self.bPendant.SetToolTipString("Connect/disconnect the pendant")
+		self.Bind(wx.EVT_BUTTON, self.onBPendant, self.bPendant)
+		btnhsizer.Add(self.bPendant)
 		btnhsizer.AddSpacer((200, 10))
+		self.pendantConnected = False
 
 		self.bRemember = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRemember, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onRemember, self.bRemember)
@@ -188,10 +195,21 @@ class PrinterDlg(wx.Frame):
 			self.pmonDlg.rememberPositions()
 			
 	def addPendant(self):
-		print "Pendant has been added to %s" % self.printerName
+		self.pendantConnected = True
+		self.updatePendantButton()
 			
 	def removePendant(self):
-		print "Pendant has been removed from %s" % self.printerName
+		self.pendantConnected = False
+		self.updatePendantButton()
+		
+	def onBPendant(self, evt):
+		self.parent.assignPendant(self.printerName)
+		
+	def updatePendantButton(self):
+		if self.pendandConnected:
+			self.bPendant.SetBitMap(self.images.pngPendanton)
+		else:
+			self.bPendant.SetBitMap(self.images.pngPendantoff)
 		
 	def doPendantCommand(self, cmd):
 		self.reprap.sendNow(cmd)
