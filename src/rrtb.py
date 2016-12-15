@@ -320,7 +320,7 @@ class MyFrame(wx.Frame):
 					shell = False
 				else:
 					print "invalid entry for (%s)" % n
-					cmd == None
+					cmd = None
 					
 				if cmd is not None:
 					b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
@@ -455,6 +455,7 @@ class MyFrame(wx.Frame):
 	def PrinterClosed(self, pName):
 		self.bPrinter[pName].Enable()
 		self.wPrinter[pName] = None
+		self.wPendant[pName].SetBitmap(self.images.pngPendantclear)
 		self.assignPendant(None)
 		
 	def assignPendant(self, pName):

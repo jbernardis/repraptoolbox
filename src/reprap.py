@@ -708,6 +708,7 @@ class RepRap:
 		self.forceGCode = False
 		self.restarting = False
 		self.restartData = None
+		self.resetting = False
 
 		self.timer = None
 		self.cycle = 0
@@ -730,6 +731,8 @@ class RepRap:
 		self.ready = True
 		
 	def reset(self):
+		self.resetting = True
+		self.suspendTempProbe(True)
 		self.clearPrint()
 		self.listener.resetPort()
 	
@@ -852,7 +855,6 @@ class RepRap:
 		
 	def clearPrint(self):
 		self._sendCmd(CMD_DRAINQUEUE)
-		self.clearPendingPauses()
 		
 	def reprapEvent(self, evt):
 		if evt.event == QUEUE_DRAINED:
@@ -871,7 +873,10 @@ class RepRap:
 			if self.ready:
 				self.sender.reportConnection(True, self.prtport)
 			self.startTimer()
-			self.win.reportConnection(True, self.printerName)
+			if not self.resetting:
+				self.win.reportConnection(True, self.printerName)
+			else:
+				self.resetting = False
 
 		elif evt.event == DISCONNECTED:
 			self.online = False
@@ -879,7 +884,8 @@ class RepRap:
 			if self.ready:
 				self.sender.reportConnection(False, None)
 			self.stopTimer()
-			self.win.reportConnection(False, self.printerName)
+			if not self.resetting:
+				self.win.reportConnection(False, self.printerName)
 
 		elif evt.event == RECEIVED_MSG:
 			if TRACE:
@@ -930,8 +936,8 @@ class RepRap:
 				if n is not None and self.positionHandler is not None:
 					self.positionHandler(n)
 
-		def suspendTempProbe(self, flag):
-				self.suspendM105 = flag
+	def suspendTempProbe(self, flag):
+		self.suspendM105 = flag
 		
 	def printStopped(self):
 		self.printing = False

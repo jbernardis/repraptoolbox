@@ -30,6 +30,7 @@ class PrinterDlg(wx.Frame):
 		self.reprap = reprap
 		self.settings = PrtSettings(cmdFolder, printerName)
 		self.images = Images(os.path.join(cmdFolder, "images"))
+		self.parentImages = self.parent.images
 		
 		self.graphDlg = None
 		self.pmonDlg = None
@@ -82,7 +83,7 @@ class PrinterDlg(wx.Frame):
 		btnhsizer.Add(self.bMacros)
 		btnhsizer.AddSpacer((10, 10))
 		
-		self.bPendant = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPendantoff, size=BUTTONDIM, style = wx.NO_BORDER)
+		self.bPendant = wx.BitmapButton(self, wx.ID_ANY, self.parentImages.pngPendantoff, size=BUTTONDIM, style = wx.NO_BORDER)
 		self.bPendant.SetToolTipString("Connect/disconnect the pendant")
 		self.Bind(wx.EVT_BUTTON, self.onBPendant, self.bPendant)
 		btnhsizer.Add(self.bPendant)
@@ -216,10 +217,10 @@ class PrinterDlg(wx.Frame):
 		self.parent.assignPendant(self.printerName)
 		
 	def updatePendantButton(self):
-		if self.pendandConnected:
-			self.bPendant.SetBitMap(self.images.pngPendanton)
+		if self.pendantConnected:
+			self.bPendant.SetBitmap(self.parentImages.pngPendanton)
 		else:
-			self.bPendant.SetBitMap(self.images.pngPendantoff)
+			self.bPendant.SetBitmap(self.parentImages.pngPendantoff)
 		
 	def doPendantCommand(self, cmd):
 		self.reprap.sendNow(cmd)
