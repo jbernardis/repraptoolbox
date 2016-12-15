@@ -303,6 +303,18 @@ class ListenThread:
 	
 		thread.start_new_thread(self.Run, ())
 		
+	def resetPort(self):
+		if _platform == "linux" or _platform == "linux2":
+			fp = open(self.port, "r")
+			new = termios.tcgetattr(fp)
+			new[2] = new[2] | ~termios.CREAD
+			termios.tcsetattr(fp, termios.TCSANOW, new)
+			fp.close()
+			self.printerPort.setDTR(1)
+			time.sleep(2)
+			self.printerPort.setDTR(0)
+			self.connected = False
+		
 	def kill(self):
 		self.isRunning = False
 
@@ -717,6 +729,10 @@ class RepRap:
 		self.sender.reportConnection(self.online, self.prtport)
 		self.ready = True
 		
+	def reset(self):
+		self.clearPrint()
+		self.listener.resetPort()
+	
 	def registerTempHandler(self, handler):
 		self.parser.setTempHandler(handler)
 		
@@ -797,22 +813,6 @@ class RepRap:
 			return self.sender.getPrintIndex()
 		else:
 			return None
-		
-	def reset(self):
-		self.clearPrint()
-		if(self.printer):
-			self.resetPort()
-			self.printer.setDTR(1)
-			time.sleep(2)
-			self.printer.setDTR(0)
-	
-	def resetPort(self):
-		if _platform == "linux" or _platform == "linux2":
-			fp = open(self.port, "r")
-			new = termios.tcgetattr(fp)
-			new[2] = new[2] | ~termios.CREAD
-			termios.tcsetattr(fp, termios.TCSANOW, new)
-			fp.close()
 		
 	def startPrint(self, data):
 		self.sender.resetCounters()

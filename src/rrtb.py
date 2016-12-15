@@ -224,6 +224,7 @@ class MyFrame(wx.Frame):
 		self.bPrinter = {}
 		self.wPrinter = {}
 		self.bId = {}
+		self.wPendant = {}
 		
 		for p in self.settings.printers:
 			pinfo = self.settings.getSection(p)
@@ -239,6 +240,8 @@ class MyFrame(wx.Frame):
 			self.bPrinter[p] = b
 			self.wPrinter[p] = None
 			self.reprap[p] = RepRap(self, p, pinfo["port"], pinfo["baud"], pinfo["firmware"])
+			self.wPendant[p] = wx.StaticBitmap(self, wx.ID_ANY, self.images.pngPendantclear)
+
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " Printers ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -248,9 +251,17 @@ class MyFrame(wx.Frame):
 		for p in sorted(self.settings.printers):
 			bhsizer.Add(self.bPrinter[p])
 			bhsizer.AddSpacer((10, 10))
+			
+		bmphsizer = wx.BoxSizer(wx.HORIZONTAL)
+		bmphsizer.AddSpacer((42, 10))
+		
+		for p in sorted(self.settings.printers):
+			bmphsizer.Add(self.wPendant[p])
+			bmphsizer.AddSpacer((74, 10))
 		
 		bvsizer.AddSpacer((10, 10))
 		bvsizer.Add(bhsizer)
+		bvsizer.Add(bmphsizer)
 		bvsizer.AddSpacer((10, 10))
 		szVFrame.Add(bvsizer)
 		szVFrame.AddSpacer((20, 20))
@@ -449,6 +460,7 @@ class MyFrame(wx.Frame):
 	def assignPendant(self, pName):
 		if self.pendantAssignment is not None and self.wPrinter[self.pendantAssignment] is not None:
 			self.wPrinter[self.pendantAssignment].removePendant()
+			self.wPendant[self.pendantAssignment].SetBitmap(self.images.pngPendantclear)
 		self.pendantAssignment = pName
 		if self.pendantAssignment is None:
 			for p in self.wPrinter.keys():
@@ -459,9 +471,10 @@ class MyFrame(wx.Frame):
 			self.log("pendant is unassigned")
 			self.pendant.assignPrinter(None)
 		else:
-			self.log("pendant is assigned to (%s)" % self.pendantAssignment)
+			self.log("pendant is assigned to: %s" % self.pendantAssignment)
 			self.wPrinter[self.pendantAssignment].addPendant()
 			self.pendant.assignPrinter(self.wPrinter[self.pendantAssignment])
+			self.wPendant[self.pendantAssignment].SetBitmap(self.images.pngPendanton)
 
 		
 	def doDesignButton(self, evt):

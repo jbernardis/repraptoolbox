@@ -86,8 +86,14 @@ class PrinterDlg(wx.Frame):
 		self.bPendant.SetToolTipString("Connect/disconnect the pendant")
 		self.Bind(wx.EVT_BUTTON, self.onBPendant, self.bPendant)
 		btnhsizer.Add(self.bPendant)
-		btnhsizer.AddSpacer((200, 10))
+		btnhsizer.AddSpacer((50, 10))
 		self.pendantConnected = False
+
+		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngReset, size=BUTTONDIM)
+		self.bReset.SetToolTipString("Hard reset the printer port")
+		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
+		btnhsizer.Add(self.bReset)
+		btnhsizer.AddSpacer((90, 10))
 
 		self.bRemember = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRemember, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onRemember, self.bRemember)
@@ -133,6 +139,10 @@ class PrinterDlg(wx.Frame):
 			return False
 		
 		return self.pmonDlg.isPrinting()
+	
+	def onBReset(self, evt):
+		print "ask if you are certain here"
+		self.reprap.reset()
 
 	def terminate(self):
 		if self.pmonDlg:
