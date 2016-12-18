@@ -37,6 +37,7 @@ class PrtSettings:
 		self.lastmacrodirectory = "."
 		self.scale = 2
 		self.buildarea = [200, 200]
+		self.firmwaretype = "MARLIN"
 		self.showmoves = False
 		self.showprevious = False
 		self.ctrlposition = None
@@ -98,6 +99,9 @@ class PrtSettings:
 					
 				elif opt == "lastmacrodirectory":
 					self.lastmacrodirectory = value
+					
+				elif opt == "firmwaretype":
+					self.firmwaretype = value
 					
 				elif opt == 'nextruders':
 					try:
@@ -222,6 +226,7 @@ class PrtSettings:
 		
 		self.cfg.set(self.section, "lastdirectory", str(self.lastdirectory))
 		self.cfg.set(self.section, "lastmacrodirectory", str(self.lastmacrodirectory))
+		self.cfg.set(self.section, "firmwaretype", str(self.firmwaretype))
 		self.cfg.set(self.section, "nextruders", str(self.nextruders))
 		self.cfg.set(self.section, "xyspeed", str(self.xyspeed))
 		self.cfg.set(self.section, "zspeed", str(self.zspeed))

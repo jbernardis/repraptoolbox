@@ -29,6 +29,10 @@ class PrinterDlg(wx.Frame):
 		self.printerName = printerName
 		self.reprap = reprap
 		self.settings = PrtSettings(cmdFolder, printerName)
+		if self.settings.firmwaretype == "MARLIN":
+			import firmwaremarlin as firmware
+			self.firmware = firmware
+			
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		self.parentImages = self.parent.images
 		
@@ -83,8 +87,9 @@ class PrinterDlg(wx.Frame):
 		btnhsizer.Add(self.bMacros)
 		btnhsizer.AddSpacer((10, 10))
 		
-		self.bPendant = wx.BitmapButton(self, wx.ID_ANY, self.parentImages.pngPendantoff, size=BUTTONDIM, style = wx.NO_BORDER)
-		self.bPendant.SetToolTipString("Connect/disconnect the pendant")
+		self.bPendant = wx.BitmapButton(self, wx.ID_ANY, self.parentImages.pngPendantclear, size=BUTTONDIM, style = wx.NO_BORDER)
+		self.bPendant.SetToolTipString("")
+		self.bPendant.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBPendant, self.bPendant)
 		btnhsizer.Add(self.bPendant)
 		btnhsizer.AddSpacer((50, 10))
@@ -195,7 +200,13 @@ class PrinterDlg(wx.Frame):
 		self.bMacros.Enable(True)
 		
 	def onFirmware(self, evt):
-		print "firmware"
+		self.fw = self.firmware.Firmware(self.parent, self.reprap, self.printerName, cmdFolder)
+		self.bFirmware.Enable(False)
+		
+	def onFirmwareExit(self):
+		self.fw = None
+		self.bFirmware.Enable(True)
+		
 		
 	def onRemember(self, evt):
 		self.settings.ctrlposition = self.GetPosition()
@@ -209,18 +220,30 @@ class PrinterDlg(wx.Frame):
 		self.pendantConnected = True
 		self.updatePendantButton()
 			
-	def removePendant(self):
+	def removePendant(self, connected):
 		self.pendantConnected = False
-		self.updatePendantButton()
+		self.updatePendantButton(connected)
 		
 	def onBPendant(self, evt):
 		self.parent.assignPendant(self.printerName)
 		
-	def updatePendantButton(self):
+	def updatePendantButton(self, connected=True):
 		if self.pendantConnected:
 			self.bPendant.SetBitmap(self.parentImages.pngPendanton)
-		else:
+			self.bPendant.SetBitmapDisabled(self.parentImages.pngPendanton)
+			self.bPendant.SetToolTipString("%s has control of the pendant" % self.printerName)
+			self.bPendant.Enable(False)
+
+		elif connected:
 			self.bPendant.SetBitmap(self.parentImages.pngPendantoff)
+			self.bPendant.SetToolTipString("Seize control of the pendant")
+			self.bPendant.Enable(True)
+
+		else:
+			self.bPendant.SetBitmap(self.parentImages.pngPendantclear)
+			self.bPendant.SetBitmapDisabled(self.parentImages.pngPendantclear)
+			self.bPendant.SetToolTipString("")
+			self.bPendant.Enable(False)
 		
 	def doPendantCommand(self, cmd):
 		self.reprap.sendNow(cmd)

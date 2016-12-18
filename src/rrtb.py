@@ -60,6 +60,7 @@ class MyFrame(wx.Frame):
 		self.dlgGEdit = None
 		
 		self.pendantAssignment = None
+		self.pendantConnected = False
 		
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
@@ -282,8 +283,8 @@ class MyFrame(wx.Frame):
 		if self.settings.port != 0:
 			self.httpServer = RepRapServer(self, port=self.settings.port)
 			
-		self.pendant = Pendant(self.log, self.pendantCommand, self.settings.pendantport, self.settings.pendantbaud)
-		
+		self.pendant = Pendant(self.log, self.pendantConnection, self.pendantCommand, self.settings.pendantport, self.settings.pendantbaud)
+				
 	def pendantCommand(self, cmd):
 		if self.pendantAssignment is not None:
 			self.wPrinter[self.pendantAssignment].doPendantCommand(cmd)
@@ -457,10 +458,24 @@ class MyFrame(wx.Frame):
 		self.wPrinter[pName] = None
 		self.wPendant[pName].SetBitmap(self.images.pngPendantclear)
 		self.assignPendant(None)
+
+	def pendantConnection(self, flag):
+		self.pendantConnected = flag
+		for p in self.wPrinter.keys():
+			self.wPrinter[p].removePendant(self.pendantConnected)
+			
+		self.assignPendant(None)
 		
 	def assignPendant(self, pName):
+		if not self.pendantConnected:
+			self.pendantAssignment = None
+			for p in self.wPrinter.keys():
+				self.wPendant[p].SetBitmap(self.images.pngPendantclear)
+				self.wPrinter[p].removePendant(self.pendantConnected)
+			return
+		
 		if self.pendantAssignment is not None and self.wPrinter[self.pendantAssignment] is not None:
-			self.wPrinter[self.pendantAssignment].removePendant()
+			self.wPrinter[self.pendantAssignment].removePendant(self.pendantConnected)
 			self.wPendant[self.pendantAssignment].SetBitmap(self.images.pngPendantclear)
 		self.pendantAssignment = pName
 		if self.pendantAssignment is None:

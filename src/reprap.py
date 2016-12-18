@@ -424,6 +424,8 @@ class RepRapParser:
 		self.speedHandler = None
 		self.toolHandler = None
 		
+		self.firmware = None
+		
 	def setTempHandler(self, handler):
 		self.tempHandler = handler
 
@@ -432,70 +434,76 @@ class RepRapParser:
 
 	def setToolHandler(self, handler):
 		self.toolHandler = handler
+		
+	def startFirmwareCollection(self, fw):
+		self.firmware = fw
+
+	def endFirmwareCollection(self):
+		self.firmware = None
 
 	def parseMsg(self, msg):
-		#if 'M92' in msg:
-			#X = self.parseG(msg, 'X')
-			#Y = self.parseG(msg, 'Y')
-			#Z = self.parseG(msg, 'Z')
-			#E = self.parseG(msg, 'E')
-			#if self.firmware is not None:
-				#self.firmware.m92(X, Y, Z, E)
-			#return False
-	#	
-		#if 'M201' in msg:
-			#X = self.parseG(msg, 'X')
-			#Y = self.parseG(msg, 'Y')
-			#Z = self.parseG(msg, 'Z')
-			#E = self.parseG(msg, 'E')
-			#if self.firmware is not None:
-				#self.firmware.m201(X, Y, Z, E)
-			#return False
-	#	
-		#if 'M203' in msg:
-			#X = self.parseG(msg, 'X')
-			#Y = self.parseG(msg, 'Y')
-			#Z = self.parseG(msg, 'Z')
-			#E = self.parseG(msg, 'E')
-			#if self.firmware is not None:
-				#self.firmware.m203(X, Y, Z, E)
-			#return False
-	#	
-		#if 'M204' in msg:
-			#P = self.parseG(msg, 'P')
-			#R = self.parseG(msg, 'R')
-			#T = self.parseG(msg, 'T')
-			#if self.firmware is not None:
-				#self.firmware.m204(P, R, T)
-			#return False
-	#	
-		#if 'M205' in msg:
-			#S = self.parseG(msg, 'S')
-			#T = self.parseG(msg, 'T')
-			#B = self.parseG(msg, 'B')
-			#X = self.parseG(msg, 'X')
-			#Z = self.parseG(msg, 'Z')
-			#E = self.parseG(msg, 'E')
-			#if self.firmware is not None:
-				#self.firmware.m205(S, T, B, X, Z, E)
-			#return False
-	#	
-		#if 'M206' in msg:
-			#X = self.parseG(msg, 'X')
-			#Y = self.parseG(msg, 'Y')
-			#Z = self.parseG(msg, 'Z')
-			#if self.firmware is not None:
-				#self.firmware.m206(X, Y, Z)
-			#return False
-	#	
-		#if 'M301' in msg:
-			#P = self.parseG(msg, 'P')
-			#I = self.parseG(msg, 'I')
-			#D = self.parseG(msg, 'D')
-			#if self.firmware is not None:
-				#self.firmware.m301(P, I, D)
-			#return False
-	#	
+		if 'M92' in msg:
+			X = self.parseG(msg, 'X')
+			Y = self.parseG(msg, 'Y')
+			Z = self.parseG(msg, 'Z')
+			E = self.parseG(msg, 'E')
+			if self.firmware is not None:
+				self.firmware.m92(X, Y, Z, E)
+			return False
+		
+		if 'M201' in msg:
+			X = self.parseG(msg, 'X')
+			Y = self.parseG(msg, 'Y')
+			Z = self.parseG(msg, 'Z')
+			E = self.parseG(msg, 'E')
+			if self.firmware is not None:
+				self.firmware.m201(X, Y, Z, E)
+			return False
+		
+		if 'M203' in msg:
+			X = self.parseG(msg, 'X')
+			Y = self.parseG(msg, 'Y')
+			Z = self.parseG(msg, 'Z')
+			E = self.parseG(msg, 'E')
+			if self.firmware is not None:
+				self.firmware.m203(X, Y, Z, E)
+			return False
+		
+		if 'M204' in msg:
+			P = self.parseG(msg, 'P')
+			R = self.parseG(msg, 'R')
+			T = self.parseG(msg, 'T')
+			if self.firmware is not None:
+				self.firmware.m204(P, R, T)
+			return False
+		
+		if 'M205' in msg:
+			S = self.parseG(msg, 'S')
+			T = self.parseG(msg, 'T')
+			B = self.parseG(msg, 'B')
+			X = self.parseG(msg, 'X')
+			Z = self.parseG(msg, 'Z')
+			E = self.parseG(msg, 'E')
+			if self.firmware is not None:
+				self.firmware.m205(S, T, B, X, Z, E)
+			return False
+		
+		if 'M206' in msg:
+			X = self.parseG(msg, 'X')
+			Y = self.parseG(msg, 'Y')
+			Z = self.parseG(msg, 'Z')
+			if self.firmware is not None:
+				self.firmware.m206(X, Y, Z)
+			return False
+		
+		if 'M301' in msg:
+			P = self.parseG(msg, 'P')
+			I = self.parseG(msg, 'I')
+			D = self.parseG(msg, 'D')
+			if self.firmware is not None:
+				self.firmware.m301(P, I, D)
+			return False
+		
 		#if "SD card ok" in msg:
 			#evt = SDCardEvent(event = SD_CARD_OK)
 			#wx.PostEvent(self.printmon, evt)
@@ -750,6 +758,12 @@ class RepRap:
 		
 	def registerEventHandler(self, handler):
 		self.eventHandler = handler
+		
+	def startFirmwareCollection(self, fw):
+		self.parser.startFirmwareCollection(fw)
+		
+	def endFirmwareCollection(self):
+		self.parser.endFirmwareCollection()
 
 	def terminate(self):
 		try:
