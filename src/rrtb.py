@@ -463,18 +463,18 @@ class MyFrame(wx.Frame):
 	# works with wxpython, so we need to send an event to ourselves and do the processing
 	# in the main thread				
 	def pendantCommand(self, cmd):
-		evt = PendantCmdEvent(cmd=cmd)
-		wx.PostEvent(self, evt)
+		if cmd is not None or self.pendantAssignment is None:
+			evt = PendantCmdEvent(cmd=cmd)
+			wx.PostEvent(self, evt)
 
 	def pendantConnection(self, flag):
 		evt = PendantConnEvent(flag=flag)
 		wx.PostEvent(self, evt)
 		
 	def pendantCommandHandler(self, evt):
-		if self.pendantAssignment is not None:
-			cl = pendantCommand(evt.cmd, self.wPrinter[self.pendantAssignment], self.log)
-			for cmd in cl:
-				self.wPrinter[self.pendantAssignment].doPendantCommand(cmd)
+		cl = pendantCommand(evt.cmd, self.wPrinter[self.pendantAssignment], self.log)
+		for cmd in cl:
+			self.wPrinter[self.pendantAssignment].doPendantCommand(cmd)
 		
 	def pendantConnectionHandler(self, evt):
 		self.pendantConnected = evt.flag

@@ -151,8 +151,16 @@ class PrinterDlg(wx.Frame):
 		return self.pmonDlg.isPrinting()
 	
 	def onBReset(self, evt):
-		print "ask if you are certain here"
-		self.reprap.reset()
+		dlg = wx.MessageDialog(self,
+				"Are you sure you want to\nreset the %s connection?" % self.printerName,
+				"Reset %s connection" % self.printerName,
+				wx.YES_NO | wx.NO_DEFAULT | wx.ICON_HAND)
+			
+		rc = dlg.ShowModal()
+		dlg.Destroy()
+
+		if rc == wx.ID_YES:
+			self.reprap.reset()
 
 	def terminate(self):
 		if self.pmonDlg:

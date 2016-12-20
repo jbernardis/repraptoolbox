@@ -51,6 +51,11 @@ pendantMoves = {
 	's-movez-3': "Z-10",
 	}
 
+metaCommands = {
+	"s-home" : "@print",
+	"s-homex" : "@pause"
+	}
+
 def pendantCommand(cmd, printer, log):
 	c = cmd.lower()
 	if c in pendantMoves.keys():
@@ -69,6 +74,9 @@ def pendantCommand(cmd, printer, log):
 			
 	elif c in pendantHomes.keys():
 		return [pendantHomes[c]]
+			
+	elif c in metaCommands.keys():
+		return [metaCommands[c]]
 		
 	elif c == "extrude":
 		dst = printer.getEDistance()
@@ -123,7 +131,6 @@ def pendantCommand(cmd, printer, log):
 			log("Pendant temp command has invalid temp index: " + cmd)
 			return None
 	else:
-		print "unexpected pendant command: (%s)" % c
 		return None  # command not handled
 
 class Pendant:

@@ -33,8 +33,9 @@ class GCodeEntry(wx.Window):
 		self.Fit()
 		
 	def evtGCodeSend(self, evt):
-		cmd = self.tGCode.GetValue()
-		self.reprap.sendNow(cmd, True)
+		cmd = self.tGCode.GetValue().strip()
+		if cmd != "":
+			self.reprap.sendNow(cmd, True)
 		
 	def onClear(self, evt):
 		self.tGCode.SetValue("")
