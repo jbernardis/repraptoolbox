@@ -450,8 +450,7 @@ class MyFrame(wx.Frame):
 		
 		self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
 		self.bPrinter[pName].Enable(False)
-		if self.pendantAssignment is None:
-			self.assignPendant(pName)
+		self.assignPendantIf(pName)
 	
 	def PrinterClosed(self, pName):
 		self.bPrinter[pName].Enable()
@@ -462,16 +461,24 @@ class MyFrame(wx.Frame):
 	def pendantConnection(self, flag):
 		self.pendantConnected = flag
 		for p in self.wPrinter.keys():
-			self.wPrinter[p].removePendant(self.pendantConnected)
+			if self.wPrinter[p] is not None:
+				self.wPrinter[p].removePendant(self.pendantConnected)
 			
 		self.assignPendant(None)
+		
+	def assignPendantIf(self, pName):
+		if self.pendantAssignment is None:
+			self.assignPendant(pName)
+		elif self.wPrinter[pName] is not None:
+			self.wPrinter[pName].removePendant(self.pendantConnected)
 		
 	def assignPendant(self, pName):
 		if not self.pendantConnected:
 			self.pendantAssignment = None
 			for p in self.wPrinter.keys():
 				self.wPendant[p].SetBitmap(self.images.pngPendantclear)
-				self.wPrinter[p].removePendant(self.pendantConnected)
+				if self.wPrinter[p] is not None:
+					self.wPrinter[p].removePendant(self.pendantConnected)
 			return
 		
 		if self.pendantAssignment is not None and self.wPrinter[self.pendantAssignment] is not None:

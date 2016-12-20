@@ -93,7 +93,7 @@ class PrinterDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onBPendant, self.bPendant)
 		btnhsizer.Add(self.bPendant)
 		btnhsizer.AddSpacer((50, 10))
-		self.pendantConnected = False
+		self.pendantAssigned = False
 
 		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngReset, size=BUTTONDIM)
 		self.bReset.SetToolTipString("Hard reset the printer port")
@@ -217,18 +217,18 @@ class PrinterDlg(wx.Frame):
 			self.pmonDlg.rememberPositions()
 			
 	def addPendant(self):
-		self.pendantConnected = True
+		self.pendantAssigned = True
 		self.updatePendantButton()
 			
 	def removePendant(self, connected):
-		self.pendantConnected = False
+		self.pendantAssigned = False
 		self.updatePendantButton(connected)
 		
 	def onBPendant(self, evt):
 		self.parent.assignPendant(self.printerName)
 		
 	def updatePendantButton(self, connected=True):
-		if self.pendantConnected:
+		if self.pendantAssigned:
 			self.bPendant.SetBitmap(self.parentImages.pngPendanton)
 			self.bPendant.SetBitmapDisabled(self.parentImages.pngPendanton)
 			self.bPendant.SetToolTipString("%s has control of the pendant" % self.printerName)
