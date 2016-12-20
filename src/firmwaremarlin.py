@@ -118,7 +118,7 @@ class Firmware:
 		
 		self.readingFirmware = True 
 		self.reprap.startFirmwareCollection(self)
-		self.reprap.send_now("M503")
+		self.reprap.sendNow("M503")
 		
 	def checkComplete(self):
 		if self.got92 and self.got201 and self.got203 and self.got204 and self.got204 and self.got206 and self.got301:
@@ -198,7 +198,7 @@ class Firmware:
 			return
 		
 		self.dlgVisible = True
-		self.wDlg = FirmwareDlg(self, self.flash, self.eeprom, self.eepromfile, self.printerName) 
+		self.wDlg = FirmwareDlg(self, self.parent, self.flash, self.eeprom, self.eepromfile, self.printerName) 
 		self.wDlg.CenterOnScreen()
 		self.wDlg.Show(True)
 		
@@ -251,9 +251,9 @@ class TextBox(wx.PyWindow):
 	
 BSIZE = (140, 40)
 class FirmwareDlg(wx.Dialog):
-	def __init__(self, parent, flash, eeprom, eepromfile, pname):
+	def __init__(self, parent, win, flash, eeprom, eepromfile, pname):
 		self.parent = parent
-		self.app = parent.app
+		self.wparent = win
 		self.log = parent.log
 		self.reprap = parent.reprap
 		self.flash = flash
@@ -267,7 +267,7 @@ class FirmwareDlg(wx.Dialog):
 		pos = wx.DefaultPosition
 		sz = (950, 780)
 		style = wx.DEFAULT_DIALOG_STYLE
-		pre.Create(self.app, wx.ID_ANY, "%s Firmware Parameters" % self.printerName, pos, sz, style)
+		pre.Create(self.wparent, wx.ID_ANY, "%s Firmware Parameters" % self.printerName, pos, sz, style)
 		self.PostCreate(pre)
 		
 		self.sizer = wx.GridBagSizer()
@@ -397,7 +397,7 @@ class FirmwareDlg(wx.Dialog):
 		
 		if val != "":
 			cmd = "%s%s" % (ik.upper().replace('_', ' '), val)
-			self.reprap.send_now(cmd)
+			self.reprap.sendNow(cmd)
 		
 			wFlash = self.itemMap[ik][1]
 			wFlash.setText(val)
@@ -428,14 +428,14 @@ class FirmwareDlg(wx.Dialog):
 				self.flash.setValue(ik, val)
 				
 		if nterms != 0:
-			self.reprap.send_now(cmd)
+			self.reprap.sendNow(cmd)
 			
 	def onCopyAllToFlash(self, evt):
 		for g in grporder:
 			self.sendGroupToFlash(g)
 			
 	def onCopyFlashToEEProm(self, evt):
-		self.reprap.send_now("M500")
+		self.reprap.sendNow("M500")
 		for i in self.itemMap.keys():
 			v = self.itemMap[i][1].getText()
 			self.itemMap[i][2].setText(v)
@@ -445,7 +445,7 @@ class FirmwareDlg(wx.Dialog):
 			
 	def onCopyEEPromToFlash(self, evt):
 		self.enableButtons(False)
-		self.reprap.send_now("M501")
+		self.reprap.sendNow("M501")
 		self.parent.start()
 		
 	def copyEEPromToFlashResume(self, evt):

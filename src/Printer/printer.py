@@ -200,7 +200,7 @@ class PrinterDlg(wx.Frame):
 		self.bMacros.Enable(True)
 		
 	def onFirmware(self, evt):
-		self.fw = self.firmware.Firmware(self.parent, self.reprap, self.printerName, cmdFolder)
+		self.fw = self.firmware.Firmware(self, self.reprap, self.printerName, cmdFolder)
 		self.bFirmware.Enable(False)
 		
 	def onFirmwareExit(self):
