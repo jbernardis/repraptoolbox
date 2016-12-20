@@ -621,6 +621,14 @@ class PrintMonitorDlg(wx.Frame):
 			self.bPause.Enable(True);
 			self.bPause.setResume()
 			
+	def emulatePrintButton(self):
+		if self.state == PrintState.printing:
+			self.log("Already printing")
+		elif not self.bPrint.IsEnabled():
+			self.log("Unable to print right now")
+		else:
+			self.onPrint(None)
+			
 	def onPrint(self, evt):
 		oldState = self.state
 		self.state = PrintState.printing
@@ -647,6 +655,12 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.revisedEta, "")
 		self.log("Print %s at %s" % (action, stime))
 
+	def emulatePauseButton(self):
+		if not self.bPause.IsEnabled():
+			self.log("Unable to pause right now")
+		else:
+			self.onPause(None)
+	
 	def onPause(self, evt):
 		if self.state == PrintState.paused:
 			self.state = PrintState.printing

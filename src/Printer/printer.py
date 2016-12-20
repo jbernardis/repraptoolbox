@@ -258,7 +258,30 @@ class PrinterDlg(wx.Frame):
 			self.bPendant.Enable(False)
 		
 	def doPendantCommand(self, cmd):
-		self.reprap.sendNow(cmd)
+		if cmd.startswith("@"):
+			self.reprap.metaCommand(cmd)
+		else:
+			self.reprap.sendNow(cmd)
+			
+	def metaCommand(self, cmd):
+		if cmd == "@print":
+			self.emlulatePrintButton()
+		elif cmd == "@pause":
+			self.emulatePauseButton()
+		else:
+			self.log("Unimplemented meta command: %s" % cmd)
+			
+	def emulatePrintButton(self):
+		if self.pmonDlg is None:
+			self.log("Unable to start print - no file loaded")
+		else:
+			self.pmonDlg.emulatePrintButton()
+	
+	def emulatePauseButton(self):
+		if self.pmonDlg is None:
+			self.log("Unable to pause print - no file loaded")
+		else:
+			self.pmonDlg.emulatePauseButton()
 		
 	def getXYSpeed(self):
 		return self.settings.xyspeed
