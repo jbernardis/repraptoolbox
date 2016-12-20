@@ -16,6 +16,7 @@ from heaters import Heaters
 from tempgraph import TempDlg
 from printmon import PrintMonitorDlg
 from macros import MacroDialog
+from gcodeentry import GCodeEntry
 
 BUTTONDIM = (48, 48)
 
@@ -53,19 +54,22 @@ class PrinterDlg(wx.Frame):
 		
 		szWindow.Add(szHeaters, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		szWindow.AddSpacer((20, 20))
+		
+		szWindow.Add(GCodeEntry(self), 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		szWindow.AddSpacer((20, 20))
 
 		btnhsizer = wx.BoxSizer(wx.HORIZONTAL)
 		btnhsizer.AddSpacer((10, 10))
 		
 		self.bGraph = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGraph, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
-		self.bGraph.SetToolTipString("Show Temperature monitoring graph")
+		self.bGraph.SetToolTipString("Temperature graph dialog box")
 		btnhsizer.Add(self.bGraph)
 		btnhsizer.AddSpacer((10, 10))
 		
 		self.bPrintMon = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPrintmon, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onPrintMon, self.bPrintMon)
-		self.bPrintMon.SetToolTipString("Show dialog box to monitor printing a G Code file")
+		self.bPrintMon.SetToolTipString("Print monitoring dialog box")
 		btnhsizer.Add(self.bPrintMon)
 		btnhsizer.AddSpacer((10, 10))
 		

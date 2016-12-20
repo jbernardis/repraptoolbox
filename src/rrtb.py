@@ -1,4 +1,5 @@
-import wx
+#import wx
+import wx.lib.newevent
 import os
 import sys, inspect
 
@@ -18,8 +19,10 @@ from Printer.printer import PrinterDlg
 from reprap import RepRap
 from log import Logger
 from HTTPServer import RepRapServer
-from pendant import Pendant
-	
+from pendant import Pendant, pendantCommand
+
+(PendantCmdEvent, EVT_PENDANT_COMMAND) = wx.lib.newevent.NewEvent()
+(PendantConnEvent, EVT_PENDANT_CONNECT) = wx.lib.newevent.NewEvent()
 
 
 BUTTONDIM = (48, 48)
@@ -66,6 +69,8 @@ class MyFrame(wx.Frame):
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
 		self.Bind(wx.EVT_CLOSE, self.onClose)
+		self.Bind(EVT_PENDANT_COMMAND, self.pendantCommandHandler)
+		self.Bind(EVT_PENDANT_CONNECT, self.pendantConnectionHandler)
 		self.logger = Logger(self)
 		
 		self.statusReportCB = {}
@@ -283,11 +288,7 @@ class MyFrame(wx.Frame):
 		if self.settings.port != 0:
 			self.httpServer = RepRapServer(self, port=self.settings.port)
 			
-		self.pendant = Pendant(self.log, self.pendantConnection, self.pendantCommand, self.settings.pendantport, self.settings.pendantbaud)
-				
-	def pendantCommand(self, cmd):
-		if self.pendantAssignment is not None:
-			self.wPrinter[self.pendantAssignment].doPendantCommand(cmd)
+		self.pendant = Pendant(self.pendantConnection, self.pendantCommand, self.settings.pendantport, self.settings.pendantbaud)
 		
 	def createSectionButtons(self, section, handler):
 		buttons = []
@@ -458,8 +459,30 @@ class MyFrame(wx.Frame):
 		self.wPendant[pName].SetBitmap(self.images.pngPendantclear)
 		self.assignPendant(None)
 
+	# the next 2 methods are called from the pendant thread - we can't do anything there that 
+	# works with wxpython, so we need to send an event to ourselves and do the processing
+	# in the main thread				
+	def pendantCommand(self, cmd):
+		evt = PendantCmdEvent(cmd=cmd)
+		wx.PostEvent(self, evt)
+
 	def pendantConnection(self, flag):
-		self.pendantConnected = flag
+		evt = PendantConnEvent(flag=flag)
+		wx.PostEvent(self, evt)
+		
+	def pendantCommandHandler(self, evt):
+		if self.pendantAssignment is not None:
+			cl = pendantCommand(evt.cmd, self.wPrinter[self.pendantAssignment], self.log)
+			for cmd in cl:
+				self.wPrinter[self.pendantAssignment].doPendantCommand(cmd)
+		
+	def pendantConnectionHandler(self, evt):
+		self.pendantConnected = evt.flag
+		if evt.flag:
+			self.log("Pendant connected")
+		else:
+			self.log("Pendant disconnected")
+			
 		for p in self.wPrinter.keys():
 			if self.wPrinter[p] is not None:
 				self.wPrinter[p].removePendant(self.pendantConnected)
@@ -492,11 +515,10 @@ class MyFrame(wx.Frame):
 					
 		if self.pendantAssignment is None:
 			self.log("pendant is unassigned")
-			self.pendant.assignPrinter(None)
+
 		else:
 			self.log("pendant is assigned to: %s" % self.pendantAssignment)
 			self.wPrinter[self.pendantAssignment].addPendant()
-			self.pendant.assignPrinter(self.wPrinter[self.pendantAssignment])
 			self.wPendant[self.pendantAssignment].SetBitmap(self.images.pngPendanton)
 
 		
