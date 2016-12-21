@@ -10,16 +10,11 @@ from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED, 
 from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
+from printstateenum import PrintState
 from tools import formatElapsed
 from gcsuffix import parseGCSuffix
 
 BUTTONDIM = (48, 48)
-
-class PrintState:
-	idle = 0
-	printing = 1
-	paused = 2
-	label = { idle: "Idle", printing: "Printing", paused: "Paused" }
 	
 RECORD_TIMES = True
 
@@ -321,6 +316,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.enableButtonsByState()
 		t = self.buildTitle()
 		self.SetTitle(t)
+		self.propDlg.setPrintStatus(PrintState.idle)
 		
 	def loadGCode(self, fn):
 		def gnormal(s):
@@ -506,6 +502,7 @@ class PrintMonitorDlg(wx.Frame):
 	def reprapEvent(self, evt):
 		if evt.event == PRINT_COMPLETE:
 			self.state = PrintState.idle
+			self.propDlg.setPrintStatus(PrintState.idle)
 			self.gcf.setPrintPosition(-1)
 			self.printPosition = None
 			self.printLayer = 0
@@ -520,6 +517,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.reprap.printComplete()
 		elif evt.event == PRINT_STOPPED:
 			self.state = PrintState.paused
+			self.propDlg.setPrintStatus(PrintState.paused)
 			self.enableButtonsByState()
 			self.reprap.printStopped()
 		elif evt.event == PRINT_STARTED:
@@ -629,9 +627,15 @@ class PrintMonitorDlg(wx.Frame):
 		else:
 			self.onPrint(None)
 			
+	def reset(self):
+		self.state = PrintState.idle
+		self.propDlg.setPrintStatus(PrintState.idle)
+		self.enableButtonsByState()
+			
 	def onPrint(self, evt):
 		oldState = self.state
 		self.state = PrintState.printing
+		self.propDlg.setPrintStatus(PrintState.printing)
 		self.enableButtonsByState()
 	
 		self.printPos = 0
@@ -664,9 +668,11 @@ class PrintMonitorDlg(wx.Frame):
 	def onPause(self, evt):
 		if self.state == PrintState.paused:
 			self.state = PrintState.printing
+			self.propDlg.setPrintStatus(PrintState.printing)
 			self.enableButtonsByState()
 			self.reprap.resumePrint()
 		else:
 			self.state = PrintState.paused
+			self.propDlg.setPrintStatus(PrintState.paused)
 			self.enableButtonsByState()
 			self.reprap.pausePrint()

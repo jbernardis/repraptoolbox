@@ -1,4 +1,3 @@
-#import wx
 import wx.lib.newevent
 import os
 import sys, inspect
@@ -56,6 +55,8 @@ class MyFrame(wx.Frame):
 		self.modified = False
 		wx.Frame.__init__(self, None, wx.ID_ANY, "RepRap Toolbox", size=(300, 300))
 		self.Show()
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "rrtbico.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 		
 		self.dlgSlic3r = None
 		self.dlgViewStl = None
@@ -588,4 +589,3 @@ class App(wx.App):
 
 app = App(False)
 app.MainLoop()
-

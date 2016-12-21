@@ -2,6 +2,7 @@ import wx
 import wx.propgrid as wxpg
 
 from propenums import CategoryEnum, PropertyEnum
+from printstateenum import PrintState
 
 
 catOrder = [CategoryEnum.fileProp, CategoryEnum.layerInfo, CategoryEnum.printStats]
@@ -18,14 +19,16 @@ propertyMap = {
 toolMap = [ PropertyEnum.filamentUsed0, PropertyEnum.filamentUsed1, PropertyEnum.filamentUsed2, PropertyEnum.filamentUsed3 ]
 
 class PropertiesDlg(wx.Frame):
-	def __init__(self, parent, wparent, printerName):
+	def __init__(self, parent, wparent, printerName, cb=None):
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, size=(500, 500))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.printerName = printerName
 		self.parent = parent
+		self.callback = cb
 		self.log = self.parent.log
 		self.fileName = None
 		self.nextruders = parent.settings.nextruders
+		self.printStatus = PrintState.idle
 		self.setTitle()
 
 		pgFont = wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
@@ -48,6 +51,9 @@ class PropertiesDlg(wx.Frame):
 
 		lines = 0		
 		for cat in catOrder:
+			if self.printerName is None and cat == CategoryEnum.printStats:
+				continue
+			
 			pg.Append(wxpg.PropertyCategory(CategoryEnum.label[cat]))
 			lines += 1
 			for k in propertyMap[cat]:
@@ -80,12 +86,25 @@ class PropertiesDlg(wx.Frame):
 		pg.SetSplitterLeft()
 		
 	def onClose(self, evt):
-		return
+		if self.callback is not None:
+			self.callback()
+			self.Destroy()
+	
+	def setPrintStatus(self, status):
+		self.printStatus = status
+		self.setTitle()
 		
 	def setTitle(self):
-		s = "Printer %s data" % self.printerName
-		if self.fileName is not None:
-			s += " - %s" % self.fileName
+		if self.printerName is not None:
+			st = PrintState.label[self.printStatus]
+			s = "Printer %s status (%s)" % (self.printerName, st)
+			if self.fileName is not None:
+				s += " - %s" % self.fileName
+		else:
+			if self.fileName is not None:
+				s = "G Code File %s" % self.fileName
+			else:
+				s = ""
 			
 		self.SetTitle(s)
 		

@@ -161,6 +161,8 @@ class PrinterDlg(wx.Frame):
 
 		if rc == wx.ID_YES:
 			self.reprap.reset()
+			if self.pmonDlg is not None:
+				self.pmonDlg.reset()
 
 	def terminate(self):
 		if self.pmonDlg:
@@ -259,13 +261,13 @@ class PrinterDlg(wx.Frame):
 		
 	def doPendantCommand(self, cmd):
 		if cmd.startswith("@"):
-			self.reprap.metaCommand(cmd)
+			self.metaCommand(cmd)
 		else:
 			self.reprap.sendNow(cmd)
 			
 	def metaCommand(self, cmd):
 		if cmd == "@print":
-			self.emlulatePrintButton()
+			self.emulatePrintButton()
 		elif cmd == "@pause":
 			self.emulatePauseButton()
 		else:

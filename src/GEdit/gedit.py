@@ -19,6 +19,8 @@ from savelayer import SaveLayerDlg
 from images import Images
 from tools import formatElapsed
 from gcsuffix import parseGCSuffix
+from properties import PropertiesDlg
+from propenums import PropertyEnum
 
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 BUTTONDIM = (48, 48)
@@ -38,6 +40,7 @@ class GEditDlg(wx.Frame):
 		self.Show()
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)
+		self.propDlg = None
 		
 		self.log = self.parent.log
 		
@@ -348,19 +351,58 @@ class GEditDlg(wx.Frame):
 		self.gcodeFileDialog()
 		
 	def onInfo(self, evt):
-		print "Filament: ", self.gObj.getFilament()
-		print "current layer: ", self.currentLayer
-		print "layer filament: ", self.gObj.getLayerFilament(self.currentLayer)
-		print "estimated print time", self.totalTimeStr
-		print "estimated time for current layer " , self.layerTimeStr[self.currentLayer]
-		print "filename ", self.filename
-		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(self.filename)))
-		print "mod time: ", ftime
+		if self.propDlg is None:
+			return
+		
+		self.propDlg = PropertiesDlg(self, self, None, cb=self.onInfoClose())
+		
+		self.showFileProperties()
+		self.showLayerProperties(self.currentLayer)
+		self.propDlg.Show()
+		
+	def onInfoClose(self):
+		self.propDlg = None
+		
+	def updateInfoDlg(self, lx):
+		if self.propDlg is None:
+			return
+		
+		self.showFileProperties()
+		self.showLayerProperties()
+		
+	def showFileProperties(self):
 		slCfg, filSiz, tempsHE, tempsBed = parseGCSuffix(self.gcode)
-		print "slicer config: ", slCfg
-		print "filament info: ", filSiz
-		print "HE Temps: ", tempsHE
-		print "Bed Temps: ", tempsBed
+		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(self.filename)))
+		self.propDlg.setProperty(PropertyEnum.fileName, self.filename)
+		self.propDlg.setProperty(PropertyEnum.slicerCfg, slCfg)
+		self.propDlg.setProperty(PropertyEnum.filamentSize, filSiz)
+		self.propDlg.setProperty(PropertyEnum.temperatures, "HE:%s  BED:%s" % (tempsHE, tempsBed))
+		self.propDlg.setProperty(PropertyEnum.sliceTime, ftime)
+		self.propDlg.setProperty(PropertyEnum.printEstimate, self.totalTimeStr)
+		
+	def showLayerProperties(self, lx):
+		if self.propDlg is None:
+			return
+		
+		self.propDlg.setProperty(PropertyEnum.layerNum, "%d" % lx)
+		x0, y0, xn, yn = self.gObj.getLayerMinMaxXY(lx)
+		if x0 is None:
+			self.propDlg.setProperty(PropertyEnum.minMaxXY, "")
+		else:
+			self.propDlg.setProperty(PropertyEnum.minMaxXY, "(%.2f, %.2f) - (%.2f, %.2f)" % (x0, y0, xn, yn))
+		
+		le, prior, after = self.gObj.getLayerFilament(lx)
+		s = []
+		for i in range(self.settings.nextruders):
+			s.append("%.2f/%.2f    <: %.2f    >: %.2f" % (le[i], self.eUsed[i], prior[i], after[i]))
+		self.propDlg.setProperty(PropertyEnum.filamentUsed, s)
+		
+		self.propDlg.setProperty(PropertyEnum.layerPrintTime, self.layerTimeStr[lx])
+		if lx == 0:
+			self.propDlg.setProperty(PropertyEnum.timeUntil, "")
+		else:
+			t = sum(self.layerTimes[:lx])
+			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 		
 	def gcodeFileDialog(self):
 		wildcard = "GCode (*.gcode)|*.gcode|"	 \
@@ -409,6 +451,7 @@ class GEditDlg(wx.Frame):
 		self.currentLayer = 0
 		self.setLayerText()
 		self.slLayers.SetValue(0)
+		self.updateInfoDlg(0)
 
 		self.setModified(False)
 		if self.gObj is not None:
@@ -702,6 +745,7 @@ class GEditDlg(wx.Frame):
 		self.slLayers.SetValue(v)
 		self.setLayerText()
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(v))
+		self.showLayerProperties(v)
 		
 	def setLayerText(self):
 		if self.gObj is None:

@@ -23,6 +23,7 @@ class Settings:
 		
 		self.buildarea = [200, 200]
 		self.scale = 3
+		self.nextruders = 1
 		self.showprevious = True
 		self.showmoves = True
 		self.uselinenbrs = False
@@ -67,6 +68,13 @@ class Settings:
 						print "invalid value in ini file for abstemps"
 						self.abstemps = (110, 225)
 						
+				elif opt == 'nextruders':
+					try:
+						self.nextruders = int(value)
+					except:
+						print("Non-integer value in ini file for nextruders")
+						self.nextruders = 1
+						
 				elif opt == 'scale':
 					try:
 						self.scale = int(value)
@@ -108,6 +116,7 @@ class Settings:
 			pass
 		
 		self.cfg.set(self.section, "buildarea", str(self.buildarea))
+		self.cfg.set(self.section, "nextruders", str(self.nextruders))
 		self.cfg.set(self.section, "scale", str(self.scale))
 		self.cfg.set(self.section, "showprevious", str(self.showprevious))
 		self.cfg.set(self.section, "showmoves", str(self.showmoves))
