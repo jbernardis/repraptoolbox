@@ -211,6 +211,7 @@ class GEditDlg(wx.Frame):
 		btnszr.Add(self.bSave)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bSaveAs)
+		btnszr.AddSpacer((10, 10))
 
 		hszr = wx.BoxSizer(wx.HORIZONTAL)
 		hszr.AddSpacer((20,20))
@@ -301,6 +302,7 @@ class GEditDlg(wx.Frame):
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(l))
 		self.bBracketDel.Enable(False)
+		self.updateInfoDlg(self.currentLayer)
 	
 	def updateTitle(self):
 		if self.filename is None:
@@ -351,10 +353,10 @@ class GEditDlg(wx.Frame):
 		self.gcodeFileDialog()
 		
 	def onInfo(self, evt):
-		if self.propDlg is None:
+		if self.propDlg is not None:
 			return
 		
-		self.propDlg = PropertiesDlg(self, self, None, cb=self.onInfoClose())
+		self.propDlg = PropertiesDlg(self, self, None, cb=self.onInfoClose)
 		
 		self.showFileProperties()
 		self.showLayerProperties(self.currentLayer)
@@ -368,12 +370,15 @@ class GEditDlg(wx.Frame):
 			return
 		
 		self.showFileProperties()
-		self.showLayerProperties()
+		self.showLayerProperties(lx)
 		
 	def showFileProperties(self):
 		slCfg, filSiz, tempsHE, tempsBed = parseGCSuffix(self.gcode)
 		ftime = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(self.filename)))
-		self.propDlg.setProperty(PropertyEnum.fileName, self.filename)
+		if len(self.filename) > 50:
+			self.propDlg.setProperty(PropertyEnum.fileName, os.path.basename(self.filename))
+		else:
+			self.propDlg.setProperty(PropertyEnum.fileName, self.filename)
 		self.propDlg.setProperty(PropertyEnum.slicerCfg, slCfg)
 		self.propDlg.setProperty(PropertyEnum.filamentSize, filSiz)
 		self.propDlg.setProperty(PropertyEnum.temperatures, "HE:%s  BED:%s" % (tempsHE, tempsBed))
@@ -392,10 +397,17 @@ class GEditDlg(wx.Frame):
 			self.propDlg.setProperty(PropertyEnum.minMaxXY, "(%.2f, %.2f) - (%.2f, %.2f)" % (x0, y0, xn, yn))
 		
 		le, prior, after = self.gObj.getLayerFilament(lx)
+		eUsed = self.gObj.getFilament()
 		s = []
 		for i in range(self.settings.nextruders):
-			s.append("%.2f/%.2f    <: %.2f    >: %.2f" % (le[i], self.eUsed[i], prior[i], after[i]))
+			s.append("%.2f/%.2f    <: %.2f    >: %.2f" % (le[i], eUsed[i], prior[i], after[i]))
 		self.propDlg.setProperty(PropertyEnum.filamentUsed, s)
+
+		f, l = self.gObj.getGCodeLines(lx)
+		if f is None:
+			self.propDlg.setProperty(PropertyEnum.gCodeRange, "")
+		else:
+			self.propDlg.setProperty(PropertyEnum.gCodeRange, "%d - %d" % (f, l))
 		
 		self.propDlg.setProperty(PropertyEnum.layerPrintTime, self.layerTimeStr[lx])
 		if lx == 0:
@@ -505,6 +517,7 @@ class GEditDlg(wx.Frame):
 		self.gcFrame.loadModel(self.gObj, self.gcFrame.getCurrentLayer(), self.gcFrame.getZoom())
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.refreshList()
+		self.updateInfoDlg(self.currentLayer)
 
 	def applyAxisShift(self, s, axis, shift):
 		if "m117" in s or "M117" in s:
@@ -556,6 +569,7 @@ class GEditDlg(wx.Frame):
 		self.gcFrame.loadModel(self.gObj, self.gcFrame.getCurrentLayer(), self.gcFrame.getZoom())
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.refreshList()
+		self.updateInfoDlg(self.currentLayer)
 		
 	def modifyGcSuffix(self, nTemps):
 		b = nTemps[0]
@@ -635,6 +649,7 @@ class GEditDlg(wx.Frame):
 		self.gcFrame.loadModel(self.gObj, self.gcFrame.getCurrentLayer(), self.gcFrame.getZoom())
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.refreshList()
+		self.updateInfoDlg(self.currentLayer)
 
 	def applySingleSpeedChange(self, s, speeds):
 		if "m117" in s or "M117" in s:
@@ -677,6 +692,7 @@ class GEditDlg(wx.Frame):
 		self.gcFrame.loadModel(self.gObj, self.currentLayer, None)
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(self.currentLayer))
+		self.updateInfoDlg(self.currentLayer)
 	
 	def onEditGCode(self, evt):
 		self.editDlg = EditGCodeDlg(self, self.gcode, "<live buffer>", self.editClosed)
@@ -704,6 +720,7 @@ class GEditDlg(wx.Frame):
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(0))
 		self.lcGCode.refreshList()
+		self.updateInfoDlg(0)
 			
 	def onCbShowMoves(self, evt):
 		self.settings.showmoves = self.cbShowMoves.GetValue()
