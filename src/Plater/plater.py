@@ -78,11 +78,8 @@ class PlaterDlg(wx.Frame):
 		self.modified = False
 		self.settings = Settings(cmdFolder)
 		self.Show()
-		
-		icon = wx.EmptyIcon()
-		iconfn = os.path.join(cmdFolder, "images", "plater.ico")
-		icon.CopyFromBitmap(wx.Bitmap(iconfn, wx.BITMAP_TYPE_ANY))
-		self.SetIcon(icon)
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "platerico.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 		
 		self.savedfile = None
 		

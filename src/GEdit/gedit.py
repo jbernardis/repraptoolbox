@@ -18,7 +18,7 @@ from filamentchange import FilamentChangeDlg
 from savelayer import SaveLayerDlg
 from images import Images
 from tools import formatElapsed
-from gcsuffix import parseGCSuffix
+from gcsuffix import parseGCSuffix, modifyGCSuffix
 from properties import PropertiesDlg
 from propenums import PropertyEnum
 
@@ -38,6 +38,9 @@ class GEditDlg(wx.Frame):
 		self.parent = parent
 		wx.Frame.__init__(self, None, wx.ID_ANY, TITLE_PREFIX, size=(600, 600))
 		self.Show()
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "geditico.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
+		
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)
 		self.propDlg = None
@@ -293,7 +296,7 @@ class GEditDlg(wx.Frame):
 		self.gcode = self.gcode[:b[0]] + self.gcode[b[1]+1:]
 		self.setModified(True)
 		self.gObj = self.buildModel()
-		self.modifyGcSuffix(self.gObj.getTemps())
+		self.modGcSuffixTemps(self.gObj.getTemps())
 		l = self.gcFrame.getCurrentLayer()
 		self.gcFrame.loadModel(self.gObj, l, self.gcFrame.getZoom())
 		lmax = self.gObj.layerCount()-1
@@ -565,39 +568,42 @@ class GEditDlg(wx.Frame):
 
 		self.setModified(True)
 		self.gObj = self.buildModel()
-		self.modifyGcSuffix(self.gObj.getTemps())
+		self.modGcSuffixTemps(self.gObj.getTemps())
 		self.gcFrame.loadModel(self.gObj, self.gcFrame.getCurrentLayer(), self.gcFrame.getZoom())
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.refreshList()
 		self.updateInfoDlg(self.currentLayer)
 		
-	def modifyGcSuffix(self, nTemps):
-		b = nTemps[0]
-		he = nTemps[1]
-		sufLn = self.gcode[-1]
-		if not sufLn.startswith(";@#@#"):
-			return # no suffix - nothing to do
+	def modGcSuffixTemps(self, nTemps):
+		print "suffix before"
+		self.showSuffix()
+		print ""
 		
-		terms = sufLn.split()
+		bstr = "%d" % nTemps[0]
 		
-		nterms = []
-		for t in terms:
-			if t.startswith("B:"):
-				nterms.append("B:%s" % b)
-			elif t.startswith("T:"):
-				nt = len(t[2:].split(","))
-				newTemp = []
-				for i in range(nt):
-					if he[i] is None:
-						newTemp.append("0.0")
-					else:
-						newTemp.append("%s" % he[i])
-				nterms.append("T:%s" % ",".join(newTemp))
+		h = []
+		for x in nTemps[1]:
+			if x is None:
+				h.append("")
 			else:
-				nterms.append(t)
-				
-		self.gcode[-1] = " ".join(nterms)
-
+				h.append("%.1f" % x)
+		hestr = ",".join(["%.1f" % x for x in h])
+		
+		print "New value for bed = (%s)" % bstr
+		print "New value for HEs = (%s)" % hestr
+		
+		modifyGCSuffix(self.gcode, None, None, bstr, hestr)
+		
+		print "suffix after"
+		self.showSuffix()
+		print ""
+		
+	def showSuffix(self):
+		sx = len(self.gcode) - 10
+		if sx < 0: sx = 0
+		
+		print "Suffix: ", self.gcode[sx:]
+		
 	def applySingleTempChange(self, s, bed, hes):
 		if "m104" in s.lower() or "m109" in s.lower():
 			m = reS.match(s)
@@ -712,7 +718,7 @@ class GEditDlg(wx.Frame):
 		self.gcode = data[:]
 		self.setModified(True)
 		self.gObj = self.buildModel()
-		self.modifyGcSuffix(self.gObj.getTemps())
+		self.modGcSuffixTemps(self.gObj.getTemps())
 		self.gcFrame.loadModel(self.gObj, 0, 1)
 		self.currentLayer = 0
 		self.setLayerText()

@@ -1,6 +1,11 @@
 import wx
 import wx.propgrid as wxpg
 
+import os
+import inspect
+
+cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+
 from propenums import CategoryEnum, PropertyEnum
 from printstateenum import PrintState
 
@@ -21,6 +26,8 @@ toolMap = [ PropertyEnum.filamentUsed0, PropertyEnum.filamentUsed1, PropertyEnum
 class PropertiesDlg(wx.Frame):
 	def __init__(self, parent, wparent, printerName, cb=None):
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, size=(500, 500))
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "propsico.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.printerName = printerName
 		self.parent = parent
