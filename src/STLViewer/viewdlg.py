@@ -294,7 +294,7 @@ class StlCanvas(glcanvas.GLCanvas):
 
 class StlViewDlg(wx.Frame):
 	def __init__(self, parent):
-		wx.Frame.__init__(self, None, wx.ID_ANY, '', size=(600, 600))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "", size=(600, 600))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)
 		self.parent = parent
@@ -304,6 +304,7 @@ class StlViewDlg(wx.Frame):
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "stlview.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
 		self.fileName = None
+		self.setTitle()
 		
 		self.gl = StlCanvas(self)
 		sizer = wx.BoxSizer(wx.VERTICAL)
@@ -340,6 +341,16 @@ class StlViewDlg(wx.Frame):
 		
 		self.SetSizer(sizer)
 		self.Fit()
+		
+	def setTitle(self):
+		s = "STL Viewer"
+		if self.fileName is not None:
+			if len(self.filename) > 50:
+				s += " - %s" % os.path.basename(self.filename)
+			else:
+				s += " - %s" % self.fileName
+				
+		self.SetTitle(s)
 		
 	def onClose(self, evt):
 		self.settings.save()
@@ -385,7 +396,7 @@ class StlViewDlg(wx.Frame):
 		
 		stlObj = stl(filename=path);
 		self.fileName = path
-		self.SetTitle(path)
+		self.setTitle()
 		self.gl.setStlObject(stlObj)
 
 def cross(v1,v2):
