@@ -26,21 +26,19 @@ def modifyGCSuffix(gc, slCfg, filSiz, tempsHE, tempsBed):
 		sx = 0
 		
 	while sx < len(gc):
-		if not gc[sx].startswith(PREFIX):
-			continue
-		
-		if "CFG:" in gc[sx] and slCfg is not None:
-			s = gc[sx].split("CFG:")[0] + "CFG:" + slCfg
-			gc[sx] = s
-		elif "FIL:" in gc[sx] and filSiz is not None:
-			s = gc[sx].split("FIL:")[0] + "FIL:" + filSiz
-			gc[sx] = s
-		elif "THE:" in gc[sx] and tempsHE is not None:
-			s = gc[sx].split("THE:")[0] + "THE:" + tempsHE
-			gc[sx] = s
-		elif "TBED:" in gc[sx] and tempsBed is not None:
-			s = gc[sx].split("TBED:")[0] + "TBED:" + tempsBed
-			gc[sx] = s
+		if gc[sx].startswith(PREFIX):
+			if "CFG:" in gc[sx] and slCfg is not None:
+				s = gc[sx].split("CFG:")[0] + "CFG:" + slCfg
+				gc[sx] = s
+			elif "FIL:" in gc[sx] and filSiz is not None:
+				s = gc[sx].split("FIL:")[0] + "FIL:" + filSiz
+				gc[sx] = s
+			elif "THE:" in gc[sx] and tempsHE is not None:
+				s = gc[sx].split("THE:")[0] + "THE:" + tempsHE
+				gc[sx] = s
+			elif "TBED:" in gc[sx] and tempsBed is not None:
+				s = gc[sx].split("TBED:")[0] + "TBED:" + tempsBed
+				gc[sx] = s
 		sx += 1
 
 def parseGCSuffix(gc):

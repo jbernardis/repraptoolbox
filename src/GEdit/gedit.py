@@ -575,34 +575,21 @@ class GEditDlg(wx.Frame):
 		self.updateInfoDlg(self.currentLayer)
 		
 	def modGcSuffixTemps(self, nTemps):
-		print "suffix before"
-		self.showSuffix()
-		print ""
-		
-		bstr = "%d" % nTemps[0]
+		bstr = "%.1f" % nTemps[0]
 		
 		h = []
+		nct = 0
 		for x in nTemps[1]:
 			if x is None:
-				h.append("")
+				nct += 1
 			else:
+				if nct != 0:
+					h.extend([None]*nct)
+					nct = 0
 				h.append("%.1f" % x)
-		hestr = ",".join(["%.1f" % x for x in h])
+		hestr = ",".join(h)
 		
-		print "New value for bed = (%s)" % bstr
-		print "New value for HEs = (%s)" % hestr
-		
-		modifyGCSuffix(self.gcode, None, None, bstr, hestr)
-		
-		print "suffix after"
-		self.showSuffix()
-		print ""
-		
-	def showSuffix(self):
-		sx = len(self.gcode) - 10
-		if sx < 0: sx = 0
-		
-		print "Suffix: ", self.gcode[sx:]
+		modifyGCSuffix(self.gcode, None, None, hestr, bstr)
 		
 	def applySingleTempChange(self, s, bed, hes):
 		if "m104" in s.lower() or "m109" in s.lower():
