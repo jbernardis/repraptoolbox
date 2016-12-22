@@ -1,5 +1,5 @@
 import os
-import sys, inspect
+import inspect
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
@@ -301,6 +301,8 @@ class StlViewDlg(wx.Frame):
 		self.log = self.parent.log
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		self.Show()
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "stlview.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 		self.fileName = None
 		
 		self.gl = StlCanvas(self)

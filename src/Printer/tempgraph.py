@@ -1,4 +1,8 @@
 import wx
+import os
+import inspect
+
+cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
 dk_Gray = wx.Colour(224, 224, 224)
 lt_Gray = wx.Colour(128, 128, 128)
@@ -27,6 +31,8 @@ class TempDlg(wx.Frame):
 		title = "%s temperatures" % prtName
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, title)
 		self.Show()
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "graph.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.font12bold = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 		self.font20bold = wx.Font(20, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)

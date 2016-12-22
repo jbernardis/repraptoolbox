@@ -2,6 +2,9 @@ import os
 import wx
 import time
 import string
+import inspect
+
+cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
 BUTTONDIM = (48, 48)
 
@@ -9,6 +12,8 @@ class Logger(wx.Frame):
 	def __init__(self, parent):
 		self.parent = parent
 		wx.Frame.__init__(self, None, wx.ID_ANY, "RepRap Log")
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "logbook.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 
 		self.parent = parent
 		self.settings = parent.settings

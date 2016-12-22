@@ -2,6 +2,9 @@ import wx
 import re
 import os
 import time
+import inspect
+
+cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
@@ -76,6 +79,8 @@ class PrintMonitorDlg(wx.Frame):
 		title = self.buildTitle()
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, title=title)
 		self.Show()
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "printmon.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 		
 		self.gcf = GcFrame(self, self.gObj, self.settings)
 		

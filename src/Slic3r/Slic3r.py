@@ -9,6 +9,7 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 
 import wx.lib.newevent
 import re
+import shlex
 import subprocess
 import thread
 import time
@@ -134,6 +135,8 @@ class Slic3rDlg(wx.Frame):
 		
 		self.Bind(EVT_SLIC3R_UPDATE, self.slic3rUpdate)
 		self.Show()
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "slic3r.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 		
 		self.lblStl = wx.StaticText(self, wx.ID_ANY, "STL File:", size=(70, -1))
 		self.tcStl = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
@@ -152,11 +155,8 @@ class Slic3rDlg(wx.Frame):
 		self.lblGc = wx.StaticText(self, wx.ID_ANY, "G Code File:", size=(70, -1))
 		self.tcGc = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
-		self.lCfgPrint = self.getCfgFiles("print")
-		self.lCfgPrinter = self.getCfgFiles("printer")
-		self.lCfgFilament = self.getCfgFiles("filament")
+		self.loadConfigFiles()
 		
-		self.choicesPrint    = sorted(self.lCfgPrint.keys())
 		self.chPrint = wx.Choice(self, wx.ID_ANY, size = (225,-1), choices = self.choicesPrint)
 		self.Bind(wx.EVT_CHOICE, self.onChoicePrint, self.chPrint)
 		cxPrint = 0
@@ -164,7 +164,6 @@ class Slic3rDlg(wx.Frame):
 			cxPrint = self.choicesPrint.index(self.settings.printchoice)
 		self.chPrint.SetSelection(cxPrint)
 		
-		self.choicesPrinter  = sorted(self.lCfgPrinter.keys())
 		self.chPrinter = wx.Choice(self, wx.ID_ANY, size = (225, -1), choices = self.choicesPrinter)
 		self.Bind(wx.EVT_CHOICE, self.onChoicePrinter, self.chPrinter)
 		cxPrinter = 0
@@ -174,7 +173,6 @@ class Slic3rDlg(wx.Frame):
 		
 		self.nExtruders = self.getExtruderCount(self.lCfgPrinter[self.choicesPrinter[cxPrinter]])
 
-		self.choicesFilament = sorted(self.lCfgFilament.keys())
 		self.chFilament = [None, None, None, None]
 		cxFilament = [0, 0, 0, 0]
 		for ex in range(len(self.chFilament)):
@@ -257,6 +255,20 @@ class Slic3rDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onBExport, self.bExport)
 		szButton.Add(self.bExport)
 		
+		szButton.AddSpacer((20, 20))
+		
+		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlic3r, size=BUTTONDIM)
+		self.bConfig.SetToolTipString("Load slic3r to modify configurations")
+		self.Bind(wx.EVT_BUTTON, self.onConfig, self.bConfig)
+		szButton.Add(self.bConfig)
+		
+		szButton.AddSpacer((20, 20))
+		
+		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRefresh, size=BUTTONDIM)
+		self.bRefresh.SetToolTipString("Refresh dialog box from slic3r configuration files")
+		self.Bind(wx.EVT_BUTTON, self.onRefresh, self.bRefresh)
+		szButton.Add(self.bRefresh)
+		
 		self.enableButtons()
 		
 		sizer = wx.BoxSizer(wx.VERTICAL)
@@ -324,6 +336,55 @@ class Slic3rDlg(wx.Frame):
 		ex = evt.GetId() - FILAMENT_BASE
 		cx = self.chFilament[ex].GetSelection()
 		self.settings.filamentchoice[ex] = self.chFilament[ex].GetString(cx)
+		
+	def onConfig(self, evt):
+		cmd = "%s --no-plater" % self.settings.executable
+		args = shlex.split(str(cmd))
+		try:
+			subprocess.Popen(args,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
+		except:
+			print "Exception occurred trying to spawn slicer"
+			return
+		
+	def onRefresh(self, evt):
+		printChoice = self.chPrint.GetString(self.chPrint.GetSelection())
+		printerChoice = self.chPrinter.GetString(self.chPrinter.GetSelection())
+		filamentChoices = []
+		for fx in range(len(self.chFilament)):
+			filamentChoices.append(self.chFilament[fx].GetString(self.chFilament[fx].GetSelection()))
+			
+		self.loadConfigFiles()
+		
+		self.chPrint.SetItems(self.choicesPrint)
+		self.chPrinter.SetItems(self.choicesPrinter)
+		for fx in range(len(self.chFilament)):
+			self.chFilament[fx].SetItems(self.choicesFilament)
+		
+		cx = 0
+		if printChoice in self.choicesPrint:
+			cx = self.choicesPrint.index(printChoice)
+		self.chPrint.SetSelection(cx)
+		
+		cx = 0
+		if printerChoice in self.choicesPrinter:
+			cx = self.choicesPrinter.index(printerChoice)
+		self.chPrinter.SetSelection(cx)
+		
+		for fx in range(len(self.chFilament)):
+			cx = 0
+			if filamentChoices[fx] in self.choicesFilament:
+				cx = self.choicesFilament.index(filamentChoices[fx])
+			self.chFilament[fx].SetSelection(cx)
+
+		
+	def loadConfigFiles(self):
+		self.lCfgPrint = self.getCfgFiles("print")
+		self.lCfgPrinter = self.getCfgFiles("printer")
+		self.lCfgFilament = self.getCfgFiles("filament")
+		
+		self.choicesPrint    = sorted(self.lCfgPrint.keys())
+		self.choicesPrinter  = sorted(self.lCfgPrinter.keys())
+		self.choicesFilament = sorted(self.lCfgFilament.keys())
 		
 	def getCfgFiles(self, sdir):
 		cfgdir = os.path.join(self.settings.cfgdirectory, sdir)

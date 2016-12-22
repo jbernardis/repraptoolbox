@@ -24,6 +24,8 @@ class PrinterDlg(wx.Frame):
 	def __init__(self, parent, printerName, reprap):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "%s manual control" % printerName, size=(100, 100))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
+		ico = wx.Icon(os.path.join(cmdFolder, "images", "printer.png"), wx.BITMAP_TYPE_PNG)
+		self.SetIcon(ico)
 
 		self.parent = parent
 		self.log = parent.log
