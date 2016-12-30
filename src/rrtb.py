@@ -2,6 +2,11 @@ import wx.lib.newevent
 import os
 import sys, inspect
 
+try:
+	from agw import gradientbutton as GB
+except ImportError: # if it's not there locally, try the wxPython lib.
+	import wx.lib.agw.gradientbutton as GB
+
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 if cmdFolder not in sys.path:
 	sys.path.insert(0, cmdFolder)
@@ -239,8 +244,16 @@ class MyFrame(wx.Frame):
 				print "Invalid configuration for printer %s" % p
 				continue
 			
-			b = wx.Button(self, wx.ID_ANY, p, size=PBUTTONDIM)
-			b.SetBitmap(self.images.pngPrinter, wx.LEFT)
+			b = GB.GradientButton(self.mainPanel, -1, self.images.pngPrinter, p,
+				size=PBUTTONDIM, style=wx.BORDER)
+			wht = wx.Colour(255, 255, 255)
+			blk = wx.Colour(0, 0, 0)
+			b.SetTopStartColour(wht)
+			b.SetTopEndColour(wht)
+			b.SetBottomStartColour(wht)
+			b.SetBottomEndColour(wht)
+			b.SetForegroundColour(blk)
+
 			self.bId[p] = b.GetId()
 			b.SetToolTipString("control panel for %s printer" % p)
 			self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
