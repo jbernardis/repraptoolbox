@@ -25,7 +25,7 @@ from pendant import Pendant, pendantCommand
 
 
 BUTTONDIM = (48, 48)
-PBUTTONDIM = (96, 96)
+PBUTTONDIM = (96, 72)
 
 class ToolButton:
 	def __init__(self, btn, bid, cmd, shell):
@@ -240,6 +240,7 @@ class MyFrame(wx.Frame):
 				continue
 			
 			b = wx.Button(self, wx.ID_ANY, p, size=PBUTTONDIM)
+			b.SetBitmap(self.images.pngPrinter, wx.LEFT)
 			self.bId[p] = b.GetId()
 			b.SetToolTipString("control panel for %s printer" % p)
 			self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
