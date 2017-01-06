@@ -1,0 +1,16 @@
+[curaengine]
+laststldirectory = .
+lastgcodedirectory = .
+printchoice = normal
+printerchoice = prism
+materialchoice = PLA,PLA,PLA,PLA
+autoexport = True
+executable = /usr/bin/CuraEngine
+cfgdirectory = /home/jeff/.curaengine
+cfgexecutable = /usr/bin/cura
+usestldir = True
+jsonfile = /usr/share/cura/resources/definitions/fdmextruder.def.json
+		
+		
+		
+

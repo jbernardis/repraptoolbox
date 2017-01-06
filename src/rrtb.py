@@ -30,7 +30,11 @@ from pendant import Pendant, pendantCommand
 
 
 BUTTONDIM = (48, 48)
-PBUTTONDIM = (96, 72)
+PBUTTONDIM = (144, 72)
+
+white = wx.Colour(255, 255, 255)
+black = wx.Colour(0, 0, 0)
+grey = wx.Colour(128, 128, 128)
 
 class ToolButton:
 	def __init__(self, btn, bid, cmd, shell):
@@ -64,6 +68,7 @@ class MyFrame(wx.Frame):
 		self.SetIcon(ico)
 		
 		self.dlgSlic3r = None
+		self.dlgCuraEngine = None
 		self.dlgViewStl = None
 		self.dlgPlater = None
 		self.dlgGEdit = None
@@ -92,6 +97,10 @@ class MyFrame(wx.Frame):
 		self.bSlic3r = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlic3r, size=BUTTONDIM)
 		self.bSlic3r.SetToolTipString("Invoke slic3r to slice a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doSlic3r, self.bSlic3r)
+		
+		self.bCuraEngine = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCura, size=BUTTONDIM)
+		self.bCuraEngine.SetToolTipString("Invoke Cura Engine to slice a G Code file")
+		self.Bind(wx.EVT_BUTTON, self.doCuraEngine, self.bCuraEngine)
 		
 		self.bGEdit = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGedit, size=BUTTONDIM)
 		self.bGEdit.SetToolTipString("Analyze/edit a G Code file")
@@ -161,6 +170,8 @@ class MyFrame(wx.Frame):
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bSlic3r)
+		bhsizer.AddSpacer((10, 10))
+		bhsizer.Add(self.bCuraEngine)
 		bhsizer.AddSpacer((10, 10))
 		for b in self.sliceButtons:
 			bhsizer.Add(b.getButton())
@@ -244,15 +255,13 @@ class MyFrame(wx.Frame):
 				print "Invalid configuration for printer %s" % p
 				continue
 			
-			b = GB.GradientButton(self.mainPanel, -1, self.images.pngPrinter, p,
+			b = GB.GradientButton(self, wx.ID_ANY, self.images.pngPrinter, p,
 				size=PBUTTONDIM, style=wx.BORDER)
-			wht = wx.Colour(255, 255, 255)
-			blk = wx.Colour(0, 0, 0)
-			b.SetTopStartColour(wht)
-			b.SetTopEndColour(wht)
-			b.SetBottomStartColour(wht)
-			b.SetBottomEndColour(wht)
-			b.SetForegroundColour(blk)
+			b.SetTopStartColour(white)
+			b.SetTopEndColour(white)
+			b.SetBottomStartColour(white)
+			b.SetBottomEndColour(white)
+			b.SetForegroundColour(grey)
 
 			self.bId[p] = b.GetId()
 			b.SetToolTipString("control panel for %s printer" % p)
@@ -274,11 +283,11 @@ class MyFrame(wx.Frame):
 			bhsizer.AddSpacer((10, 10))
 			
 		bmphsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bmphsizer.AddSpacer((42, 10))
+		bmphsizer.AddSpacer((66, 10))
 		
 		for p in sorted(self.settings.printers):
 			bmphsizer.Add(self.wPendant[p])
-			bmphsizer.AddSpacer((74, 10))
+			bmphsizer.AddSpacer((122, 10))
 		
 		bvsizer.AddSpacer((10, 10))
 		bvsizer.Add(bhsizer)
@@ -353,7 +362,14 @@ class MyFrame(wx.Frame):
 			if self.wPrinter[pName] is not None:
 				self.wPrinter[pName].terminate()
 				self.wPrinter[pName] = None
+		self.enablePrinterButton(pName, flag)
+
+	def enablePrinterButton(self, pName, flag):
 		self.bPrinter[pName].Enable(flag)
+		if flag:
+			self.bPrinter[pName].SetForegroundColour(black)
+		else:
+			self.bPrinter[pName].SetForegroundColour(grey)
 		
 	def registerPrinterStatusReporter(self, printerName, cb):
 		self.statusReportCB[printerName] = cb
@@ -387,6 +403,11 @@ class MyFrame(wx.Frame):
 			
 		try:
 			self.dlgSlic3r.Destroy()
+		except:
+			pass
+			
+		try:
+			self.dlgCuraEngine.Destroy()
 		except:
 			pass
 			
@@ -452,6 +473,16 @@ class MyFrame(wx.Frame):
 		self.bSlic3r.Enable(True)
 		self.dlgSlic3r = None
 		
+	def doCuraEngine(self, evt):
+		dlg = Slic3rDlg(self)
+		self.bCuraEngine.Enable(False)
+		dlg.Show()
+		self.dlgCuraEngine = dlg
+	
+	def CuraEngineClosed(self):
+		self.bCuraEngine.Enable(True)
+		self.dlgCuraEngine = None
+		
 	def doPrinter(self, evt):
 		bid = evt.GetId()
 		pName = None
@@ -465,11 +496,11 @@ class MyFrame(wx.Frame):
 			return
 		
 		self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
-		self.bPrinter[pName].Enable(False)
+		self.enablePrinterButton(pName, False)
 		self.assignPendantIf(pName)
 	
 	def PrinterClosed(self, pName):
-		self.bPrinter[pName].Enable()
+		self.enablePrinterButton(pName, True)
 		self.wPrinter[pName] = None
 		self.wPendant[pName].SetBitmap(self.images.pngPendantclear)
 		self.assignPendant(None)
