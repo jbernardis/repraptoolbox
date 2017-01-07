@@ -19,6 +19,7 @@ from STLViewer.viewdlg import StlViewDlg
 from Plater.plater import PlaterDlg
 from GEdit.gedit import GEditDlg
 from Slic3r.Slic3r import Slic3rDlg
+from CuraEngine.CuraEngine import CuraEngineDlg
 from Printer.printer import PrinterDlg
 from reprap import RepRap
 from log import Logger
@@ -474,7 +475,7 @@ class MyFrame(wx.Frame):
 		self.dlgSlic3r = None
 		
 	def doCuraEngine(self, evt):
-		dlg = Slic3rDlg(self)
+		dlg = CuraEngineDlg(self)
 		self.bCuraEngine.Enable(False)
 		dlg.Show()
 		self.dlgCuraEngine = dlg

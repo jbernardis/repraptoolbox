@@ -56,7 +56,7 @@ class SaveDlg(wx.Dialog):
 		
 	def onBSave(self, evt):
 		cfgfn = self.cbFileList.GetValue()
-		fn = os.path.join(self.cfgdir, cfgfn + ".ini")
+		fn = os.path.join(self.cfgdir, cfgfn + ".json")
 		if os.path.exists(fn):
 			dlg = wx.MessageDialog(self, "Configuration file\n\n"
 				" %s\n\n"
@@ -124,7 +124,7 @@ class CategoryCfg(wx.Panel):
 		
 	def buildFileLists(self):
 		cf = os.listdir(self.cfgDir)
-		self.cfgFileList = [os.path.splitext(os.path.basename(fn))[0] for fn in cf if fn.lower().endswith(".ini")]
+		self.cfgFileList = [os.path.splitext(os.path.basename(fn))[0] for fn in cf if fn.lower().endswith(".json")]
 		self.cfgNameList = ["<default>"] + self.cfgFileList
 		
 	def hasBeenModified(self):
@@ -154,7 +154,7 @@ class CategoryCfg(wx.Panel):
 			self.props.setOverlay(None)
 			self.bDelete.Enable(False)
 		else:
-			self.props.setOverlay(os.path.join(self.cfgDir, self.cfgNameList[chx] + ".ini"))
+			self.props.setOverlay(os.path.join(self.cfgDir, self.cfgNameList[chx] + ".json"))
 			self.bDelete.Enable(True)
 			
 	def setModified(self, flag):
@@ -166,7 +166,7 @@ class CategoryCfg(wx.Panel):
 		
 		if rc == wx.ID_SAVE:
 			fn = dlg.getFn()
-			cfgFn = os.path.join(self.cfgDir, fn + ".ini")
+			cfgFn = os.path.join(self.cfgDir, fn + ".json")
 			
 		dlg.Destroy()
 		
@@ -200,7 +200,7 @@ class CategoryCfg(wx.Panel):
 		if rc == wx.ID_NO:
 			return
 
-		os.unlink(os.path.join(self.cfgDir, fn + ".ini"))
+		os.unlink(os.path.join(self.cfgDir, fn + ".json"))
 		self.buildFileLists()
 		self.chCfgFile.SetItems(self.cfgNameList)
 		self.props.setOverlay(None)

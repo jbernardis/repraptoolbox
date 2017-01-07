@@ -162,7 +162,10 @@ class CuraEngineDlg(wx.Frame):
 			cxPrinter = self.choicesPrinter.index(self.settings.printerchoice)
 		self.chPrinter.SetSelection(cxPrinter)
 		
-		self.nExtruders = self.getExtruderCount(self.lCfgPrinter[self.choicesPrinter[cxPrinter]])
+		if len(self.choicesPrinter) > 0:
+			self.nExtruders = self.getExtruderCount(self.lCfgPrinter[self.choicesPrinter[cxPrinter]])
+		else:
+			self.nExtruders = 0
 
 		self.chMaterial = [None, None, None, None]
 		cxMaterial = [0, 0, 0, 0]
@@ -248,7 +251,7 @@ class CuraEngineDlg(wx.Frame):
 		
 		szButton.AddSpacer((20, 20))
 		
-		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlic3r, size=BUTTONDIM)
+		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCuracfg, size=BUTTONDIM)
 		self.bConfig.SetToolTipString("Load cura configurator")
 		self.Bind(wx.EVT_BUTTON, self.onConfig, self.bConfig)
 		szButton.Add(self.bConfig)

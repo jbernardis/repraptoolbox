@@ -136,14 +136,5 @@ class CuraCfgDlg(wx.Frame):
 		else:
 			self.nb.SetPageImage(pageid, imageId=self.nbilUnmodifiedIdx)
 
-class App(wx.App):
-	def OnInit(self):
-		self.frame = CuraCfgDlg()
-		self.frame.Show()
-		self.SetTopWindow(self.frame)
-		return True
-
-app = App(False)
-app.MainLoop()
 
 

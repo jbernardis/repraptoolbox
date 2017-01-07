@@ -23,7 +23,7 @@ class Settings:
 		self.executable = "/usr/bin/CuraEngine"
 		self.cfgexecutable = "/usr/bin/cura"
 		self.cfgdirectory = "/home/jeff/.curaengine"
-		self.jsonfile = "/usr/share/cura/resources/definitions/fdmextruder.def.json"
+		self.jsonfile = "/usr/share/cura/resources/definitions/fdmprinter.def.json"
 		self.usestldir = True
 		self.laststldirectory = "."
 		self.lastgcodedirectory = "."
@@ -42,6 +42,7 @@ class Settings:
 
 		if self.cfg.has_section(self.section):
 			for opt, value in self.cfg.items(self.section):
+				print "processing setting (%s) value (%s)" % (opt, value)
 				if opt == "laststldirectory":
 					self.laststldirectory = value
 				elif opt == "lastgcodedirectory":
@@ -52,14 +53,16 @@ class Settings:
 					self.executable = value
 				elif opt == "cfgdirectory":
 					self.cfgdirectory = value
-				elif opt == "printchoice":
-					self.printchoice = value
+				elif opt == "profilechoice":
+					self.profilechoice = value
 				elif opt == "printerchoice":
 					self.printerchoice = value
 				elif opt == "autoexport":
 					self.autoexport = parseBoolean(value, True)
-				elif opt == "filamentchoice":
-					self.filamentchoice = re.split("\s*,\s*", value)
+				elif opt == "materialchoice":
+					self.materialchoice = re.split("\s*,\s*", value)
+		else:
+			print "no section named (%s) in inifile (%s)" % (self.section, self.inifile)
 					
 	def save(self):
 		try:
@@ -72,13 +75,13 @@ class Settings:
 		self.cfg.set(self.section, "usestldir", str(self.usestldir))
 		self.cfg.set(self.section, "executable", str(self.executable))
 		self.cfg.set(self.section, "cfgdirectory", str(self.cfgdirectory))
-		self.cfg.set(self.section, "printchoice", str(self.printchoice))
+		self.cfg.set(self.section, "profilechoice", str(self.profilechoice))
 		self.cfg.set(self.section, "printerchoice", str(self.printerchoice))
-		self.cfg.set(self.section, "filamentchoice", ",".join(self.filamentchoice))
+		self.cfg.set(self.section, "materialchoice", ",".join(self.materialchoice))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
 
 		try:		
-			cfp = open(self.inifile, 'wb')
+			cfp = open(self.inifile, 'w')
 		except:
 			print "Unable to open settings file %s for writing" % self.inifile
 			return
