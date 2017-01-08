@@ -49,14 +49,14 @@ class SaveDlg(wx.Dialog):
 		self.Fit()
 		
 	def getFn(self):
-		return self.cbFileList.GetValue()
+		fn = self.cbFileList.GetValue()
+		return fn, os.path.join(self.cfgDir, fn + ".json")
 		
 	def onBCancel(self, evt):
 		self.EndModal(wx.ID_CANCEL)
 		
 	def onBSave(self, evt):
-		cfgfn = self.cbFileList.GetValue()
-		fn = os.path.join(self.cfgdir, cfgfn + ".json")
+		fn = self.getFn()[1]
 		if os.path.exists(fn):
 			dlg = wx.MessageDialog(self, "Configuration file\n\n"
 				" %s\n\n"
@@ -165,8 +165,7 @@ class CategoryCfg(wx.Panel):
 		rc = dlg.ShowModal()
 		
 		if rc == wx.ID_SAVE:
-			fn = dlg.getFn()
-			cfgFn = os.path.join(self.cfgDir, fn + ".json")
+			fn, cfgFn = dlg.getFn()
 			
 		dlg.Destroy()
 		

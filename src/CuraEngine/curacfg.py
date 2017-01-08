@@ -8,7 +8,6 @@ if cmd_folder not in sys.path:
 
 from images import Images
 from categorycfg import CategoryCfg	
-from curadefinitions import CuraDefinitions
 
 NBWIDTH = 600
 NBHEIGHT = 600
@@ -68,7 +67,7 @@ class NotebookPage:
 	printer = 2
 
 class CuraCfgDlg(wx.Frame):
-	def __init__(self, settings, cb=None):
+	def __init__(self, settings, curasettings, cb=None):
 		wx.Frame.__init__(self, None, title="Cura Engine Configuration")
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
@@ -92,7 +91,6 @@ class CuraCfgDlg(wx.Frame):
 		self.nb.AssignImageList(self.nbil)
 		self.Show()
 		
-		curasettings = CuraDefinitions(self.settings.jsonfile)
 		ProfileMap.Directory = os.path.join(self.settings.cfgdirectory, "profile")
 		MaterialMap.Directory = os.path.join(self.settings.cfgdirectory, "material")
 		PrinterMap.Directory = os.path.join(self.settings.cfgdirectory, "printer")

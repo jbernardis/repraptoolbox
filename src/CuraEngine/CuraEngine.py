@@ -16,6 +16,7 @@ import json
 from settings import Settings
 from images import Images
 from gcsuffix import buildGCSuffix
+from curadefinitions import CuraDefinitions
 from curacfg import CuraCfgDlg
 
 (SlicerEvent, EVT_CURA_UPDATE) = wx.lib.newevent.NewEvent()
@@ -123,6 +124,8 @@ class CuraEngineDlg(wx.Frame):
 		
 		self.slicing = False
 		self.sliceComplete = False
+		
+		self.curasettings = CuraDefinitions(self.settings.jsonfile)
 		
 		self.Bind(EVT_CURA_UPDATE, self.curaUpdate)
 		self.Show()
@@ -327,7 +330,7 @@ class CuraEngineDlg(wx.Frame):
 		self.settings.materialchoice[ex] = self.chMaterial[ex].GetString(cx)
 		
 	def onConfig(self, evt):
-		self.cfgDlg = CuraCfgDlg(self.settings, self.cfgClosed)
+		self.cfgDlg = CuraCfgDlg(self.settings, self.curasettings, self.cfgClosed)
 		self.bConfig.Enable(False)
 		
 	def cfgClosed(self):
@@ -429,7 +432,7 @@ class CuraEngineDlg(wx.Frame):
 			
 		self.slicing = True
 		self.sliceComplete = False
-		thr = SlicerThread(self, self.settings.executable, self.stlFn, self.gcFn, dProfile, dMaterial, dPrinter)
+		thr = SlicerThread(self, self.settings.executable, self.stlFn, self.gcFn, self.settings.jsonfile, dProfile, dMaterial, dPrinter)
 		thr.Start()
 		self.updateFileDisplay()
 		self.enableButtons()
@@ -444,35 +447,19 @@ class CuraEngineDlg(wx.Frame):
 			if "material_diameter" in cfg.keys():
 				filSiz.append(cfg["material_diameter"])
 			else:
-				filSiz.append("")
+				filSiz.append(self.curasettings.getDefinition("material_diameter"))
 	
 			if "material_print_temperature_layer_0" in cfg.keys():
 				tempsHE.append(cfg["material_print_temperature_layer_0"])
-			elif "material_print_temperature" in cfg.keys():
-				tempsHE.append(cfg["material_print_temperature_layer_0"])
 			else:
-				tempsHE.append("")
+				tempsHE.append(self.curasettings.getDefinition("material_print_temperature_layer_0"))
 				
 			if "material_bed_temperature_layer_0" in cfg.keys():
 				tempsBed.append(cfg["material_bed_temperature_layer_0"])
-			elif "material_bed_temperature" in cfg.keys():
-				tempsBed.append(["material_bed_temperature"])
 			else:
-				tempsBed.append("")
-
-		empty = "," * (len(cfgMaterial)-1)	
+				tempsBed.append(self.curasettings.getDefinition("material_bed_temperature"))
 		
-		filSiz = ",".join(filSiz)
-		if filSiz == empty:
-			filSiz = None	
-		tempsHE = ",".join(tempsHE)
-		if tempsHE == empty:
-			tempsHE = None	
-		tempsBed = ",".join(tempsBed)
-		if tempsBed == empty:
-			tempsBed = None	
-			
-		return buildGCSuffix(slCfg, filSiz, tempsHE, tempsBed)
+		return buildGCSuffix(slCfg, ",".join(filSiz), ",".join(tempsHE), ",".join(tempsBed))
 
 		
 	def onBImport(self, evt):
