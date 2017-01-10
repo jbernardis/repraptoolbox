@@ -10,7 +10,7 @@ class SaveDlg(wx.Dialog):
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Save Configuration")
 		
 		self.parent = parent
-		self.cfgdir = cfgdir
+		self.cfgDir = cfgdir
 		
 		if dftx < 0:
 			dftx = 0

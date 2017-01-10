@@ -60,7 +60,8 @@ class SlicerThread:
 
 	def Run(self):
 		print "Need to build command line here"
-		args = [self.executable, "-j", self.jsonFile, "-o", self.gcFile]
+		args = [self.executable, "slice", "-j", self.jsonFile, "-o", self.gcFile]
+		args.extend(["-s", "center_object=true"])
 		for k,v in self.profileCfg.iteritems():
 			args.extend(("-s", "%s=%s" % (k,v)))
 		for k,v in self.printerCfg.iteritems():
@@ -71,6 +72,8 @@ class SlicerThread:
 			ex += 1
 			for k,v in m.iteritems():
 				args.extend(("-s", "%s=%s" % (k,v)))
+
+		args.extend(("-l", self.stlFile))
 		print args
 		try:
 			p = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
@@ -447,17 +450,17 @@ class CuraEngineDlg(wx.Frame):
 			if "material_diameter" in cfg.keys():
 				filSiz.append(cfg["material_diameter"])
 			else:
-				filSiz.append(self.curasettings.getDefinition("material_diameter"))
+				filSiz.append(str(self.curasettings.getDefinition("material_diameter").getDefault()))
 	
 			if "material_print_temperature_layer_0" in cfg.keys():
 				tempsHE.append(cfg["material_print_temperature_layer_0"])
 			else:
-				tempsHE.append(self.curasettings.getDefinition("material_print_temperature_layer_0"))
+				tempsHE.append(str(self.curasettings.getDefinition("material_print_temperature_layer_0").getDefault()))
 				
 			if "material_bed_temperature_layer_0" in cfg.keys():
 				tempsBed.append(cfg["material_bed_temperature_layer_0"])
 			else:
-				tempsBed.append(self.curasettings.getDefinition("material_bed_temperature"))
+				tempsBed.append(str(self.curasettings.getDefinition("material_bed_temperature_layer_0").getDefault()))
 		
 		return buildGCSuffix(slCfg, ",".join(filSiz), ",".join(tempsHE), ",".join(tempsBed))
 

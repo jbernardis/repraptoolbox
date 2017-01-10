@@ -175,6 +175,8 @@ class PropertiesGrid(wxpg.PropertyGrid):
 			dt = stg.getDType()
 			if dt == "str":
 				v = str(value)
+				if v is not None:
+					v = v.replace("\n", "\\n")
 				self.SetPropertyValue(pid, v)
 				
 			elif dt == "float":
