@@ -28,19 +28,32 @@ MATERIAL_BASE = 1000
 BUTTONDIM = (48, 48)
 
 
-def loadProfile(fn, log):
+def loadProfile(fn, log, curasettings):
 	with open(fn) as json_data:
 		kdict = json.load(json_data)
+
+	result = {}		
+	for k, v in kdict.iteritems():
+		df = curasettings.getDefinition(k)
+		if df is None:
+			print "Unable to find definition for (%s)" % k
+			continue
+		dt = df.getDType()
+		
+		if dt == "bool":
+			result[k] = str(v).lower()
 			
-	return kdict
+		else:
+			result[k] = v
+			
+	return result
 
 class SlicerThread:
-	def __init__(self, win, executable, stlFile, gcFile, jsonFile, profileCfg, materialCfg, printerCfg):
+	def __init__(self, win, settings, stlFile, gcFile, profileCfg, materialCfg, printerCfg):
 		self.win = win
-		self.executable = executable
+		self.settings = settings
 		self.stlFile = stlFile
 		self.gcFile = gcFile
-		self.jsonFile = jsonFile
 		self.profileCfg = profileCfg
 		self.materialCfg = materialCfg
 		self.printerCfg = printerCfg
@@ -60,8 +73,9 @@ class SlicerThread:
 
 	def Run(self):
 		print "Need to build command line here"
-		args = [self.executable, "slice", "-j", self.jsonFile, "-o", self.gcFile]
-		args.extend(["-s", "center_object=true"])
+		args = [self.settings.executable, "slice", "-j", self.settings.jsonFile, "-o", self.gcFile]
+		v = str(self.settings.centerobject).lower()
+		args.extend(["-s", "center_object=%s" % v])
 		for k,v in self.profileCfg.iteritems():
 			args.extend(("-s", "%s=%s" % (k,v)))
 		for k,v in self.printerCfg.iteritems():
@@ -74,7 +88,6 @@ class SlicerThread:
 				args.extend(("-s", "%s=%s" % (k,v)))
 
 		args.extend(("-l", self.stlFile))
-		print args
 		try:
 			p = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 		except:
@@ -159,6 +172,8 @@ class CuraEngineDlg(wx.Frame):
 		cxProfile = 0
 		if self.settings.profilechoice in self.choicesProfile:
 			cxProfile = self.choicesProfile.index(self.settings.profilechoice)
+		elif len(self.choicesProfile) > 1:
+			cxProfile = 1
 		self.chProfile.SetSelection(cxProfile)
 		
 		self.chPrinter = wx.Choice(self, wx.ID_ANY, size = (225, -1), choices = self.choicesPrinter)
@@ -166,6 +181,8 @@ class CuraEngineDlg(wx.Frame):
 		cxPrinter = 0
 		if self.settings.printerchoice in self.choicesPrinter:
 			cxPrinter = self.choicesPrinter.index(self.settings.printerchoice)
+		elif len(self.choicesPrinter) > 1:
+			cxPrinter = 1
 		self.chPrinter.SetSelection(cxPrinter)
 		
 		if len(self.choicesPrinter) > 0:
@@ -180,6 +197,8 @@ class CuraEngineDlg(wx.Frame):
 			self.Bind(wx.EVT_CHOICE, self.onChoiceMaterial, self.chMaterial[ex])
 			if self.settings.materialchoice[ex] in self.choicesMaterial:
 				cxMaterial[ex] = self.choicesMaterial.index(self.settings.materialchoice[ex])
+			elif len(self.choicesMaterial) > 1:
+				cxMaterial[ex] = 1
 			self.chMaterial[ex].SetSelection(cxMaterial[ex])
 			self.chMaterial[ex].Enable(ex < self.nExtruders)
 			
@@ -303,7 +322,7 @@ class CuraEngineDlg(wx.Frame):
 		self.Fit()
 		
 	def getExtruderCount(self, cfgfn):
-		d = loadProfile(cfgfn, self.log)
+		d = loadProfile(cfgfn, self.log, self.curasettings)
 		k = "machine_extruder_count"
 		if k in d.keys():
 			return int(d[k])
@@ -416,14 +435,14 @@ class CuraEngineDlg(wx.Frame):
 				
 	def onBSlice(self, evt):
 		k = self.chProfile.GetString(self.chProfile.GetSelection())
-		dProfile = loadProfile(self.lCfgProfile[k], self.log)
+		dProfile = loadProfile(self.lCfgProfile[k], self.log, self.curasettings)
 		k = self.chPrinter.GetString(self.chPrinter.GetSelection())
-		dPrinter = loadProfile(self.lCfgPrinter[k], self.log)
+		dPrinter = loadProfile(self.lCfgPrinter[k], self.log, self.curasettings)
 		dMaterial = []
 		
 		for i in range(self.nExtruders):
 			k = self.chMaterial[i].GetString(self.chMaterial[i].GetSelection())
-			dMaterial.append(loadProfile(self.lCfgMaterial[k], self.log))
+			dMaterial.append(loadProfile(self.lCfgMaterial[k], self.log, self.curasettings))
 
 		self.gcSuffix = self.buildSuffix(dMaterial)
 		
@@ -435,7 +454,7 @@ class CuraEngineDlg(wx.Frame):
 			
 		self.slicing = True
 		self.sliceComplete = False
-		thr = SlicerThread(self, self.settings.executable, self.stlFn, self.gcFn, self.settings.jsonfile, dProfile, dMaterial, dPrinter)
+		thr = SlicerThread(self, self.settings, self.stlFn, self.gcFn, dProfile, dMaterial, dPrinter)
 		thr.Start()
 		self.updateFileDisplay()
 		self.enableButtons()

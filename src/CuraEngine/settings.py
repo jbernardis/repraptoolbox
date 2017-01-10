@@ -31,6 +31,7 @@ class Settings:
 		self.printerchoice = "prism"
 		self.materialchoice = ["PLA", "PLA", "PLA", "PLA"]
 		self.autoexport = True
+		self.centerobject = True
 		
 		self.inifile = os.path.join(folder, INIFILE)
 		
@@ -42,17 +43,22 @@ class Settings:
 
 		if self.cfg.has_section(self.section):
 			for opt, value in self.cfg.items(self.section):
-				print "processing setting (%s) value (%s)" % (opt, value)
 				if opt == "laststldirectory":
 					self.laststldirectory = value
 				elif opt == "lastgcodedirectory":
 					self.lastgcodedirectory = value
 				elif opt == "usestldir":
 					self.usestldir = parseBoolean(value, True)
+				elif opt == "centerobject":
+					self.centerobject = parseBoolean(value, True)
 				elif opt == "executable":
 					self.executable = value
+				elif opt == "cfgexecutable":
+					self.cfgexecutable = value
 				elif opt == "cfgdirectory":
 					self.cfgdirectory = value
+				elif opt == "jsonfile":
+					self.jsonfile = value
 				elif opt == "profilechoice":
 					self.profilechoice = value
 				elif opt == "printerchoice":
@@ -79,6 +85,7 @@ class Settings:
 		self.cfg.set(self.section, "printerchoice", str(self.printerchoice))
 		self.cfg.set(self.section, "materialchoice", ",".join(self.materialchoice))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
+		self.cfg.set(self.section, "centerobject", str(self.centerobject))
 
 		try:		
 			cfp = open(self.inifile, 'w')

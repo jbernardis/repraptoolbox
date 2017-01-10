@@ -74,7 +74,7 @@ class CuraDefinition():
 	def getPerExtruder(self):
 		return self.perExtruder
 		
-	def pprint(self, prefix):
+	def pprint(self, prefix=""):
 		print prefix + "======="
 		print prefix + "Name: %s" % self.name
 		print prefix + "Description: %s" % self.description
