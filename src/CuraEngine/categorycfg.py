@@ -71,7 +71,7 @@ class SaveDlg(wx.Dialog):
 		self.EndModal(wx.ID_SAVE)
 
 class CategoryCfg(wx.Panel):
-	def __init__(self, gparent, parent, pageid, images, pmap, definitions):
+	def __init__(self, gparent, parent, pageid, images, pmap, crntChoice, definitions):
 		wx.Panel.__init__(self, parent, wx.ID_ANY, size=(600, 400))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
@@ -86,8 +86,11 @@ class CategoryCfg(wx.Panel):
 		self.buildFileLists()
 		self.chCfgFile = wx.Choice(self, wx.ID_ANY, choices=self.cfgNameList, size=(150, -1))
 		self.Bind(wx.EVT_CHOICE, self.onChCfgFile, self.chCfgFile)
-		self.chCfgFile.SetSelection(0)
-		self.currentChoice = 0
+		if crntChoice in self.cfgNameList:
+			self.currentChoice = self.cfgNameList.index(crntChoice)
+		else:
+			self.currentChoice = 0
+		self.chCfgFile.SetSelection(self.currentChoice)
 		
 		self.bSave = wx.BitmapButton(self, wx.ID_ANY, images.pngSave, size=(32, 32), style=wx.NO_BORDER)
 		self.bSave.SetBackgroundColour(bkgd)
@@ -121,6 +124,7 @@ class CategoryCfg(wx.Panel):
 		sz.AddSpacer((10, 10))
 		
 		self.SetSizer(sz)
+		self.props.SetSplitterLeft()
 		
 	def buildFileLists(self):
 		cf = os.listdir(self.cfgDir)

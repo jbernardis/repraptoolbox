@@ -14,9 +14,12 @@ NBHEIGHT = 600
 bkgd = wx.Colour(229, 214, 169)
 
 class ProfileMap:
-	CategoryOrder = ["Quality", "Shell", "Infill", "Speed", "Travel", "Bed Adhesion", "Support"]
+	CategoryOrder = ["Quality", "Line Width", "Shell", "Infill", "Speed", "Travel", "Bed Adhesion", "Support"]
 	PropertyOrder = {
-		"Quality": ["layer_height", "layer_height_0"],
+		"Quality": ["layer_height", "layer_height_0", "outer_inset_first", "fill_perimeter_gaps",
+				"z_seam_gap", "infill_overlap", "skin_overlap", "infill_before_walls"],
+		"Line Width": ["line_width", "wall_line_width", "skin_line_width", "infill_line_width",
+					"skirt_brim_line_width", "support_line_width", "support_interface_line_width" ],
 		"Shell": ["wall_line_count", "top_layers", "bottom_layers"],
 		"Infill": ["infill_sparse_density", "infill_pattern"],
 		"Speed": [ "speed_print", "speed_print_layer_0", "speed_travel", "speed_travel_layer_0",
@@ -45,7 +48,8 @@ class MaterialMap:
 						"material_bed_temperature_layer_0", "material_standby_temperature"],
 		"Cooling": ["cool_fan_enabled", "cool_fan_speed", "cool_fan_speed_max", "cool_min_layer_time_fan_speed_max",
 				"cool_min_layer_time", "cool_min_speed"],
-		"Retraction": ["retraction_enable", "retract_at_layer_change", "retraction_amount", "retraction_speed", "retraction_min_travel"]
+		"Retraction": ["retraction_enable", "retract_at_layer_change", "retraction_amount", "retraction_speed",
+					"retraction_extra_prime_amount", "retraction_min_travel", "retraction_combing"]
 		}
 	Directory = "C:\\tmp\\materials"
 
@@ -55,7 +59,8 @@ class PrinterMap:
 		"Printer" : [ 
 			"machine_start_gcode", "machine_end_gcode", "machine_width", "machine_depth", "machine_height",
 			"machine_center_is_zero", "machine_heated_bed", "machine_extruder_count",
-			"machine_nozzle_size", "machine_nozzle_size_1", "machine_nozzle_size_2", "machine_nozzle_size_3"],
+			"machine_nozzle_size", "machine_nozzle_size_1", "machine_nozzle_size_2", "machine_nozzle_size_3",
+			"machine_max_acceleration_x", "machine_max_acceleration_y", "machine_acceleration"],
 		"Dual Extrusion" : [
 			"prime_tower_enable", "prime_tower_size", "prime_tower_position_x", "prime_tower_position_y"]
 		}
@@ -95,13 +100,13 @@ class CuraCfgDlg(wx.Frame):
 		MaterialMap.Directory = os.path.join(self.settings.cfgdirectory, "material")
 		PrinterMap.Directory = os.path.join(self.settings.cfgdirectory, "printer")
 
-		self.profileCfg = CategoryCfg(self, self.nb, NotebookPage.profile, self.images, ProfileMap, curasettings)
+		self.profileCfg = CategoryCfg(self, self.nb, NotebookPage.profile, self.images, ProfileMap, settings.profilechoice, curasettings)
 		self.nb.AddPage(self.profileCfg, "Profile", imageId=self.nbilUnmodifiedIdx)
 
-		self.materialCfg = CategoryCfg(self, self.nb, NotebookPage.material, self.images, MaterialMap, curasettings)
+		self.materialCfg = CategoryCfg(self, self.nb, NotebookPage.material, self.images, MaterialMap, settings.materialchoice[0], curasettings)
 		self.nb.AddPage(self.materialCfg, "Material", imageId=self.nbilUnmodifiedIdx)
 		
-		self.printerCfg = CategoryCfg(self, self.nb, NotebookPage.printer, self.images, PrinterMap, curasettings)
+		self.printerCfg = CategoryCfg(self, self.nb, NotebookPage.printer, self.images, PrinterMap, settings.printerchoice, curasettings)
 		self.nb.AddPage(self.printerCfg, "Printer", imageId=self.nbilUnmodifiedIdx)
 
 		sizer.Add(self.nb)

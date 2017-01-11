@@ -85,7 +85,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 		self.rowCount = lines
 		
 		self.setBaseValues()
-		self.SetSplitterLeft()
+# 		self.SetSplitterLeft()
 		
 	def setBaseValues(self):
 		for cat in self.catOrder:
@@ -160,7 +160,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 		self.setModified(False)
 		self.setBaseValues()
 		if fn is None:
-			self.SetSplitterLeft()
+# 			self.SetSplitterLeft()
 			return
 		
 		with open(fn) as json_data:
@@ -220,7 +220,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 				
 			self.SetPropertyHelpString(pid, self.formHelpText(stg, v))
 			
-		self.SetSplitterLeft()
+# 		self.SetSplitterLeft()
 
 	def onPropertyChanged(self, evt):
 		self.setModified()
