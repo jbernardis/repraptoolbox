@@ -12,7 +12,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 	def __init__(self, parent, catOrder, propertyOrder, definitions):
 
 		pgFont = wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-		wxpg.PropertyGrid.__init__(self, parent)
+		wxpg.PropertyGrid.__init__(self, parent, style=wxpg.PG_TOOLBAR)
 		
 		self.Bind(wxpg.EVT_PG_CHANGING, self.onPropertyChanged)
 		self.definitionsMap = {}
@@ -85,7 +85,6 @@ class PropertiesGrid(wxpg.PropertyGrid):
 		self.rowCount = lines
 		
 		self.setBaseValues()
-# 		self.SetSplitterLeft()
 		
 	def setBaseValues(self):
 		for cat in self.catOrder:
@@ -160,7 +159,6 @@ class PropertiesGrid(wxpg.PropertyGrid):
 		self.setModified(False)
 		self.setBaseValues()
 		if fn is None:
-# 			self.SetSplitterLeft()
 			return
 		
 		with open(fn) as json_data:
@@ -220,7 +218,6 @@ class PropertiesGrid(wxpg.PropertyGrid):
 				
 			self.SetPropertyHelpString(pid, self.formHelpText(stg, v))
 			
-# 		self.SetSplitterLeft()
 
 	def onPropertyChanged(self, evt):
 		self.setModified()

@@ -70,9 +70,10 @@ class SaveDlg(wx.Dialog):
 
 		self.EndModal(wx.ID_SAVE)
 
-class CategoryCfg(wx.Panel):
+class CategoryCfg(wx.Window):
 	def __init__(self, gparent, parent, pageid, images, pmap, crntChoice, definitions):
-		wx.Panel.__init__(self, parent, wx.ID_ANY, size=(600, 400))
+		#wx.Panel.__init__(self, parent, wx.ID_ANY, size=(600, 400))
+		wx.Window.__init__(self, parent, wx.ID_ANY, size=(600, 400))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
 		self.cfgDir = pmap.Directory
@@ -124,7 +125,11 @@ class CategoryCfg(wx.Panel):
 		sz.AddSpacer((10, 10))
 		
 		self.SetSizer(sz)
+		wx.CallLater(100, self.setSplitter)
+
+	def setSplitter(self):
 		self.props.SetSplitterLeft()
+		self.props.Refresh()
 		
 	def buildFileLists(self):
 		cf = os.listdir(self.cfgDir)

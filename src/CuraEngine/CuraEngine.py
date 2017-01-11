@@ -72,7 +72,6 @@ class SlicerThread:
 		return self.running
 
 	def Run(self):
-		print "Need to build command line here"
 		args = [self.settings.executable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFile]
 		v = str(self.settings.centerobject).lower()
 		args.extend(["-s", "center_object=%s" % v])
@@ -88,6 +87,8 @@ class SlicerThread:
 				args.extend(("-s", "%s=%s" % (k,v)))
 
 		args.extend(("-l", self.stlFile))
+		print args
+		print args
 		try:
 			p = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 		except:
@@ -138,9 +139,6 @@ class CuraEngineDlg(wx.Frame):
 		self.gcDir = self.settings.lastgcodedirectory
 		self.gcFn = None
 		
-		self.font12bold = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-		self.font12 = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-		
 		self.slicing = False
 		self.sliceComplete = False
 		
@@ -151,7 +149,6 @@ class CuraEngineDlg(wx.Frame):
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "cura.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
 		
-		#self.lblStl = wx.StaticText(self, wx.ID_ANY, "STL File:", size=(70, -1))
 		self.tcStl = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
@@ -167,13 +164,12 @@ class CuraEngineDlg(wx.Frame):
 		self.cbGcDir.SetValue(self.settings.usestldir)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbGcDir, self.cbGcDir)
 
-		self.tcGcDir = wx.TextCtrl(self, wx.ID_ANY, "", size=(330, -1), style=wx.TE_READONLY)
+		self.tcGcDir = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		self.bGcDir = wx.Button(self, wx.ID_ANY, "...", size=(30, 22))
 		self.bGcDir.Enable(not self.settings.usestldir)
 		self.bGcDir.SetToolTipString("Choose G Code directory")
 		self.Bind(wx.EVT_BUTTON, self.onBGcDir, self.bGcDir)
 		
-		#self.lblGc = wx.StaticText(self, wx.ID_ANY, "G Code File:", size=(70, -1))
 		self.tcGc = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
@@ -187,8 +183,9 @@ class CuraEngineDlg(wx.Frame):
 		cxProfile = 0
 		if self.settings.profilechoice in self.choicesProfile:
 			cxProfile = self.choicesProfile.index(self.settings.profilechoice)
-		elif len(self.choicesProfile) > 1:
-			cxProfile = 1
+		else:
+			self.settings.profilechoice = self.choicesProfile[0]
+			cxProfile = 0
 		self.chProfile.SetSelection(cxProfile)
 		
 		self.chPrinter = wx.Choice(self, wx.ID_ANY, size = (225, -1), choices = self.choicesPrinter)
@@ -196,8 +193,9 @@ class CuraEngineDlg(wx.Frame):
 		cxPrinter = 0
 		if self.settings.printerchoice in self.choicesPrinter:
 			cxPrinter = self.choicesPrinter.index(self.settings.printerchoice)
-		elif len(self.choicesPrinter) > 1:
-			cxPrinter = 1
+		else:
+			self.settings.printerchoice = self.choicesPrinter[0]
+			cxPrinter = 0
 		self.chPrinter.SetSelection(cxPrinter)
 		
 		if len(self.choicesPrinter) > 0:
@@ -212,8 +210,9 @@ class CuraEngineDlg(wx.Frame):
 			self.Bind(wx.EVT_CHOICE, self.onChoiceMaterial, self.chMaterial[ex])
 			if self.settings.materialchoice[ex] in self.choicesMaterial:
 				cxMaterial[ex] = self.choicesMaterial.index(self.settings.materialchoice[ex])
-			elif len(self.choicesMaterial) > 1:
-				cxMaterial[ex] = 1
+			else:
+				self.settings.materialchoice[ex] = self.choicesMaterial[0]
+				cxMaterial[ex] = 0
 			self.chMaterial[ex].SetSelection(cxMaterial[ex])
 			self.chMaterial[ex].Enable(ex < self.nExtruders)
 			
@@ -221,11 +220,13 @@ class CuraEngineDlg(wx.Frame):
 
 		szStl = wx.BoxSizer(wx.HORIZONTAL)
 		szStl.AddSpacer((10, 10))
-		szStl.Add(self.tcStl)
+		szStl.Add(self.tcStl, 1, wx.TOP, 38)
 		szStl.AddSpacer((10, 10))
-		szStl.Add(self.bOpen)
-		szStl.AddSpacer((10, 10))
-		szStl.Add(self.bImport)
+		vsz = wx.BoxSizer(wx.VERTICAL)
+		vsz.Add(self.bOpen)
+		vsz.AddSpacer((5, 5))
+		vsz.Add(self.bImport)
+		szStl.Add(vsz)
 		szStl.AddSpacer((10, 10))
 
 		szUseStl = wx.BoxSizer(wx.HORIZONTAL)
@@ -241,10 +242,10 @@ class CuraEngineDlg(wx.Frame):
 
 		szGc = wx.BoxSizer(wx.HORIZONTAL)
 		szGc.AddSpacer((10, 10))
-		szGc.Add(self.tcGc)
-		szStl.AddSpacer((10, 10))
-		szStl.Add(self.bExport)
-		szStl.AddSpacer((10, 10))
+		szGc.Add(self.tcGc, 1, wx.TOP, 8)
+		szGc.AddSpacer((10, 10))
+		szGc.Add(self.bExport)
+		szGc.AddSpacer((10, 10))
 				
 		szCfgL = wx.BoxSizer(wx.VERTICAL)
 		szCfgR = wx.BoxSizer(wx.VERTICAL)
@@ -270,24 +271,22 @@ class CuraEngineDlg(wx.Frame):
 		szOpts.Add(self.cbCenter)
 		self.cbCenter.SetValue(self.settings.centerobject)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbCenter, self.cbCenter)
+		szOpts.AddSpacer((5, 5))
 
-		lbl = wx.StaticText(self.wx.ID_ANY, "X Offset")
-		lbl.SetFont(self.font12bold)		
+		lbl = wx.StaticText(self, wx.ID_ANY, "X Offset")
 		self.tcOffsetX = wx.TextCtrl(self, wx.ID_ANY, "0", size=(80, -1), style=wx.TE_RIGHT)
 		self.tcOffsetX.SetToolTipString("Offset in the X direction")
-		self.tcOffsetX.SetFont(self.font12)
 		sz = wx.BoxSizer(wx.HORIZONTAL)
 		sz.Add(lbl)
 		sz.AddSpacer((5,5))
 		sz.Add(self.tcOffsetX)
 		szOpts.Add(sz)
 		self.tcOffsetX.Bind(wx.EVT_KILL_FOCUS, self.evtOffsetXKillFocus, self.tcOffsetX)
+		szOpts.AddSpacer((5, 5))
 
-		lbl = wx.StaticText(self.wx.ID_ANY, "Y Offset")
-		lbl.SetFont(self.font12bold)		
+		lbl = wx.StaticText(self, wx.ID_ANY, "Y Offset")
 		self.tcOffsetY = wx.TextCtrl(self, wx.ID_ANY, "0", size=(80, -1), style=wx.TE_RIGHT)
 		self.tcOffsetY.SetToolTipString("Offset in the Y direction")
-		self.tcOffsetY.SetFont(self.font12)
 		sz = wx.BoxSizer(wx.HORIZONTAL)
 		sz.Add(lbl)
 		sz.AddSpacer((5,5))
@@ -321,13 +320,15 @@ class CuraEngineDlg(wx.Frame):
 		self.enableButtons()
 		
 		sizer = wx.BoxSizer(wx.VERTICAL)
+		sizer.AddSpacer((10, 10))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "STL File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((20, 20))
+		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szStl)
-		bsizer.AddSpacer((10, 20))
-		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		bsizer.AddSpacer((10, 10))
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizer.AddSpacer((10, 10))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code Directory")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -336,14 +337,15 @@ class CuraEngineDlg(wx.Frame):
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szGcDir)
 		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizer.AddSpacer((10, 10))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((10, 20))
+		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szGc)
 		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
 		
 		sizer.AddSpacer((20, 20))
 		sizer.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
@@ -574,7 +576,7 @@ class CuraEngineDlg(wx.Frame):
 		
 	def curaUpdate(self, evt):
 		if evt.state == CURA_MESSAGE:
-			self.tcLog.AppendText(evt.msg.rstrip()+"\n")
+			self.tcLog.AppendText(evt.msg.rstrip().replace(" -s ", "\n") + "\n")
 		elif evt.state in [ CURA_CANCELLED, CURA_FINISHED ]:
 			self.tcLog.AppendText("Cura engine completed\n")
 			self.slicing = False

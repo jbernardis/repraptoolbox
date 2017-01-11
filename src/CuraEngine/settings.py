@@ -75,7 +75,7 @@ class Settings:
 			self.cfg.add_section(self.section)
 		except ConfigParser.DuplicateSectionError:
 			pass
-		
+
 		self.cfg.set(self.section, "laststldirectory", str(self.laststldirectory))
 		self.cfg.set(self.section, "lastgcodedirectory", str(self.lastgcodedirectory))
 		self.cfg.set(self.section, "usestldir", str(self.usestldir))

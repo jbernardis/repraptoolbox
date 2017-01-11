@@ -14,12 +14,12 @@ NBHEIGHT = 600
 bkgd = wx.Colour(229, 214, 169)
 
 class ProfileMap:
-	CategoryOrder = ["Quality", "Line Width", "Shell", "Infill", "Speed", "Travel", "Bed Adhesion", "Support"]
+	CategoryOrder = ["Quality", "Shell", "Infill", "Speed", "Travel", "Bed Adhesion", "Support"]
 	PropertyOrder = {
 		"Quality": ["layer_height", "layer_height_0", "outer_inset_first", "fill_perimeter_gaps",
-				"z_seam_gap", "infill_overlap", "skin_overlap", "infill_before_walls"],
-		"Line Width": ["line_width", "wall_line_width", "skin_line_width", "infill_line_width",
-					"skirt_brim_line_width", "support_line_width", "support_interface_line_width" ],
+				"z_seam_type", "infill_overlap", "skin_overlap", "infill_before_walls",
+				"line_width", "wall_line_width", "skin_line_width", "infill_line_width",
+				"skirt_brim_line_width", "support_line_width", "support_interface_line_width" ],
 		"Shell": ["wall_line_count", "top_layers", "bottom_layers"],
 		"Infill": ["infill_sparse_density", "infill_pattern"],
 		"Speed": [ "speed_print", "speed_print_layer_0", "speed_travel", "speed_travel_layer_0",
