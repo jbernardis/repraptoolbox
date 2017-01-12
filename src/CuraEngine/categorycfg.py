@@ -76,6 +76,7 @@ class CategoryCfg(wx.Window):
 		wx.Window.__init__(self, parent, wx.ID_ANY, size=(600, 400))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
+		self.propMap = pmap
 		self.cfgDir = pmap.Directory
 		self.pageid = pageid
 		self.images = images

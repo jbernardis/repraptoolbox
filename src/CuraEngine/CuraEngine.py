@@ -8,7 +8,6 @@ import os, inspect
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
 import wx.lib.newevent
-import shlex
 import subprocess
 import thread
 import json
@@ -26,6 +25,14 @@ CURA_CANCELLED = 3
 
 MATERIAL_BASE = 1000
 BUTTONDIM = (48, 48)
+
+EnableIfTrue = {
+	"acceleration_print": "acceleration_enabled",
+	"acceleration_print_layer_0": "acceleration_enabled", 
+	"acceleration_topbottom": "acceleration_enabled",
+	"acceleration_layer_0": "acceleration_enabled"
+	}
+
 
 
 def loadProfile(fn, log, curasettings):
@@ -70,21 +77,41 @@ class SlicerThread:
 
 	def IsRunning(self):
 		return self.running
+	
+	def addArgs(self, cfg):
+		result = []
+		for k,v in cfg.iteritems():
+			includeSetting = True
+			if k in EnableIfTrue.keys():
+				tf = EnableIfTrue[k]
+				if tf in cfg.keys():
+					includeSetting = cfg[tf]
+					if includeSetting:
+						print "including %s=%s because %s is true" % (k, v, tf)
+					else:
+						print "excluding %s=%s because %s is false" % (k, v, tf)
+				else:
+					print "excluding %s=%s because %s is defaulting" % (k, v, tf)
+					includeSetting = False
+			
+			if includeSetting:
+				result.extend(("-s", "%s=%s" % (k,v)))
+			else:
+				print "excluding %s=%s because %s is false or is defaulting" % (k, v, tf)
+		
+		return result
 
 	def Run(self):
 		args = [self.settings.executable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFile]
 		v = str(self.settings.centerobject).lower()
 		args.extend(["-s", "center_object=%s" % v])
-		for k,v in self.profileCfg.iteritems():
-			args.extend(("-s", "%s=%s" % (k,v)))
-		for k,v in self.printerCfg.iteritems():
-			args.extend(("-s", "%s=%s" % (k,v)))
+		args.extend(self.addArgs(self.profileCfg))
+		args.extend(self.addArgs(self.printerCfg))
 		ex = 0
 		for m in self.materialCfg:
 			args.append("-e%d" % ex)
 			ex += 1
-			for k,v in m.iteritems():
-				args.extend(("-s", "%s=%s" % (k,v)))
+			args.extend(self.addArgs(m))
 
 		args.extend(("-l", self.stlFile))
 		print args
