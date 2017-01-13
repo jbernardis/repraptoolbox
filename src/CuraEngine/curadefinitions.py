@@ -13,6 +13,7 @@ class CuraDefinition():
 		self.default = None
 		self.category = None
 		self.perExtruder = False
+		self.enable = None
 		
 	def setName(self, name):
 		self.name = name
@@ -44,6 +45,9 @@ class CuraDefinition():
 	def setPerExtruder(self, flag):
 		self.perExtruder = flag
 		
+	def setEnable(self, expr):
+		self.enable = expr
+		
 	def getName(self):
 		return self.name
 	
@@ -73,6 +77,9 @@ class CuraDefinition():
 	
 	def getPerExtruder(self):
 		return self.perExtruder
+	
+	def getEnable(self):
+		return self.enable
 		
 	def pprint(self, prefix=""):
 		print prefix + "======="
@@ -85,6 +92,7 @@ class CuraDefinition():
 		print prefix + "Options: (%s)" % self.options
 		print prefix + "Value: (%s)" % self.value
 		print prefix + "Per Extruder: (%s)" % str(self.perExtruder)
+		print prefix + "Enable: (%s)" % str(self.enable)
 		
 class CuraDefinitionCategory():
 	def __init__(self, name):

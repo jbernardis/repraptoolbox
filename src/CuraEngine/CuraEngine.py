@@ -56,11 +56,12 @@ def loadProfile(fn, log, curasettings):
 	return result
 
 class SlicerThread:
-	def __init__(self, win, settings, stlFile, gcFile, profileCfg, materialCfg, printerCfg):
+	def __init__(self, win, settings, stlFile, gcFile, curasettings, profileCfg, materialCfg, printerCfg):
 		self.win = win
 		self.settings = settings
 		self.stlFile = stlFile
 		self.gcFile = gcFile
+		self.curasettings = curasettings
 		self.profileCfg = profileCfg
 		self.materialCfg = materialCfg
 		self.printerCfg = printerCfg
@@ -81,25 +82,36 @@ class SlicerThread:
 	def addArgs(self, cfg):
 		result = []
 		for k,v in cfg.iteritems():
-			includeSetting = True
-			if k in EnableIfTrue.keys():
-				tf = EnableIfTrue[k]
-				if tf in cfg.keys():
-					includeSetting = cfg[tf]
-					if includeSetting:
-						print "including %s=%s because %s is true" % (k, v, tf)
-					else:
-						print "excluding %s=%s because %s is false" % (k, v, tf)
-				else:
-					print "excluding %s=%s because %s is defaulting" % (k, v, tf)
-					includeSetting = False
-			
-			if includeSetting:
+			if self.includeSetting(k, cfg):
 				result.extend(("-s", "%s=%s" % (k,v)))
-			else:
-				print "excluding %s=%s because %s is false or is defaulting" % (k, v, tf)
 		
 		return result
+	
+	def includeSetting(self, sid, cfg):
+		stg = self.curasettings.getDefinition(sid)
+		if stg is None:
+			return True
+		
+		ex = stg.getEnable()
+		if ex is None:
+			return True
+		
+		print "Need to evaluate (%s) to see if (%s) should be included" % (ex, sid)
+		
+		includeStg = True
+		if sid in EnableIfTrue.keys():
+			tf = EnableIfTrue[sid]
+			if tf in cfg.keys():
+				includeStg = cfg[tf]
+				if includeStg:
+					print "including %s because %s is true" % (sid, tf)
+				else:
+					print "excluding %s because %s is false" % (sid, tf)
+			else:
+				print "excluding %s because %s is defaulting" % (sid, tf)
+				includeStg = False
+			
+		return includeStg
 
 	def Run(self):
 		args = [self.settings.executable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFile]
@@ -535,7 +547,7 @@ class CuraEngineDlg(wx.Frame):
 			
 		self.slicing = True
 		self.sliceComplete = False
-		thr = SlicerThread(self, self.settings, self.stlFn, self.gcFn, dProfile, dMaterial, dPrinter)
+		thr = SlicerThread(self, self.settings, self.stlFn, self.gcFn, self.curasettings, dProfile, dMaterial, dPrinter)
 		thr.Start()
 		self.updateFileDisplay()
 		self.enableButtons()
