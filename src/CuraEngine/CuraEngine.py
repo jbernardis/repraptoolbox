@@ -65,6 +65,14 @@ class SlicerThread:
 		self.profileCfg = profileCfg
 		self.materialCfg = materialCfg
 		self.printerCfg = printerCfg
+		print "SlicerThread: profile = ", profileCfg
+		print ""
+		print "Printer = ", printerCfg
+		print ""
+		for m in materialCfg:
+			print "Material = ", m
+			print ""
+
 		self.running = False
 		self.cancelled = False
 

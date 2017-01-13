@@ -168,6 +168,9 @@ class CuraDefinitions():
 					
 				if "unit" in chdata.keys():
 					stg.setUnit(chdata["unit"])
+					
+				if "enabled" in chdata.keys():
+					stg.setEnable(chdata["enabled"])
 	
 				dtype = ""			
 				if "type" in chdata.keys():

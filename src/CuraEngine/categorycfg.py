@@ -105,7 +105,12 @@ class CategoryCfg(wx.Window):
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 		self.bDelete.Enable(False)
 		
-		self.props = PropertiesGrid(self, pmap.CategoryOrder, pmap.PropertyOrder, definitions)
+		if self.currentChoice == 0:
+			ch = None
+		else:
+			ch = os.path.join(self.cfgDir, self.cfgNameList[self.currentChoice] + ".json")
+		
+		self.props = PropertiesGrid(self, pmap.CategoryOrder, pmap.PropertyOrder, definitions, ch)
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
 		sz.AddSpacer((10, 10))
