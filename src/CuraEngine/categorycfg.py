@@ -71,7 +71,7 @@ class SaveDlg(wx.Dialog):
 		self.EndModal(wx.ID_SAVE)
 
 class CategoryCfg(wx.Window):
-	def __init__(self, gparent, parent, pageid, images, pmap, crntChoice, definitions):
+	def __init__(self, gparent, parent, pageid, images, pmap, definitions):
 		#wx.Panel.__init__(self, parent, wx.ID_ANY, size=(600, 400))
 		wx.Window.__init__(self, parent, wx.ID_ANY, size=(600, 400))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
@@ -88,10 +88,7 @@ class CategoryCfg(wx.Window):
 		self.buildFileLists()
 		self.chCfgFile = wx.Choice(self, wx.ID_ANY, choices=self.cfgNameList, size=(150, -1))
 		self.Bind(wx.EVT_CHOICE, self.onChCfgFile, self.chCfgFile)
-		if crntChoice in self.cfgNameList:
-			self.currentChoice = self.cfgNameList.index(crntChoice)
-		else:
-			self.currentChoice = 0
+		self.currentChoice = 0
 		self.chCfgFile.SetSelection(self.currentChoice)
 		
 		self.bSave = wx.BitmapButton(self, wx.ID_ANY, images.pngSave, size=(32, 32), style=wx.NO_BORDER)
@@ -105,12 +102,7 @@ class CategoryCfg(wx.Window):
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 		self.bDelete.Enable(False)
 		
-		if self.currentChoice == 0:
-			ch = None
-		else:
-			ch = os.path.join(self.cfgDir, self.cfgNameList[self.currentChoice] + ".json")
-		
-		self.props = PropertiesGrid(self, pmap.CategoryOrder, pmap.PropertyOrder, definitions, ch)
+		self.props = PropertiesGrid(self, pmap.CategoryOrder, pmap.PropertyOrder, definitions)
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
 		sz.AddSpacer((10, 10))
@@ -163,7 +155,7 @@ class CategoryCfg(wx.Window):
 			if rc == wx.ID_NO:
 				self.chCfgFile.SetSelection(self.currentChoice)
 				return
-		
+
 		self.currentChoice = chx
 		if chx == 0:
 			self.props.setOverlay(None)
@@ -171,6 +163,17 @@ class CategoryCfg(wx.Window):
 		else:
 			self.props.setOverlay(os.path.join(self.cfgDir, self.cfgNameList[chx] + ".json"))
 			self.bDelete.Enable(True)
+			
+	def initialSelection(self, fn):
+		if fn in self.cfgNameList:
+			self.currentChoice = self.cfgNameList.index(fn)
+			self.props.setOverlay(os.path.join(self.cfgDir, fn + ".json"))
+			self.bDelete.Enable(True)
+		else:
+			self.currentChoice = 0
+			self.props.setOverlay(None)
+			self.bDelete.Enable(False)
+		self.chCfgFile.SetSelection(self.currentChoice)
 			
 	def setModified(self, flag):
 		self.gparent.updateTab(self.pageid, flag)

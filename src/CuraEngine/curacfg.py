@@ -100,14 +100,18 @@ class CuraCfgDlg(wx.Frame):
 		MaterialMap.Directory = os.path.join(self.settings.cfgdirectory, "material")
 		PrinterMap.Directory = os.path.join(self.settings.cfgdirectory, "printer")
 
-		self.profileCfg = CategoryCfg(self, self.nb, NotebookPage.profile, self.images, ProfileMap, settings.profilechoice, curasettings)
+		self.profileCfg = CategoryCfg(self, self.nb, NotebookPage.profile, self.images, ProfileMap, curasettings)
 		self.nb.AddPage(self.profileCfg, "Profile", imageId=self.nbilUnmodifiedIdx)
 
-		self.materialCfg = CategoryCfg(self, self.nb, NotebookPage.material, self.images, MaterialMap, settings.materialchoice[0], curasettings)
+		self.materialCfg = CategoryCfg(self, self.nb, NotebookPage.material, self.images, MaterialMap, curasettings)
 		self.nb.AddPage(self.materialCfg, "Material", imageId=self.nbilUnmodifiedIdx)
 		
-		self.printerCfg = CategoryCfg(self, self.nb, NotebookPage.printer, self.images, PrinterMap, settings.printerchoice, curasettings)
+		self.printerCfg = CategoryCfg(self, self.nb, NotebookPage.printer, self.images, PrinterMap, curasettings)
 		self.nb.AddPage(self.printerCfg, "Printer", imageId=self.nbilUnmodifiedIdx)
+		
+		self.profileCfg.initialSelection(settings.profilechoice)
+		self.materialCfg.initialSelection(settings.materialchoice[0])
+		self.printerCfg.initialSelection(settings.printerchoice)
 
 		sizer.Add(self.nb)
 		self.SetSizer(sizer)

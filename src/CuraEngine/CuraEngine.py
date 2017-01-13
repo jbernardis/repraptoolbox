@@ -30,10 +30,23 @@ EnableIfTrue = {
 	"acceleration_print": "acceleration_enabled",
 	"acceleration_print_layer_0": "acceleration_enabled", 
 	"acceleration_topbottom": "acceleration_enabled",
-	"acceleration_layer_0": "acceleration_enabled"
+	"acceleration_layer_0": "acceleration_enabled",
+	"speed_support" : "support_enable",
+	"retraction_min_travel" : "retraction_enable",
+	"retraction_speed" : "retraction_enable",
+	"retraction_amount" : "retraction_enable",
+	"cool_fan_speed" : "cool_fan_enabled"
 	}
 
+EnableIfEqual = {
+	"brim_line_count" : ("adhesion_type", "brim"),
+	"skirt_line_count" : ("adhesion_type", "skirt")
+	}
 
+EnableIfGreater = {
+	"speed_infill" : ("infill_sparse_density", 0),
+	"infill_pattern" : ("infill_sparse_density", 0)
+	}
 
 def loadProfile(fn, log, curasettings):
 	with open(fn) as json_data:
@@ -104,22 +117,20 @@ class SlicerThread:
 		if ex is None:
 			return True
 		
-		print "Need to evaluate (%s) to see if (%s) should be included" % (ex, sid)
-		
-		includeStg = True
 		if sid in EnableIfTrue.keys():
 			tf = EnableIfTrue[sid]
 			if tf in cfg.keys():
-				includeStg = cfg[tf]
-				if includeStg:
+				if cfg[tf]:
 					print "including %s because %s is true" % (sid, tf)
+					return True
 				else:
 					print "excluding %s because %s is false" % (sid, tf)
+					return False
 			else:
 				print "excluding %s because %s is defaulting" % (sid, tf)
-				includeStg = False
+				return False
 			
-		return includeStg
+		return True
 
 	def Run(self):
 		args = [self.settings.executable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFile]

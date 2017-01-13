@@ -9,7 +9,7 @@ import json
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
 class PropertiesGrid(wxpg.PropertyGrid):
-	def __init__(self, parent, catOrder, propertyOrder, definitions, fnChoice):
+	def __init__(self, parent, catOrder, propertyOrder, definitions):
 
 		pgFont = wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 		wxpg.PropertyGrid.__init__(self, parent, style=wxpg.PG_TOOLBAR)
@@ -84,7 +84,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 
 		self.rowCount = lines
 		
-		self.setOverlay(fnChoice)
+		self.setBaseValues()
 		
 	def setBaseValues(self):
 		for cat in self.catOrder:
