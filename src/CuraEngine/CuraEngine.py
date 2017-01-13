@@ -111,25 +111,81 @@ class SlicerThread:
 	def includeSetting(self, sid, cfg):
 		stg = self.curasettings.getDefinition(sid)
 		if stg is None:
-			return True
+			print "can't find the definition for %s - excluding" % sid
+			return False
 		
 		ex = stg.getEnable()
 		if ex is None:
+			print "setting %s has no enabling conditions - including" % sid
 			return True
 		
 		if sid in EnableIfTrue.keys():
 			tf = EnableIfTrue[sid]
 			if tf in cfg.keys():
 				if cfg[tf]:
-					print "including %s because %s is true" % (sid, tf)
+					print "including %s because %s is true (" % (sid, tf), cfg[tf], ")"
 					return True
 				else:
-					print "excluding %s because %s is false" % (sid, tf)
+					print "excluding %s because %s is false (" % (sid, tf), cfg[tf], ")"
 					return False
 			else:
-				print "excluding %s because %s is defaulting" % (sid, tf)
-				return False
-			
+				lstg = self.curasettings.getDefinition(tf)
+				if lstg is None:
+					print "can't find definition for %s - including %s" % (tf, sid)
+					
+				dval = lstg.getDefault()
+				if dval:
+					print "including %s because %s is default True" % (sid, tf)
+					return True
+				else:
+					print "excluding %s because %s is default False" % (sid, tf)
+					return False
+				
+		if sid in EnableIfEqual.keys():
+			tf, tv = EnableIfEqual[sid]
+			if tf in cfg.keys():
+				if cfg[tf] == tv:
+					print "including %s because %s == %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because %s != %s (" % (sid, tf, tv), cfg[tf], ")"
+					return False
+			else:
+				lstg = self.curasettings.getDefinition(tf)
+				if lstg is None:
+					print "can't find definition for %s - including %s" % (tf, sid)
+					
+				dval = lstg.getDefault()
+				if dval == tv:
+					print "including %s because default %s == %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because default %s != %s (" % (sid, tf, tv), dval, ")"
+					return False
+				
+		if sid in EnableIfGreater.keys():
+			tf, tv = EnableIfGreater[sid]
+			if tf in cfg.keys():
+				if cfg[tf] > tv:
+					print "including %s because %s > %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because %s <= %s (" % (sid, tf, tv), cfg[tf], ")"
+					return False
+			else:
+				lstg = self.curasettings.getDefinition(tf)
+				if lstg is None:
+					print "can't find definition for %s - including %s" % (tf, sid)
+					
+				dval = lstg.getDefault()
+				if dval > tv:
+					print "including %s because default %s > %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because default %s <= %s (" % (sid, tf, tv), dval, ")"
+					return False
+		
+		print "pass through for %s - including" % sid	
 		return True
 
 	def Run(self):
@@ -377,16 +433,16 @@ class CuraEngineDlg(wx.Frame):
 		
 		self.enableButtons()
 		
-		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.AddSpacer((10, 10))
+		sizerl = wx.BoxSizer(wx.VERTICAL)
+		sizerl.AddSpacer((5, 5))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "STL File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szStl)
 		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizer.AddSpacer((10, 10))
+		sizerl.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizerl.AddSpacer((5, 5))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code Directory")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -395,25 +451,37 @@ class CuraEngineDlg(wx.Frame):
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szGcDir)
 		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizer.AddSpacer((10, 10))
+		sizerl.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizerl.AddSpacer((5, 5))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szGc)
 		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizerl.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizerl.AddSpacer((5, 5))
 		
-		sizer.AddSpacer((20, 20))
-		sizer.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((10, 10))
-		sizer.Add(szOpts, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((10, 10))
-		sizer.Add(self.tcLog, flag=wx.EXPAND | wx.ALL, border=10)
-		sizer.AddSpacer((10, 10))
+		sizerr = wx.BoxSizer(wx.VERTICAL)
+		sizerr.AddSpacer((5, 5))
+		sizerr.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		sizerr.AddSpacer((10, 10))
+		sizerr.Add(szOpts, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		sizerr.AddSpacer((5, 5))
+		sizerr.Add(self.tcLog, flag=wx.EXPAND | wx.ALL, border=10)
+		sizerr.AddSpacer((5, 5))
+		
+		sizerlr = wx.BoxSizer(wx.HORIZONTAL)
+		sizerlr.AddSpacer((5, 5))
+		sizerlr.Add(sizerl)
+		sizerlr.AddSpacer((10, 10))
+		sizerlr.Add(sizerr)
+		sizerlr.AddSpacer((5, 5))
+		
+		sizer = wx.BoxSizer(wx.VERTICAL)
+		sizer.Add(sizerlr, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		sizer.Add(szButton, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((20, 20))
+		sizer.AddSpacer((10, 10))
 		
 		self.SetSizer(sizer)
 		self.Fit()

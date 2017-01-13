@@ -345,8 +345,8 @@ class StlViewDlg(wx.Frame):
 	def setTitle(self):
 		s = "STL Viewer"
 		if self.fileName is not None:
-			if len(self.filename) > 50:
-				s += " - %s" % os.path.basename(self.filename)
+			if len(self.fileName) > 50:
+				s += " - %s" % os.path.basename(self.fileName)
 			else:
 				s += " - %s" % self.fileName
 				
