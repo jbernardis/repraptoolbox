@@ -340,6 +340,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.layerTimes = []
 		self.layerTimeStr = []
 		self.propDlg.clearAllProperties()
+		self.reprap.clearPrint()
 		if fn is None:
 			return
 		
