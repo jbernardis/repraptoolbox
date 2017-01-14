@@ -20,8 +20,8 @@ class Settings:
 	def __init__(self, folder):
 		self.section = "curaengine"	
 		
-		self.executable = "/usr/bin/CuraEngine"
-		self.cfgexecutable = "/usr/bin/cura"
+		self.engineexecutable = "/usr/bin/CuraEngine"
+		self.curaexecutable = "/usr/bin/cura"
 		self.cfgdirectory = "/home/jeff/.curaengine"
 		self.jsonfile = "/usr/share/cura/resources/definitions/fdmprinter.def.json"
 		self.usestldir = True
@@ -51,10 +51,10 @@ class Settings:
 					self.usestldir = parseBoolean(value, True)
 				elif opt == "centerobject":
 					self.centerobject = parseBoolean(value, True)
-				elif opt == "executable":
-					self.executable = value
-				elif opt == "cfgexecutable":
-					self.cfgexecutable = value
+				elif opt == "engineexecutable":
+					self.engineexecutable = value
+				elif opt == "curaexecutable":
+					self.curaexecutable = value
 				elif opt == "cfgdirectory":
 					self.cfgdirectory = value
 				elif opt == "jsonfile":
@@ -78,8 +78,10 @@ class Settings:
 
 		self.cfg.set(self.section, "laststldirectory", str(self.laststldirectory))
 		self.cfg.set(self.section, "lastgcodedirectory", str(self.lastgcodedirectory))
+		self.cfg.set(self.section, "jsonfile", str(self.jsonfile))
 		self.cfg.set(self.section, "usestldir", str(self.usestldir))
-		self.cfg.set(self.section, "executable", str(self.executable))
+		self.cfg.set(self.section, "engineexecutable", str(self.engineexecutable))
+		self.cfg.set(self.section, "curaexecutable", str(self.curaexecutable))
 		self.cfg.set(self.section, "cfgdirectory", str(self.cfgdirectory))
 		self.cfg.set(self.section, "profilechoice", str(self.profilechoice))
 		self.cfg.set(self.section, "printerchoice", str(self.printerchoice))

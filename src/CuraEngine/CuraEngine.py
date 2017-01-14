@@ -69,23 +69,9 @@ def loadProfile(fn, log, curasettings):
 	return result
 
 class SlicerThread:
-	def __init__(self, win, settings, stlFile, gcFile, curasettings, profileCfg, materialCfg, printerCfg):
+	def __init__(self, win, args):
 		self.win = win
-		self.settings = settings
-		self.stlFile = stlFile
-		self.gcFile = gcFile
-		self.curasettings = curasettings
-		self.profileCfg = profileCfg
-		self.materialCfg = materialCfg
-		self.printerCfg = printerCfg
-		print "SlicerThread: profile = ", profileCfg
-		print ""
-		print "Printer = ", printerCfg
-		print ""
-		for m in materialCfg:
-			print "Material = ", m
-			print ""
-
+		self.args = args
 		self.running = False
 		self.cancelled = False
 
@@ -99,112 +85,10 @@ class SlicerThread:
 
 	def IsRunning(self):
 		return self.running
-	
-	def addArgs(self, cfg):
-		result = []
-		for k,v in cfg.iteritems():
-			if self.includeSetting(k, cfg):
-				result.extend(("-s", "%s=%s" % (k,v)))
-		
-		return result
-	
-	def includeSetting(self, sid, cfg):
-		stg = self.curasettings.getDefinition(sid)
-		if stg is None:
-			print "can't find the definition for %s - excluding" % sid
-			return False
-		
-		ex = stg.getEnable()
-		if ex is None:
-			print "setting %s has no enabling conditions - including" % sid
-			return True
-		
-		if sid in EnableIfTrue.keys():
-			tf = EnableIfTrue[sid]
-			if tf in cfg.keys():
-				if cfg[tf]:
-					print "including %s because %s is true (" % (sid, tf), cfg[tf], ")"
-					return True
-				else:
-					print "excluding %s because %s is false (" % (sid, tf), cfg[tf], ")"
-					return False
-			else:
-				lstg = self.curasettings.getDefinition(tf)
-				if lstg is None:
-					print "can't find definition for %s - including %s" % (tf, sid)
-					
-				dval = lstg.getDefault()
-				if dval:
-					print "including %s because %s is default True" % (sid, tf)
-					return True
-				else:
-					print "excluding %s because %s is default False" % (sid, tf)
-					return False
-				
-		if sid in EnableIfEqual.keys():
-			tf, tv = EnableIfEqual[sid]
-			if tf in cfg.keys():
-				if cfg[tf] == tv:
-					print "including %s because %s == %s" % (sid, tf, tv)
-					return True
-				else:
-					print "excluding %s because %s != %s (" % (sid, tf, tv), cfg[tf], ")"
-					return False
-			else:
-				lstg = self.curasettings.getDefinition(tf)
-				if lstg is None:
-					print "can't find definition for %s - including %s" % (tf, sid)
-					
-				dval = lstg.getDefault()
-				if dval == tv:
-					print "including %s because default %s == %s" % (sid, tf, tv)
-					return True
-				else:
-					print "excluding %s because default %s != %s (" % (sid, tf, tv), dval, ")"
-					return False
-				
-		if sid in EnableIfGreater.keys():
-			tf, tv = EnableIfGreater[sid]
-			if tf in cfg.keys():
-				if cfg[tf] > tv:
-					print "including %s because %s > %s" % (sid, tf, tv)
-					return True
-				else:
-					print "excluding %s because %s <= %s (" % (sid, tf, tv), cfg[tf], ")"
-					return False
-			else:
-				lstg = self.curasettings.getDefinition(tf)
-				if lstg is None:
-					print "can't find definition for %s - including %s" % (tf, sid)
-					
-				dval = lstg.getDefault()
-				if dval > tv:
-					print "including %s because default %s > %s" % (sid, tf, tv)
-					return True
-				else:
-					print "excluding %s because default %s <= %s (" % (sid, tf, tv), dval, ")"
-					return False
-		
-		print "pass through for %s - including" % sid	
-		return True
 
 	def Run(self):
-		args = [self.settings.executable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFile]
-		v = str(self.settings.centerobject).lower()
-		args.extend(["-s", "center_object=%s" % v])
-		args.extend(self.addArgs(self.profileCfg))
-		args.extend(self.addArgs(self.printerCfg))
-		ex = 0
-		for m in self.materialCfg:
-			args.append("-e%d" % ex)
-			ex += 1
-			args.extend(self.addArgs(m))
-
-		args.extend(("-l", self.stlFile))
-		print args
-		print args
 		try:
-			p = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+			p = subprocess.Popen(self.args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 		except:
 			evt = SlicerEvent(msg = "Exception occurred trying to spawn cura_engine", state = CURA_CANCELLED)
 			wx.PostEvent(self.win, evt)
@@ -235,7 +119,6 @@ class SlicerThread:
 		wx.PostEvent(self.win, evt)
 
 		self.running = False
-
 
 class CuraEngineDlg(wx.Frame):
 	def __init__(self, parent):
@@ -420,9 +303,16 @@ class CuraEngineDlg(wx.Frame):
 		szButton.AddSpacer((20, 20))
 		
 		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCuracfg, size=BUTTONDIM)
-		self.bConfig.SetToolTipString("Load cura configurator")
+		self.bConfig.SetToolTipString("Load cura engine onfigurator")
 		self.Bind(wx.EVT_BUTTON, self.onConfig, self.bConfig)
 		szButton.Add(self.bConfig)
+		
+		szButton.AddSpacer((20, 20))
+		
+		self.bCuraUI = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCura, size=BUTTONDIM)
+		self.bCuraUI.SetToolTipString("Load cura user interface")
+		self.Bind(wx.EVT_BUTTON, self.onCuraUI, self.bCuraUI)
+		szButton.Add(self.bCuraUI)
 		
 		szButton.AddSpacer((20, 20))
 		
@@ -539,6 +429,13 @@ class CuraEngineDlg(wx.Frame):
 		self.bConfig.Enable(True)
 		self.cfgDlg = None
 		
+	def onCuraUI(self, evt):
+		try:
+			subprocess.Popen([self.settings.curaexecutable],stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
+		except:
+			print "Exception occurred trying to spawn Cura User Interface"
+			return
+		
 	def onRefresh(self, evt):
 		profileChoice = self.chProfile.GetString(self.chProfile.GetSelection())
 		printerChoice = self.chPrinter.GetString(self.chPrinter.GetSelection())
@@ -634,10 +531,128 @@ class CuraEngineDlg(wx.Frame):
 			
 		self.slicing = True
 		self.sliceComplete = False
-		thr = SlicerThread(self, self.settings, self.stlFn, self.gcFn, self.curasettings, dProfile, dMaterial, dPrinter)
-		thr.Start()
+		SlicerThread(self, self.formCommandLine(dProfile, dMaterial, dPrinter)).Start()
 		self.updateFileDisplay()
 		self.enableButtons()
+	
+	def formCommandLine(self, dProfile, dMaterial, dPrinter):	
+		args = [self.settings.engineexecutable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFn]
+		v = str(self.settings.centerobject).lower()
+		args.extend(["-s", "center_object=%s" % v])
+		
+		args.extend(self.addArgs(dProfile))
+		args.extend(self.addArgs(dPrinter))
+		ex = 0
+		for m in dMaterial:
+			args.append("-e%d" % ex)
+			ex += 1
+			args.extend(self.addArgs(m))
+
+		args.extend(("-l", self.stlFn))
+		
+		return args
+	
+	def addArgs(self, cfg):
+		result = []
+		for k,v in cfg.iteritems():
+			if self.includeSetting(k, cfg):
+				result.extend(("-s", "%s=%s" % (k,v)))
+		
+		return result
+	
+	def includeSetting(self, sid, cfg):
+		stg = self.curasettings.getDefinition(sid)
+		if stg is None:
+			print "can't find the definition for %s - excluding" % sid
+			return False
+		
+		ex = stg.getEnable()
+		if ex is None:
+			print "setting %s has no enabling conditions - including" % sid
+			return True
+		
+		if sid in EnableIfTrue.keys():
+			tf = EnableIfTrue[sid]
+			if tf in cfg.keys():
+				if cfg[tf] == "true":
+					print "including %s because %s is true (" % (sid, tf), cfg[tf], ")"
+					return True
+				else:
+					print "excluding %s because %s is false (" % (sid, tf), cfg[tf], ")"
+					return False
+			else:
+				lstg = self.curasettings.getDefinition(tf)
+				if lstg is None:
+					print "can't find definition for %s - including %s" % (tf, sid)
+					
+				dval = lstg.getDefault()
+				if dval:
+					print "including %s because %s is default True" % (sid, tf)
+					return True
+				else:
+					print "excluding %s because %s is default False" % (sid, tf)
+					return False
+				
+		if sid in EnableIfEqual.keys():
+			tf, tv = EnableIfEqual[sid]
+			if tf in cfg.keys():
+				if cfg[tf] == tv:
+					print "including %s because %s == %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because %s != %s (" % (sid, tf, tv), cfg[tf], ")"
+					return False
+			else:
+				lstg = self.curasettings.getDefinition(tf)
+				if lstg is None:
+					print "can't find definition for %s - including %s" % (tf, sid)
+					
+				dval = lstg.getDefault()
+				if dval == tv:
+					print "including %s because default %s == %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because default %s != %s (" % (sid, tf, tv), dval, ")"
+					return False
+				
+		if sid in EnableIfGreater.keys():
+			tf, tv = EnableIfGreater[sid]
+			if tf in cfg.keys():
+				try:
+					cv = float(cfg[tf])
+					print "converted value = %f" % cv
+				except:
+					print "Unable to convert - assuming 0.0"
+					cv = 0.0
+				if cv > tv:
+					print "including %s because %s > %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because %s <= %s (" % (sid, tf, tv), cv, ")"
+					return False
+			else:
+				lstg = self.curasettings.getDefinition(tf)
+				if lstg is None:
+					print "can't find definition for %s - including %s" % (tf, sid)
+					
+				dval = lstg.getDefault()
+				if dval > tv:
+					print "including %s because default %s > %s" % (sid, tf, tv)
+					return True
+				else:
+					print "excluding %s because default %s <= %s (" % (sid, tf, tv), dval, ")"
+					return False
+		
+		print "pass through for %s - including" % sid	
+		return True
+		
+		
+		
+		
+		
+		
+		
+		
 		
 	def buildSuffix(self, cfgMaterial):
 		slCfg = self.getConfigString()

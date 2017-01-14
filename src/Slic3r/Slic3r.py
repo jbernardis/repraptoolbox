@@ -138,8 +138,15 @@ class Slic3rDlg(wx.Frame):
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "slic3r.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
 		
-		self.lblStl = wx.StaticText(self, wx.ID_ANY, "STL File:", size=(70, -1))
 		self.tcStl = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
+		
+		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
+		self.bOpen.SetToolTipString("Select an STL file for slicing")
+		self.Bind(wx.EVT_BUTTON, self.onBOpen, self.bOpen)
+		
+		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
+		self.bImport.SetToolTipString("Import a model file from toolbox")
+		self.Bind(wx.EVT_BUTTON, self.onBImport, self.bImport)
 		
 		self.cbGcDir = wx.CheckBox(self, wx.ID_ANY, "Use STL directory for G Code file")
 		self.cbGcDir.SetToolTipString("Use the directory from the STL file for the resulting G Code file")
@@ -152,8 +159,11 @@ class Slic3rDlg(wx.Frame):
 		self.bGcDir.SetToolTipString("Choose G Code directory")
 		self.Bind(wx.EVT_BUTTON, self.onBGcDir, self.bGcDir)
 		
-		self.lblGc = wx.StaticText(self, wx.ID_ANY, "G Code File:", size=(70, -1))
 		self.tcGc = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
+		
+		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
+		self.bExport.SetToolTipString("Export G Code file to toolbox")
+		self.Bind(wx.EVT_BUTTON, self.onBExport, self.bExport)
 		
 		self.loadConfigFiles()
 		
@@ -186,9 +196,15 @@ class Slic3rDlg(wx.Frame):
 		self.updateFileDisplay()
 
 		szStl = wx.BoxSizer(wx.HORIZONTAL)
-		szStl.AddSpacer((20, 10))
-		szStl.Add(self.lblStl)
+		szStl.AddSpacer((10, 10))
 		szStl.Add(self.tcStl)
+		szStl.AddSpacer((10, 10))
+		vsz = wx.BoxSizer(wx.VERTICAL)
+		vsz.Add(self.bOpen)
+		vsz.AddSpacer((5, 5))
+		vsz.Add(self.bImport)
+		szStl.Add(vsz)
+		szStl.AddSpacer((10, 10))
 
 		szUseStl = wx.BoxSizer(wx.HORIZONTAL)
 		szUseStl.AddSpacer((20, 10))
@@ -202,9 +218,11 @@ class Slic3rDlg(wx.Frame):
 		szGcDir.AddSpacer((10, 10))
 
 		szGc = wx.BoxSizer(wx.HORIZONTAL)
-		szGc.AddSpacer((20, 10))
-		szGc.Add(self.lblGc)
-		szGc.Add(self.tcGc)
+		szGc.AddSpacer((10, 10))
+		szGc.Add(self.tcGc, 1, wx.TOP, 8)
+		szGc.AddSpacer((10, 10))
+		szGc.Add(self.bExport)
+		szGc.AddSpacer((10, 10))
 				
 		szCfgL = wx.BoxSizer(wx.VERTICAL)
 		szCfgR = wx.BoxSizer(wx.VERTICAL)
@@ -236,27 +254,6 @@ class Slic3rDlg(wx.Frame):
 		
 		szButton.AddSpacer((100, 10))
 		
-		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
-		self.bOpen.SetToolTipString("Select an STL file for slicing")
-		self.Bind(wx.EVT_BUTTON, self.onBOpen, self.bOpen)
-		szButton.Add(self.bOpen)
-		
-		szButton.AddSpacer((20, 20))
-		
-		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
-		self.bImport.SetToolTipString("Import a model file from toolbox")
-		self.Bind(wx.EVT_BUTTON, self.onBImport, self.bImport)
-		szButton.Add(self.bImport)
-		
-		szButton.AddSpacer((20, 20))
-		
-		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
-		self.bExport.SetToolTipString("Export G Code file to toolbox")
-		self.Bind(wx.EVT_BUTTON, self.onBExport, self.bExport)
-		szButton.Add(self.bExport)
-		
-		szButton.AddSpacer((20, 20))
-		
 		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlic3r, size=BUTTONDIM)
 		self.bConfig.SetToolTipString("Load slic3r to modify configurations")
 		self.Bind(wx.EVT_BUTTON, self.onConfig, self.bConfig)
@@ -272,32 +269,40 @@ class Slic3rDlg(wx.Frame):
 		self.enableButtons()
 		
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.AddSpacer((20, 20))
-		sizer.Add(szStl)
-		sizer.AddSpacer((10, 20))
+		sizer.AddSpacer((5, 5))
+		
+		box = wx.StaticBox(self, wx.ID_ANY, "STL File")
+		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bsizer.AddSpacer((10, 10))
+		bsizer.Add(szStl)
+		bsizer.AddSpacer((10, 20))
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizer.AddSpacer((5, 5))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code Directory")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szUseStl)
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szGcDir)
 		bsizer.AddSpacer((10, 10))
-		
 		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		sizer.AddSpacer((5, 5))
 		
-		sizer.AddSpacer((10, 20))
-		sizer.Add(szGc)
-		sizer.AddSpacer((10, 10))
+		box = wx.StaticBox(self, wx.ID_ANY, "G Code File")
+		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bsizer.AddSpacer((10, 10))
+		bsizer.Add(szGc)
+		bsizer.AddSpacer((10, 10))
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
+		sizer.AddSpacer((5, 5))
 		
-		sizer.AddSpacer((20, 20))
 		sizer.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		sizer.AddSpacer((10, 10))
 		sizer.Add(self.tcLog, flag=wx.EXPAND | wx.ALL, border=10)
 		sizer.AddSpacer((10, 10))
 		sizer.Add(szButton, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((20, 20))
+		sizer.AddSpacer((5, 5))
 		
 		self.SetSizer(sizer)
 		self.Fit()
