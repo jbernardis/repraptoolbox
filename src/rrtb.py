@@ -397,38 +397,36 @@ class MyFrame(wx.Frame):
 					
 		self.settings.tbposition = self.GetPosition()
 		self.settings.logposition = self.logger.GetPosition()
-		self.settings.save()
 						
 		for p in self.reprap.keys():
 			self.reprap[p].terminate()
 			
 		try:
-			self.dlgSlic3r.Destroy()
+			self.dlgSlic3r.terminate()
 		except:
 			pass
 			
 		try:
-			self.dlgCuraEngine.Destroy()
+			self.dlgCuraEngine.terminate()
 		except:
 			pass
 			
-		try:
+		if self.dlgViewStl is not None:
+			self.settings.viewerposition = self.dlgViewStl.GetPosition()
 			self.dlgViewStl.Destroy()
-		except:
-			pass
 			
-		try:
+		if self.dlgPlater is not None:
+			self.settings.platerposition = self.dlgPlater.GetPosition()
 			self.dlgPlater.Destroy()
-		except:
-			pass
 			
-		try:
+		if self.dlgGEdit is not None:
+			self.settings.gcodeposition = self.dlgGEdit.GetPosition()
 			self.dlgGEdit.Destroy()
-		except:
-			pass
 		
 		if self.settings.port != 0:
 			self.httpServer.close()
+
+		self.settings.save()
 
 		self.logger.Destroy()
 		self.pendant.kill()		
@@ -437,32 +435,44 @@ class MyFrame(wx.Frame):
 	def doViewStl(self, evt):
 		dlg = StlViewDlg(self)
 		dlg.Show()
+		if self.settings.viewerposition is not None:
+			dlg.SetPosition(self.settings.viewerposition)
 		self.bStlView.Enable(False);
 		self.dlgViewStl = dlg
 	
 	def viewStlClosed(self):
 		self.bStlView.Enable(True);
+		self.settings.viewerposition = self.dlgViewStl.GetPosition()
+		self.dlgViewStl.Destroy()
 		self.dlgViewStl = None
 	
 	def doPlater(self, evt):
 		dlg = PlaterDlg(self)
 		self.bPlater.Enable(False);
 		dlg.Show()
+		if self.settings.platerposition is not None:
+			dlg.SetPosition(self.settings.platerposition)
 		self.dlgPlater = dlg
 	
 	def platerClosed(self):
 		self.bPlater.Enable(True);
+		self.settings.platerposition = self.dlgPlater.GetPosition()
+		self.dlgPlater.Destroy()
 		self.dlgPlater = None
 		
 	def doGEdit(self, evt):
 		dlg = GEditDlg(self)
 		self.bGEdit.Enable(False)
 		dlg.Show()
+		if self.settings.gcodeposition is not None:
+			dlg.SetPosition(self.settings.gcodeposition)
 		self.dlgGEdit = dlg
 	
 	def GEditClosed(self):
 		self.bGEdit.Enable(True)
-		self.dlgGEdir = None
+		self.settings.gcodeposition = self.dlgGEdit.GetPosition()
+		self.dlgGEdit.Destroy()
+		self.dlgGEdit = None
 		
 	def doSlic3r(self, evt):
 		dlg = Slic3rDlg(self)

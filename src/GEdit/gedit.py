@@ -778,10 +778,8 @@ class GEditDlg(wx.Frame):
 			dlg.Destroy()
 			if rc == wx.ID_YES:
 				self.parent.GEditClosed()
-				self.Destroy()
 		else:
 			self.parent.GEditClosed()
-			self.Destroy()
 		
 	def loadGCode(self, fn):
 		if fn is None:

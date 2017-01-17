@@ -197,7 +197,7 @@ class Slic3rDlg(wx.Frame):
 
 		szStl = wx.BoxSizer(wx.HORIZONTAL)
 		szStl.AddSpacer((10, 10))
-		szStl.Add(self.tcStl)
+		szStl.Add(self.tcStl, 1, wx.TOP, 38)
 		szStl.AddSpacer((10, 10))
 		vsz = wx.BoxSizer(wx.VERTICAL)
 		vsz.Add(self.bOpen)
@@ -286,7 +286,7 @@ class Slic3rDlg(wx.Frame):
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szGcDir)
 		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
 		sizer.AddSpacer((5, 5))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code File")
@@ -306,6 +306,8 @@ class Slic3rDlg(wx.Frame):
 		
 		self.SetSizer(sizer)
 		self.Fit()
+		if self.settings.dlgposition is not None:
+			self.SetPosition(self.settings.dlgposition)
 		
 	def getExtruderCount(self, cfgfn):
 		try:
@@ -552,8 +554,12 @@ class Slic3rDlg(wx.Frame):
 			self.tcGc.SetValue("")
 		
 	def onClose(self, evt):
-		self.settings.save()
 		self.parent.Slic3rClosed()
+		self.terminate()
+		
+	def terminate(self):
+		self.settings.dlgposition = self.GetPosition()
+		self.settings.save()
 		self.Destroy()
 		
 	def getConfigString(self):

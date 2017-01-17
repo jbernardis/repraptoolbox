@@ -25,6 +25,9 @@ class Settings:
 		self.printers = []
 		self.tbposition = None
 		self.logposition = None
+		self.platerposition = None
+		self.gcodeposition = None
+		self.viewerposition = None
 		self.lastlogdirectory = "."
 		self.pendantbaud = 9600
 		self.pendantport = "/dev/pendant"
@@ -84,6 +87,33 @@ class Settings:
 						print "invalid value in ini file for log position"
 						self.logposition = None
 						
+				elif opt == 'platerposition':
+					try:
+						s = []
+						exec("s=%s" % value)
+						self.platerposition = s
+					except:
+						print "invalid value in ini file for plater position"
+						self.platerposition = None
+						
+				elif opt == 'gcodeposition':
+					try:
+						s = []
+						exec("s=%s" % value)
+						self.gcodeposition = s
+					except:
+						print "invalid value in ini file for gcode position"
+						self.gcodeposition = None
+						
+				elif opt == 'viewerposition':
+					try:
+						s = []
+						exec("s=%s" % value)
+						self.viewerposition = s
+					except:
+						print "invalid value in ini file for stl viewer position"
+						self.viewerposition = None
+						
 				else:
 					print("Unknown %s option: %s - ignoring" % (self.section, opt))
 		else:
@@ -108,6 +138,9 @@ class Settings:
 		self.cfg.set(self.section, "printers", str(self.printers))
 		self.cfg.set(self.section, "tbposition", str(self.tbposition))
 		self.cfg.set(self.section, "logposition", str(self.logposition))
+		self.cfg.set(self.section, "platerposition", str(self.platerposition))
+		self.cfg.set(self.section, "gcodeposition", str(self.gcodeposition))
+		self.cfg.set(self.section, "viewerposition", str(self.viewerposition))
 		self.cfg.set(self.section, "lastlogdirectory", str(self.lastlogdirectory))
 		self.cfg.set(self.section, "port", str(self.port))
 		self.cfg.set(self.section, "pendantport", str(self.pendantport))

@@ -1,7 +1,7 @@
-import wx
+#import wx
 import wx.lib.newevent
 import os
-import sys, inspect
+import inspect
 import thread
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
@@ -440,7 +440,7 @@ class PlaterDlg(wx.Frame):
 		
 	def doMirror(self, evt):
 		dlg = MirrorDlg(self, self.stlCanvas, self.images, wx.GetMousePosition())
-		rc = dlg.ShowModal()
+		dlg.ShowModal()
 		dlg.Destroy()
 			
 	def doRotate(self, evt):
@@ -484,8 +484,7 @@ class PlaterDlg(wx.Frame):
 		self.modified = True
 		
 		seqNbrs = [masterSeq]
-		for i in range(copies):
-			seqNbrs.append(self.clone())
+		seqNbrs.extend(self.clone()*copies)
 			
 		self.stlCanvas.gridArrange(seqNbrs, rows, cols)
 		
@@ -621,8 +620,6 @@ class PlaterDlg(wx.Frame):
 			dlg.Destroy()
 			if rc == wx.ID_YES:
 				self.parent.platerClosed()
-				self.Destroy()
 		else:
 			self.parent.platerClosed()
-			self.Destroy()
 

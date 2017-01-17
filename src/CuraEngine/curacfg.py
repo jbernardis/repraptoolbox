@@ -117,6 +117,9 @@ class CuraCfgDlg(wx.Frame):
 		self.SetSizer(sizer)
 		self.Fit()
 		
+		if self.settings.cfgdlgposition is not None:
+			self.SetPosition(self.settings.cfgdlgposition)
+		
 	def onClose(self, evt):
 		self.nb.SetFocus()
 		wx.CallLater(10, self.checkForClosure)
@@ -135,6 +138,10 @@ class CuraCfgDlg(wx.Frame):
 		if self.callback is not None:
 			self.callback()
 			
+		self.terminate()
+		
+	def terminate(self):
+		self.settings.cfgdlgposition = self.GetPosition()
 		self.Destroy()
 		
 	def updateTab(self, pageid, modflag):

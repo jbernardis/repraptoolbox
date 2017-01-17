@@ -7,7 +7,7 @@ from wx import glcanvas
 import wx
 
 from OpenGL.GL import *
-from OpenGL.GLU import *
+from OpenGL.GLU import gluLookAt
 from OpenGL.arrays import vbo
 		
 import struct, math
@@ -76,7 +76,7 @@ class StlCanvas(glcanvas.GLCanvas):
 		event.Skip()
 
 	def OnPaint(self, event):
-		dc = wx.PaintDC(self)
+		dc = wx.PaintDC(self)  # @UnusedVariable
 		if self.IsShown():
 			self.SetCurrent(self.context)
 			if not self.init:
@@ -356,7 +356,6 @@ class StlViewDlg(wx.Frame):
 		self.settings.save()
 		self.gl.Destroy()
 		self.parent.viewStlClosed()
-		self.Destroy()
 		
 	def onExport(self, evt):
 		self.parent.exportStlFile(self.fileName)
@@ -528,7 +527,7 @@ class stl:
 		elif l.startswith("endfacet"):
 			self.infacet=0
 			self.facets+=[self.facet]
-			facet=self.facet
+			#facet=self.facet
 		elif l.startswith("vertex"):
 			l=l.replace(",",".")
 			self.facet[1][self.facetloc]=map(float,l.split()[1:])

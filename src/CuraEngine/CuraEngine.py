@@ -375,6 +375,8 @@ class CuraEngineDlg(wx.Frame):
 		
 		self.SetSizer(sizer)
 		self.Fit()
+		if self.settings.dlgposition is not None:
+			self.SetPosition(self.settings.dlgposition)
 		
 	def getExtruderCount(self, cfgfn):
 		d = loadProfile(cfgfn, self.log, self.curasettings)
@@ -563,56 +565,51 @@ class CuraEngineDlg(wx.Frame):
 	def includeSetting(self, sid, cfg):
 		stg = self.curasettings.getDefinition(sid)
 		if stg is None:
-			print "can't find the definition for %s - excluding" % sid
+			self.slog("Unable to find the definition for %s - excluding" % sid)
 			return False
 		
 		ex = stg.getEnable()
 		if ex is None:
-			print "setting %s has no enabling conditions - including" % sid
 			return True
 		
 		if sid in EnableIfTrue.keys():
 			tf = EnableIfTrue[sid]
 			if tf in cfg.keys():
 				if cfg[tf] == "true":
-					print "including %s because %s is true (" % (sid, tf), cfg[tf], ")"
 					return True
 				else:
-					print "excluding %s because %s is false (" % (sid, tf), cfg[tf], ")"
+					self.slog("Excluding %s because %s is false" % (sid, tf))
 					return False
 			else:
 				lstg = self.curasettings.getDefinition(tf)
 				if lstg is None:
-					print "can't find definition for %s - including %s" % (tf, sid)
+					return True
 					
 				dval = lstg.getDefault()
 				if dval:
-					print "including %s because %s is default True" % (sid, tf)
 					return True
 				else:
-					print "excluding %s because %s is default False" % (sid, tf)
+					self.slog("Excluding %s because %s is default False" % (sid, tf))
 					return False
 				
 		if sid in EnableIfEqual.keys():
 			tf, tv = EnableIfEqual[sid]
 			if tf in cfg.keys():
 				if cfg[tf] == tv:
-					print "including %s because %s == %s" % (sid, tf, tv)
 					return True
 				else:
-					print "excluding %s because %s != %s (" % (sid, tf, tv), cfg[tf], ")"
+					self.slog("Excluding %s because %s != %s" % (sid, tf, tv))
 					return False
 			else:
 				lstg = self.curasettings.getDefinition(tf)
 				if lstg is None:
-					print "can't find definition for %s - including %s" % (tf, sid)
+					return True
 					
 				dval = lstg.getDefault()
 				if dval == tv:
-					print "including %s because default %s == %s" % (sid, tf, tv)
 					return True
 				else:
-					print "excluding %s because default %s != %s (" % (sid, tf, tv), dval, ")"
+					self.slog("Excluding %s because default %s != %s" % (sid, tf, tv))
 					return False
 				
 		if sid in EnableIfGreater.keys():
@@ -620,40 +617,28 @@ class CuraEngineDlg(wx.Frame):
 			if tf in cfg.keys():
 				try:
 					cv = float(cfg[tf])
-					print "converted value = %f" % cv
 				except:
-					print "Unable to convert - assuming 0.0"
+					self.slog("Unable to convert value for %s - %s - to type float  - assuming 0.0" % (sid, cfg[tf]))
 					cv = 0.0
 				if cv > tv:
-					print "including %s because %s > %s" % (sid, tf, tv)
 					return True
 				else:
-					print "excluding %s because %s <= %s (" % (sid, tf, tv), cv, ")"
+					self.slog("Excluding %s because %s <= %s" % (sid, tf, tv))
 					return False
 			else:
 				lstg = self.curasettings.getDefinition(tf)
 				if lstg is None:
-					print "can't find definition for %s - including %s" % (tf, sid)
+					return True
 					
 				dval = lstg.getDefault()
 				if dval > tv:
-					print "including %s because default %s > %s" % (sid, tf, tv)
 					return True
 				else:
-					print "excluding %s because default %s <= %s (" % (sid, tf, tv), dval, ")"
+					self.slog("Excluding %s because default %s <= %s" % (sid, tf, tv))
 					return False
 		
-		print "pass through for %s - including" % sid	
 		return True
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
 	def buildSuffix(self, cfgMaterial):
 		slCfg = self.getConfigString()
 
@@ -717,9 +702,9 @@ class CuraEngineDlg(wx.Frame):
 		
 	def curaUpdate(self, evt):
 		if evt.state == CURA_MESSAGE:
-			self.tcLog.AppendText(evt.msg.rstrip().replace(" -s ", "\n") + "\n")
+			self.slog(evt.msg.rstrip().replace(" -s ", "\n") + "\n")
 		elif evt.state in [ CURA_CANCELLED, CURA_FINISHED ]:
-			self.tcLog.AppendText("Cura engine completed\n")
+			self.slog("Cura engine completed\n")
 			self.slicing = False
 			if evt.state == CURA_FINISHED:
 				self.sliceComplete = True
@@ -729,6 +714,9 @@ class CuraEngineDlg(wx.Frame):
 				
 			self.updateFileDisplay()
 			self.enableButtons()
+			
+	def slog(self, msg):
+		self.tcLog.AppendText(msg)
 			
 	def addGcSuffix(self):
 		fp = open(self.gcFn, "a")
@@ -758,10 +746,13 @@ class CuraEngineDlg(wx.Frame):
 		
 	def onClose(self, evt):
 		if self.cfgDlg is not None:
-			self.cfgDlg.Destroy()
-			
-		self.settings.save()
+			self.cfgDlg.terminate()
 		self.parent.CuraEngineClosed()
+		self.terminate()
+		
+	def terminate(self):
+		self.settings.dlgposition = self.GetPosition()
+		self.settings.save()
 		self.Destroy()
 		
 	def getConfigString(self):

@@ -32,6 +32,8 @@ class Settings:
 		self.materialchoice = ["PLA", "PLA", "PLA", "PLA"]
 		self.autoexport = True
 		self.centerobject = True
+		self.dlgposition = None
+		self.cfgdlgposition = None
 		
 		self.inifile = os.path.join(folder, INIFILE)
 		
@@ -67,6 +69,21 @@ class Settings:
 					self.autoexport = parseBoolean(value, True)
 				elif opt == "materialchoice":
 					self.materialchoice = re.split("\s*,\s*", value)
+				elif opt == 'dlgposition':
+					try:
+						s = None
+						exec("s=%s" % value)
+						self.dlgposition = s
+					except:
+						self.dlgposition = None
+				elif opt == 'cfgdlgposition':
+					try:
+						s = None
+						exec("s=%s" % value)
+						self.cfgdlgposition = s
+					except:
+						self.cfgdlgposition = None
+
 		else:
 			print "no section named (%s) in inifile (%s)" % (self.section, self.inifile)
 					
@@ -88,6 +105,8 @@ class Settings:
 		self.cfg.set(self.section, "materialchoice", ",".join(self.materialchoice))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
 		self.cfg.set(self.section, "centerobject", str(self.centerobject))
+		self.cfg.set(self.section, "dlgposition", str(self.dlgposition))
+		self.cfg.set(self.section, "cfgdlgposition", str(self.cfgdlgposition))
 
 		try:		
 			cfp = open(self.inifile, 'w')
