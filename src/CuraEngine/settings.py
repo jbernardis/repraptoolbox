@@ -34,6 +34,7 @@ class Settings:
 		self.centerobject = True
 		self.dlgposition = None
 		self.cfgdlgposition = None
+		self.addsettingstogcode = True
 		
 		self.inifile = os.path.join(folder, INIFILE)
 		
@@ -53,6 +54,8 @@ class Settings:
 					self.usestldir = parseBoolean(value, True)
 				elif opt == "centerobject":
 					self.centerobject = parseBoolean(value, True)
+				elif opt == "addsettingstogcode":
+					self.addsettingstogcode = parseBoolean(value, True)
 				elif opt == "engineexecutable":
 					self.engineexecutable = value
 				elif opt == "curaexecutable":
@@ -105,6 +108,7 @@ class Settings:
 		self.cfg.set(self.section, "materialchoice", ",".join(self.materialchoice))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
 		self.cfg.set(self.section, "centerobject", str(self.centerobject))
+		self.cfg.set(self.section, "addsettingstogcode", str(self.addsettingstogcode))
 		self.cfg.set(self.section, "dlgposition", str(self.dlgposition))
 		self.cfg.set(self.section, "cfgdlgposition", str(self.cfgdlgposition))
 

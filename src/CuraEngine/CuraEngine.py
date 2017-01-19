@@ -11,6 +11,7 @@ import wx.lib.newevent
 import subprocess
 import thread
 import json
+import re
 
 from settings import Settings
 from images import Images
@@ -291,6 +292,11 @@ class CuraEngineDlg(wx.Frame):
 		szOpts.Add(sz)
 		self.tcOffsetY.Bind(wx.EVT_KILL_FOCUS, self.evtOffsetYKillFocus, self.tcOffsetY)
 		
+		self.cbAddSettings = wx.CheckBox(self, wx.ID_ANY, "Add Settings to G Code")
+		self.cbAddSettings.SetValue(self.settings.addsettingstogcode)
+		self.Bind(wx.EVT_CHECKBOX, self.onAddSettings, self.dbAddSettings)
+		szOpts.Add(self.cbAddSettings)
+		
 		self.tcLog = wx.TextCtrl(self, wx.ID_ANY, size=(600, 200), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
 		
 		szButton = wx.BoxSizer(wx.HORIZONTAL)
@@ -410,6 +416,9 @@ class CuraEngineDlg(wx.Frame):
 		
 	def onCbCenter(self, evt):
 		self.settings.centerobject = self.cbCenter.GetValue()
+		
+	def onAddSettings(self, evt):
+		self.settings.addsettingstogcode = self.cbAddSettings.GetValue()
 		
 	def evtOffsetXKillFocus(self, evt):
 		try:
@@ -533,6 +542,7 @@ class CuraEngineDlg(wx.Frame):
 			
 		self.slicing = True
 		self.sliceComplete = False
+		self.curaOutput = ""
 		SlicerThread(self, self.formCommandLine(dProfile, dMaterial, dPrinter)).Start()
 		self.updateFileDisplay()
 		self.enableButtons()
@@ -702,8 +712,33 @@ class CuraEngineDlg(wx.Frame):
 		
 	def curaUpdate(self, evt):
 		if evt.state == CURA_MESSAGE:
-			self.slog(evt.msg.rstrip().replace(" -s ", "\n") + "\n")
+			self.curaOutput += evt.msg + "\n"
 		elif evt.state in [ CURA_CANCELLED, CURA_FINISHED ]:
+			settingsString = self.curaOutput.split(" -s ", 1)[1]
+			
+			trains = ["base"] + re.findall(r" -e[0-3] ", settingsString)
+			trainsArray = re.compile(" -e[0-3] ").split(settingsString)
+			
+			if self.settings.addsettingstogcode:
+				fp = open(self.gcFn, "a")
+			
+			for i in range(len(trains)-1):
+				trainSettingsList = sorted(trainsArray[i].replace("\n", "\\n").split(" -s ")[1:])
+				if i == 0:
+					s = "Base settings:"
+				else:
+					s = "Settings for extruder train %s" % trains[i].replace(" -e", "")
+				self.slog(s)
+				if self.settings.addsettingstogcode:
+					fp.write("%s\n" % s)
+				for s in trainSettingsList:
+					self.slog("  %s" % s)	
+					if self.settings.addsettingstogcode:
+						fp.write("  %s\n" % s)	
+						
+				if self.settings.addsettingstogcode:
+					fp.close()	
+			
 			self.slog("Cura engine completed\n")
 			self.slicing = False
 			if evt.state == CURA_FINISHED:
