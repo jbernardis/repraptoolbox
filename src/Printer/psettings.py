@@ -40,6 +40,7 @@ class PrtSettings:
 		self.firmwaretype = "MARLIN"
 		self.showmoves = False
 		self.showprevious = False
+		self.hassdcard = True
 		self.ctrlposition = None
 		self.tempposition = None
 		self.propposition = None
@@ -165,6 +166,9 @@ class PrtSettings:
 				elif opt == 'moveabsolute':
 					self.moveabsolute = parseBoolean(value, True)
 					
+				elif opt == 'hassdcard':
+					self.hassdcard = parseBoolean(value, True)
+					
 				elif opt == 'extrudeabsolute':
 					self.extrudeabsolute = parseBoolean(value, True)
 					
@@ -236,6 +240,7 @@ class PrtSettings:
 		self.cfg.set(self.section, "moveabsolute", str(self.moveabsolute))
 		self.cfg.set(self.section, "extrudeabsolute", str(self.extrudeabsolute))
 		self.cfg.set(self.section, "usem82", str(self.useM82))
+		self.cfg.set(self.section, "hassdcard", str(self.hassdcard))
 		self.cfg.set(self.section, "speedquery", str(self.speedquery))
 		self.cfg.set(self.section, "bedinfo", str(self.bedinfo))
 		self.cfg.set(self.section, "heinfo", str(self.heinfo))

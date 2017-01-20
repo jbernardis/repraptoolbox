@@ -294,7 +294,7 @@ class CuraEngineDlg(wx.Frame):
 		
 		self.cbAddSettings = wx.CheckBox(self, wx.ID_ANY, "Add Settings to G Code")
 		self.cbAddSettings.SetValue(self.settings.addsettingstogcode)
-		self.Bind(wx.EVT_CHECKBOX, self.onAddSettings, self.dbAddSettings)
+		self.Bind(wx.EVT_CHECKBOX, self.onAddSettings, self.cbAddSettings)
 		szOpts.Add(self.cbAddSettings)
 		
 		self.tcLog = wx.TextCtrl(self, wx.ID_ANY, size=(600, 200), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
@@ -575,7 +575,7 @@ class CuraEngineDlg(wx.Frame):
 	def includeSetting(self, sid, cfg):
 		stg = self.curasettings.getDefinition(sid)
 		if stg is None:
-			self.slog("Unable to find the definition for %s - excluding" % sid)
+			self.slog("Unable to find the definition for %s - excluding\n" % sid)
 			return False
 		
 		ex = stg.getEnable()
@@ -588,7 +588,7 @@ class CuraEngineDlg(wx.Frame):
 				if cfg[tf] == "true":
 					return True
 				else:
-					self.slog("Excluding %s because %s is false" % (sid, tf))
+					self.slog("Excluding %s because %s is false\n" % (sid, tf))
 					return False
 			else:
 				lstg = self.curasettings.getDefinition(tf)
@@ -599,7 +599,7 @@ class CuraEngineDlg(wx.Frame):
 				if dval:
 					return True
 				else:
-					self.slog("Excluding %s because %s is default False" % (sid, tf))
+					self.slog("Excluding %s because %s is default False\n" % (sid, tf))
 					return False
 				
 		if sid in EnableIfEqual.keys():
@@ -608,7 +608,7 @@ class CuraEngineDlg(wx.Frame):
 				if cfg[tf] == tv:
 					return True
 				else:
-					self.slog("Excluding %s because %s != %s" % (sid, tf, tv))
+					self.slog("Excluding %s because %s != %s\n" % (sid, tf, tv))
 					return False
 			else:
 				lstg = self.curasettings.getDefinition(tf)
@@ -619,7 +619,7 @@ class CuraEngineDlg(wx.Frame):
 				if dval == tv:
 					return True
 				else:
-					self.slog("Excluding %s because default %s != %s" % (sid, tf, tv))
+					self.slog("Excluding %s because default %s != %s\n" % (sid, tf, tv))
 					return False
 				
 		if sid in EnableIfGreater.keys():
@@ -628,12 +628,12 @@ class CuraEngineDlg(wx.Frame):
 				try:
 					cv = float(cfg[tf])
 				except:
-					self.slog("Unable to convert value for %s - %s - to type float  - assuming 0.0" % (sid, cfg[tf]))
+					self.slog("Unable to convert value for %s - %s - to type float  - assuming 0.0\n" % (sid, cfg[tf]))
 					cv = 0.0
 				if cv > tv:
 					return True
 				else:
-					self.slog("Excluding %s because %s <= %s" % (sid, tf, tv))
+					self.slog("Excluding %s because %s <= %s\n" % (sid, tf, tv))
 					return False
 			else:
 				lstg = self.curasettings.getDefinition(tf)
@@ -644,7 +644,7 @@ class CuraEngineDlg(wx.Frame):
 				if dval > tv:
 					return True
 				else:
-					self.slog("Excluding %s because default %s <= %s" % (sid, tf, tv))
+					self.slog("Excluding %s because default %s <= %s\n" % (sid, tf, tv))
 					return False
 		
 		return True
@@ -725,19 +725,21 @@ class CuraEngineDlg(wx.Frame):
 			for i in range(len(trains)-1):
 				trainSettingsList = sorted(trainsArray[i].replace("\n", "\\n").split(" -s ")[1:])
 				if i == 0:
-					s = "Base settings:"
+					s = "Base settings:\n"
 				else:
-					s = "Settings for extruder train %s" % trains[i].replace(" -e", "")
+					s = "Settings for extruder train %s\n" % trains[i].replace(" -e", "")
 				self.slog(s)
+				
 				if self.settings.addsettingstogcode:
-					fp.write("%s\n" % s)
+					fp.write("%s" % s)
+					
 				for s in trainSettingsList:
-					self.slog("  %s" % s)	
+					self.slog("      %s\n" % s)	
 					if self.settings.addsettingstogcode:
-						fp.write("  %s\n" % s)	
+						fp.write("    %s\n" % s)	
 						
-				if self.settings.addsettingstogcode:
-					fp.close()	
+			if self.settings.addsettingstogcode:
+				fp.close()	
 			
 			self.slog("Cura engine completed\n")
 			self.slicing = False

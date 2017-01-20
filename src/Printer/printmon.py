@@ -16,8 +16,10 @@ from propenums import PropertyEnum
 from printstateenum import PrintState
 from tools import formatElapsed
 from gcsuffix import parseGCSuffix
+from sdcard import SDCard
 
 BUTTONDIM = (48, 48)
+BUTTONDIMWIDE = (96, 48)
 	
 RECORD_TIMES = True
 
@@ -81,7 +83,12 @@ class PrintMonitorDlg(wx.Frame):
 		self.Show()
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "printmon.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
-		
+			
+		if self.settings.hassdcard:
+			self.sdcard = SDCard(self.parent, self, self.reprap, self.log)
+		else:
+			self.sdcard = None
+
 		self.gcf = GcFrame(self, self.gObj, self.settings)
 		
 		ht = self.gcf.GetSize().Get()[1] - BUTTONDIM[1]*2 - 20
@@ -121,6 +128,18 @@ class PrintMonitorDlg(wx.Frame):
 		self.bPause = PauseButton(self, self.images)
 		self.bPause.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onPause, self.bPause)
+		
+		self.bSdPrintTo = wx.BitmapButton(self, wx.ID_ANY, self.images.Sdprintto, size=(BUTTONDIMWIDE))
+		self.bSdPrintTo.Enable(False)
+		self.Bind(wx.EVT_BUTTON, self.onSdPrintTo, self.bSdPrintTo)
+		
+		self.bSdPrintFrom = wx.BitmapButton(self, wx.ID_ANY, self.images.Sdprintfrom, size=(BUTTONDIMWIDE))
+		self.bSdPrintFrom.Enable(False)
+		self.Bind(wx.EVT_BUTTON, self.onSdPrintFrom, self.bSdPrintFrom)
+		
+		self.bSdDelete = wx.BitmapButton(self, wx.ID_ANY, self.images.Sddelete, size=(BUTTONDIM))
+		self.bSdDelete.Enable(False)
+		self.Bind(wx.EVT_BUTTON, self.onSdDelete, self.bSdDelete)
 		
 		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp, size=BUTTONDIM)
 		self.bUp.SetToolTipString("Move up one layer")
@@ -165,6 +184,14 @@ class PrintMonitorDlg(wx.Frame):
 		szBtn.Add(self.bPrint)
 		szBtn.AddSpacer((10, 10))
 		szBtn.Add(self.bPause)
+		if self.sdcard:
+			szBtn.AddSpacer((20, 10))
+			szBtn.Add(self.bSdPrintTo)
+			szBtn.AddSpacer((10, 10))
+			szBtn.Add(self.bSdPrintFrom)
+			szBtn.AddSpacer((10, 10))
+			szBtn.Add(self.bSdDelete)
+			
 		szBtn.AddSpacer((10, 10))
 		
 		szDlg = wx.BoxSizer(wx.VERTICAL)
@@ -602,6 +629,11 @@ class PrintMonitorDlg(wx.Frame):
 		if self.state == PrintState.idle:
 			self.bImport.Enable(True)
 			self.bOpen.Enable(True)
+			if self.sdcard:
+				self.bSdPrintTo.Enable(True)
+				self.bSdPrintFrom.Enable(True)
+				self.bSdDelete.Enable(True)
+				
 			if self.gcodeLoaded:
 				self.bPrint.Enable(True)
 				self.bPrint.setPrint()
@@ -617,6 +649,10 @@ class PrintMonitorDlg(wx.Frame):
 			self.bPrint.setPrint()
 			self.bPause.Enable(True);
 			self.bPause.setPause()
+			if self.sdcard:
+				self.bSdPrintTo.Enable(False)
+				self.bSdPrintFrom.Enable(False)
+				self.bSdDelete.Enable(False)
 		elif self.state == PrintState.paused:
 			self.bImport.Enable(True)
 			self.bOpen.Enable(True)
@@ -624,6 +660,10 @@ class PrintMonitorDlg(wx.Frame):
 			self.bPrint.setRestart()
 			self.bPause.Enable(True);
 			self.bPause.setResume()
+			if self.sdcard:
+				self.bSdPrintTo.Enable(True)
+				self.bSdPrintFrom.Enable(True)
+				self.bSdDelete.Enable(True)
 			
 	def emulatePrintButton(self):
 		if self.state == PrintState.printing:
@@ -664,6 +704,15 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.remaining, formatElapsed(self.remaining))
 		self.propDlg.setProperty(PropertyEnum.revisedEta, "")
 		self.log("Print %s at %s" % (action, stime))
+		
+	def onSdPrintTo(self, evt):
+		print "sd prnt to"
+		
+	def onSdPrintFrom(self, evt):
+		print "sd print from"
+		
+	def onSdDelete(self, evt):
+		print "sd delete"
 
 	def emulatePauseButton(self):
 		if not self.bPause.IsEnabled():
