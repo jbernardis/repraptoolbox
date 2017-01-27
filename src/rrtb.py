@@ -209,6 +209,7 @@ class MyFrame(wx.Frame):
 		bhsizer.Add(self.bLogClear)
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bLogSave)
+		bhsizer.AddSpacer((10, 10))
 		bvsizer.AddSpacer((10, 10))
 		bvsizer.Add(bhsizer)
 		bvsizer.AddSpacer((10, 10))

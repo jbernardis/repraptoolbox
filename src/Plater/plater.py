@@ -386,7 +386,7 @@ class PlaterDlg(wx.Frame):
 		self.stlCanvas.commitDeltas(None)
 		ud = self.files.getSelection()
 		if ud is None:
-			return
+			return None
 		
 		mySeq = self.seq
 		self.seq += 1
@@ -484,7 +484,8 @@ class PlaterDlg(wx.Frame):
 		self.modified = True
 		
 		seqNbrs = [masterSeq]
-		seqNbrs.extend(self.clone()*copies)
+		for i in range(copies):
+			seqNbrs.append(self.clone())
 			
 		self.stlCanvas.gridArrange(seqNbrs, rows, cols)
 		

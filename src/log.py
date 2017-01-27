@@ -12,6 +12,7 @@ class Logger(wx.Frame):
 	def __init__(self, parent):
 		self.parent = parent
 		wx.Frame.__init__(self, None, wx.ID_ANY, "RepRap Log")
+		self.Bind(wx.EVT_CLOSE, self.onClose)
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "logbook.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
 
@@ -36,6 +37,9 @@ class Logger(wx.Frame):
 		self.Layout()
 		self.Fit()
 		self.Show()
+		
+	def onClose(self, evt):
+		pass
 
 	def toggleVisibility(self):
 		if self.IsShown():
