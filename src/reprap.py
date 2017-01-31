@@ -419,6 +419,7 @@ class RepRapParser:
 		self.heaters = {}
 		
 		self.sd = None
+		self.sdfiles = []
 		self.insideListing = False
 		self.tempHandler = None
 		self.speedHandler = None
@@ -504,30 +505,27 @@ class RepRapParser:
 				self.firmware.m301(P, I, D)
 			return False
 		
-		#if "SD card ok" in msg:
-			#evt = SDCardEvent(event = SD_CARD_OK)
-			#wx.PostEvent(self.printmon, evt)
-			#return False
-	#	
-		#if "SD init fail" in msg:
-			#evt = SDCardEvent(event = SD_CARD_FAIL)
-			#wx.PostEvent(self.printmon, evt)
-			#return False
-			#	
-		#if "Begin file list" in msg:
-			#self.insideListing = True
-			#self.sdfiles = []
-			#return False
+		if "SD card ok" in msg:
+			evt = SDCardEvent(event = SD_CARD_OK)
+			return self.reprap.forwardEvent(evt)
 		
-		#if "End file list" in msg:
-			#self.insideListing = False
-			#evt = SDCardEvent(event = SD_CARD_LIST, data=self.sdfiles)
-			#wx.PostEvent(self.printmon, evt)
-			#return False
+		if "SD init fail" in msg:
+			evt = SDCardEvent(event = SD_CARD_FAIL)
+			return self.reprap.forwardEvent(evt)
+				
+		if "Begin file list" in msg:
+			self.insideListing = True
+			self.sdfiles = []
+			return True
+		
+		if "End file list" in msg:
+			self.insideListing = False
+			evt = SDCardEvent(event = SD_CARD_LIST, data=self.sdfiles)
+			return self.reprap.forwardEvent(evt)
 
-		#if self.insideListing:
-			#self.sdfiles.append(msg.strip())
-			#return False
+		if self.insideListing:
+			self.sdfiles.append(msg.strip())
+			return False
 		
 		#if "SD printing byte" in msg:
 			#m = self.sdre.search(msg)
@@ -758,6 +756,13 @@ class RepRap:
 		
 	def registerEventHandler(self, handler):
 		self.eventHandler = handler
+		
+	def forwardEvent(self, evt):
+		if self.eventHandler is not None:
+			self.eventHandler(evt)
+			return True
+		else:
+			return False
 		
 	def startFirmwareCollection(self, fw):
 		self.parser.startFirmwareCollection(fw)

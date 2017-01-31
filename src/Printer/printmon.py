@@ -9,7 +9,7 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
-from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED, PRINT_ERROR
+from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED, PRINT_ERROR, SD_CARD_OK, SD_CARD_FAIL, SD_CARD_LIST
 from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
@@ -17,6 +17,11 @@ from printstateenum import PrintState
 from tools import formatElapsed
 from gcsuffix import parseGCSuffix
 from sdcard import SDCard
+
+SD_GETLISTING = 1
+
+SD_DELETE = 1
+SD_IDLE = 0
 
 BUTTONDIM = (48, 48)
 BUTTONDIMWIDE = (96, 48)
@@ -78,6 +83,9 @@ class PrintMonitorDlg(wx.Frame):
 		self.printLayer = 0
 		self.printPosition = None
 		
+		self.sdState = SD_IDLE
+		self.sdTask = SD_IDLE
+		
 		title = self.buildTitle()
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, title=title)
 		self.Show()
@@ -129,15 +137,15 @@ class PrintMonitorDlg(wx.Frame):
 		self.bPause.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onPause, self.bPause)
 		
-		self.bSdPrintTo = wx.BitmapButton(self, wx.ID_ANY, self.images.Sdprintto, size=(BUTTONDIMWIDE))
+		self.bSdPrintTo = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSdprintto, size=(BUTTONDIMWIDE))
 		self.bSdPrintTo.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onSdPrintTo, self.bSdPrintTo)
 		
-		self.bSdPrintFrom = wx.BitmapButton(self, wx.ID_ANY, self.images.Sdprintfrom, size=(BUTTONDIMWIDE))
+		self.bSdPrintFrom = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSdprintfrom, size=(BUTTONDIMWIDE))
 		self.bSdPrintFrom.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onSdPrintFrom, self.bSdPrintFrom)
 		
-		self.bSdDelete = wx.BitmapButton(self, wx.ID_ANY, self.images.Sddelete, size=(BUTTONDIM))
+		self.bSdDelete = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSddelete, size=(BUTTONDIM))
 		self.bSdDelete.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onSdDelete, self.bSdDelete)
 		
@@ -559,6 +567,15 @@ class PrintMonitorDlg(wx.Frame):
 			pass
 		elif evt.event == PRINT_ERROR:
 			self.log("Error communicating with printer")
+		elif evt.event == SD_CARD_OK:
+			self.log("SD Card OK Event")
+		elif evt.event == SD_CARD_FAIL:
+			self.log("SD Card FAIL Event")
+		elif evt.event == SD_CARD_LIST:
+			self.log("SD Card LIST Event")
+			self.log(str(evt.data))
+			if self.sdTask == SD_DELETE:
+				self.resumeSDDelete()
 		else:
 			print "unknown reprap event: ", evt.event
 				
@@ -630,9 +647,9 @@ class PrintMonitorDlg(wx.Frame):
 			self.bImport.Enable(True)
 			self.bOpen.Enable(True)
 			if self.sdcard:
-				self.bSdPrintTo.Enable(True)
-				self.bSdPrintFrom.Enable(True)
-				self.bSdDelete.Enable(True)
+				self.bSdPrintTo.Enable(self.gcodeLoaded and self.sdState == SD_IDLE)
+				self.bSdPrintFrom.Enable(self.sdState == SD_IDLE)
+				self.bSdDelete.Enable(self.sdState == SD_IDLE)
 				
 			if self.gcodeLoaded:
 				self.bPrint.Enable(True)
@@ -661,9 +678,9 @@ class PrintMonitorDlg(wx.Frame):
 			self.bPause.Enable(True);
 			self.bPause.setResume()
 			if self.sdcard:
-				self.bSdPrintTo.Enable(True)
-				self.bSdPrintFrom.Enable(True)
-				self.bSdDelete.Enable(True)
+				self.bSdPrintTo.Enable(self.gcodeLoaded and self.sdState == SD_IDLE)
+				self.bSdPrintFrom.Enable(self.sdState == SD_IDLE)
+				self.bSdDelete.Enable(self.sdState == SD_IDLE)
 			
 	def emulatePrintButton(self):
 		if self.state == PrintState.printing:
@@ -712,7 +729,16 @@ class PrintMonitorDlg(wx.Frame):
 		print "sd print from"
 		
 	def onSdDelete(self, evt):
+		self.sdTask = SD_DELETE
+		self.sdState = SD_GETLISTING
+		self.bSdDelete.Enable(False)
+		self.reprap.sendNow("M20")
 		print "sd delete"
+		
+	def resumeSDDelete(self):
+		print "resume SD DElete"
+		self.sdTask = SD_IDLE
+		self.bSdDelete.Enable(True)
 
 	def emulatePauseButton(self):
 		if not self.bPause.IsEnabled():
