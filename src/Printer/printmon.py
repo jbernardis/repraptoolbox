@@ -9,7 +9,7 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
-from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED, PRINT_ERROR, SD_CARD_OK, SD_CARD_FAIL, SD_CARD_LIST
+from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED, PRINT_ERROR
 from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
@@ -17,11 +17,6 @@ from printstateenum import PrintState
 from tools import formatElapsed
 from gcsuffix import parseGCSuffix
 from sdcard import SDCard
-
-SD_GETLISTING = 1
-
-SD_DELETE = 1
-SD_IDLE = 0
 
 BUTTONDIM = (48, 48)
 BUTTONDIMWIDE = (96, 48)
@@ -82,9 +77,6 @@ class PrintMonitorDlg(wx.Frame):
 		self.gObj = None
 		self.printLayer = 0
 		self.printPosition = None
-		
-		self.sdState = SD_IDLE
-		self.sdTask = SD_IDLE
 		
 		title = self.buildTitle()
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, title=title)
@@ -219,9 +211,11 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.Show()
 		if not self.settings.propposition is None:
 			self.propDlg.SetPosition(self.settings.propposition)
-		
+	
+		self.enableButtonsByState()	
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
 		self.reprap.registerEventHandler(self.reprapEvent)
+		self.reprap.registerSdEventHandler(self.sdcard)
 		self.wparent.registerPrinterStatusReporter(self.printerName, self)
 		
 	def getStatusReport(self):
@@ -567,15 +561,6 @@ class PrintMonitorDlg(wx.Frame):
 			pass
 		elif evt.event == PRINT_ERROR:
 			self.log("Error communicating with printer")
-		elif evt.event == SD_CARD_OK:
-			self.log("SD Card OK Event")
-		elif evt.event == SD_CARD_FAIL:
-			self.log("SD Card FAIL Event")
-		elif evt.event == SD_CARD_LIST:
-			self.log("SD Card LIST Event")
-			self.log(str(evt.data))
-			if self.sdTask == SD_DELETE:
-				self.resumeSDDelete()
 		else:
 			print "unknown reprap event: ", evt.event
 				
@@ -647,9 +632,9 @@ class PrintMonitorDlg(wx.Frame):
 			self.bImport.Enable(True)
 			self.bOpen.Enable(True)
 			if self.sdcard:
-				self.bSdPrintTo.Enable(self.gcodeLoaded and self.sdState == SD_IDLE)
-				self.bSdPrintFrom.Enable(self.sdState == SD_IDLE)
-				self.bSdDelete.Enable(self.sdState == SD_IDLE)
+				self.bSdPrintTo.Enable(self.gcodeLoaded)
+				self.bSdPrintFrom.Enable()
+				self.bSdDelete.Enable()
 				
 			if self.gcodeLoaded:
 				self.bPrint.Enable(True)
@@ -678,9 +663,9 @@ class PrintMonitorDlg(wx.Frame):
 			self.bPause.Enable(True);
 			self.bPause.setResume()
 			if self.sdcard:
-				self.bSdPrintTo.Enable(self.gcodeLoaded and self.sdState == SD_IDLE)
-				self.bSdPrintFrom.Enable(self.sdState == SD_IDLE)
-				self.bSdDelete.Enable(self.sdState == SD_IDLE)
+				self.bSdPrintTo.Enable(self.gcodeLoaded)
+				self.bSdPrintFrom.Enable()
+				self.bSdDelete.Enable()
 			
 	def emulatePrintButton(self):
 		if self.state == PrintState.printing:
@@ -721,25 +706,89 @@ class PrintMonitorDlg(wx.Frame):
 		self.propDlg.setProperty(PropertyEnum.remaining, formatElapsed(self.remaining))
 		self.propDlg.setProperty(PropertyEnum.revisedEta, "")
 		self.log("Print %s at %s" % (action, stime))
+
+
+
+		
+	def onSdPrintFrom(self, evt):
+		print "sd print from"
+				
+	def doSDPrintFrom(self, evt):
+		self.printing = False
+		self.paused = False
+		self.sdpaused = False
+		self.sdprintingfrom = True
+		self.sdStartTime = time.time()
+		#self.infoPane.setSDStartTime(self.sdStartTime)
+		self.state = PrintState.printing
+		#self.propDlg.setPrintStatus(PrintState.printing)
+		self.enableButtonsByState()
+		self.sdcard.startPrintFromSD()
+		
+	def cancelSDPrintFrom(self):
+		self.sdprintingfrom = False
+		self.printing = False
+		self.paused = False
+		self.state = PrintState.idle
+		#self.propDlg.setPrintStatus(PrintState.printing)
+		self.enableButtonsByState()
+		
+	def resumeSDPrintFrom(self, fn):
+		#self.clearModel()
+		self.reprap.send_now("M23 " + fn[1].lower())
+		self.reprap.send_now("M24")
+		self.sdprintingfrom = True
+		#self.M27Timer.Start(M27Interval, True)
+		self.sdpaused = False
+		#self.infoPane.setMode(MODE_FROM_SD)
+		self.enableButtonsByState()
+
+
+
 		
 	def onSdPrintTo(self, evt):
 		print "sd prnt to"
 		
-	def onSdPrintFrom(self, evt):
-		print "sd print from"
+	def doSDPrintTo(self, evt):
+		self.sdcard.startPrintToSD()
+		
+	def resumeSDPrintTo(self, tfn):
+		self.setSDTargetFile(tfn[1].lower())
+		#self.suspendTempProbe(True)
+		self.reprap.send_now("M28 %s" % self.sdTargetFile)
+		self.printPos = 0
+		self.startTime = time.time()
+		self.endTime = None
+		#self.reprap.startPrint(self.model)
+		#self.logger.LogMessage("Print to SD: %s started at %s" % (self.sdTargetFile, time.strftime('%H:%M:%S', time.localtime(self.startTime))))
+		#self.origEta = self.startTime + self.model.duration
+		#self.countGLines = len(self.model)
+		#self.infoPane.setMode(MODE_TO_SD)
+		#self.infoPane.showFileInfo()
+		#self.infoPane.setStartTime(self.startTime)
+		self.state = PrintState.printing
+		self.enableButtonsByState()
+		
+	def setSDTargetFile(self, tfn):
+		self.sdTargetFile = tfn
+		#self.infoPane.setSDTargetFile(tfn)
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 	def onSdDelete(self, evt):
-		self.sdTask = SD_DELETE
-		self.sdState = SD_GETLISTING
-		self.bSdDelete.Enable(False)
-		self.reprap.sendNow("M20")
-		print "sd delete"
+		self.sdcard.startDeleteFromSD()
 		
-	def resumeSDDelete(self):
-		print "resume SD DElete"
-		self.sdTask = SD_IDLE
-		self.bSdDelete.Enable(True)
-
 	def emulatePauseButton(self):
 		if not self.bPause.IsEnabled():
 			self.log("Unable to pause right now")

@@ -421,10 +421,12 @@ class RepRapParser:
 		self.sd = None
 		self.sdfiles = []
 		self.insideListing = False
+		
 		self.tempHandler = None
 		self.speedHandler = None
 		self.toolHandler = None
-		
+		self.sdEventHandler = None
+	
 		self.firmware = None
 		
 	def setTempHandler(self, handler):
@@ -435,6 +437,15 @@ class RepRapParser:
 
 	def setToolHandler(self, handler):
 		self.toolHandler = handler
+		
+	def setSdEventHandler(self, hobj):
+		self.sdEventHandler = hobj
+		
+	def sendSdEvent(self, evt):
+		if self.sdEventHandler is None:
+			return
+		
+		self.sdEventHandler.sdEvent(evt)
 		
 	def startFirmwareCollection(self, fw):
 		self.firmware = fw
@@ -507,21 +518,24 @@ class RepRapParser:
 		
 		if "SD card ok" in msg:
 			evt = SDCardEvent(event = SD_CARD_OK)
-			return self.reprap.forwardEvent(evt)
+			self.sendSdEvent(evt)
+			return False
 		
 		if "SD init fail" in msg:
 			evt = SDCardEvent(event = SD_CARD_FAIL)
-			return self.reprap.forwardEvent(evt)
+			self.sendSdEvent(evt)
+			return False
 				
 		if "Begin file list" in msg:
 			self.insideListing = True
 			self.sdfiles = []
-			return True
+			return False
 		
 		if "End file list" in msg:
 			self.insideListing = False
 			evt = SDCardEvent(event = SD_CARD_LIST, data=self.sdfiles)
-			return self.reprap.forwardEvent(evt)
+			self.sendSdEvent(evt)
+			return False
 
 		if self.insideListing:
 			self.sdfiles.append(msg.strip())
@@ -726,6 +740,7 @@ class RepRap:
 		self.prtport = None
 		self.positionHandler = None
 		self.eventHandler = None
+		self.sdEventHandler = None
 		
 		self.listener = ListenThread(self.proxyWin, self, port, baud, firmware)
 
@@ -757,18 +772,18 @@ class RepRap:
 	def registerEventHandler(self, handler):
 		self.eventHandler = handler
 		
-	def forwardEvent(self, evt):
-		if self.eventHandler is not None:
-			self.eventHandler(evt)
-			return True
-		else:
-			return False
+	def registerSdEventHandler(self, hobj):
+		self.parser.setSdEventHandler(hobj)
 		
 	def startFirmwareCollection(self, fw):
 		self.parser.startFirmwareCollection(fw)
 		
 	def endFirmwareCollection(self):
 		self.parser.endFirmwareCollection()
+		
+	def startSDDelete(self):
+		self.parser.startSDDelete()
+		self.sendNow("M20")
 
 	def terminate(self):
 		try:

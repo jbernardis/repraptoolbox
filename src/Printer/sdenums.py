@@ -10,6 +10,7 @@ class SdStatusEnum:
 	SD_LISTING = 3
 	
 class SdTaskEnum:
-	SD_PRINT_FROM = 0
-	SD_PRINT_TO = 1
-	SD_DELETE = 2
+	SD_IDLE = 0
+	SD_PRINT_FROM = 1
+	SD_PRINT_TO = 2
+	SD_DELETE = 3
