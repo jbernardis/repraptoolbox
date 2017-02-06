@@ -9,7 +9,7 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
-from reprap import PRINT_COMPLETE, PRINT_STOPPED, PRINT_STARTED, PRINT_RESUMED, PRINT_ERROR
+from reprapenums import RepRapEventEnums 
 from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
@@ -535,7 +535,7 @@ class PrintMonitorDlg(wx.Frame):
 
 		
 	def reprapEvent(self, evt):
-		if evt.event == PRINT_COMPLETE:
+		if evt.event == RepRapEventEnums.PRINT_COMPLETE:
 			self.state = PrintState.idle
 			self.propDlg.setPrintStatus(PrintState.idle)
 			self.gcf.setPrintPosition(-1)
@@ -550,16 +550,16 @@ class PrintMonitorDlg(wx.Frame):
 			self.log("Total print time of %s - expected print time %s" %
 					(formatElapsed(self.elapsed), formatElapsed(expCmpTime)))
 			self.reprap.printComplete()
-		elif evt.event == PRINT_STOPPED:
+		elif evt.event == RepRapEventEnums.PRINT_STOPPED:
 			self.state = PrintState.paused
 			self.propDlg.setPrintStatus(PrintState.paused)
 			self.enableButtonsByState()
 			self.reprap.printStopped()
-		elif evt.event == PRINT_STARTED:
+		elif evt.event == RepRapEventEnums.PRINT_STARTED:
 			pass
-		elif evt.event == PRINT_RESUMED:
+		elif evt.event == RepRapEventEnums.PRINT_RESUMED:
 			pass
-		elif evt.event == PRINT_ERROR:
+		elif evt.event == RepRapEventEnums.PRINT_ERROR:
 			self.log("Error communicating with printer")
 		else:
 			print "unknown reprap event: ", evt.event

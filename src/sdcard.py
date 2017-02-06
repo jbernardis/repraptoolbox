@@ -126,44 +126,44 @@ class SDCard:
 		
 	def startPrintFromSD(self):
 		if self.status != SdStatusEnum.SD_IDLE:
-			self.logger.LogMessage("SD Checking already started")
+			self.logger("SD Checking already started")
 			return
 		
 		self.status = SdStatusEnum.SD_CHECKING
 		self.task = SdTaskEnum.SD_PRINT_FROM
-		self.printer.send_now("M21")
+		self.printer.sendNow("M21")
 		
 	def startPrintToSD(self):
 		if self.status != SdStatusEnum.SD_IDLE:
-			self.logger.LogMessage("SD Checking already started")
+			self.logger("SD Checking already started")
 			return
 		
 		self.status = SdStatusEnum.SD_CHECKING
 		self.task = SdTaskEnum.SD_PRINT_TO
-		self.printer.send_now("M21")
+		self.printer.sendNow("M21")
 		
 	def startDeleteFromSD(self):
 		if self.status != SdStatusEnum.SD_IDLE:
-			self.logger.LogMessage("SD Checking already started")
+			self.logger("SD Checking already started")
 			return
 		
 		self.status = SdStatusEnum.SD_CHECKING
 		self.task = SdTaskEnum.SD_DELETE
-		self.printer.send_now("M21")
+		self.printer.sendNow("M21")
 		
 	def sdEvent(self, evt):
 		if evt.event == SdEventEnum.SD_CARD_OK:
 			if self.status != SdStatusEnum.SD_CHECKING:
 				return
 			self.status = SdStatusEnum.SD_LISTING
-			self.printer.send_now("M20")
+			self.printer.sendNow("M20")
 			return
 		
 		if evt.event == SdEventEnum.SD_CARD_FAIL:
 			if self.status != SdStatusEnum.SD_CHECKING:
 				return
 			self.status = SdStatusEnum.SD_IDLE
-			self.logger.LogMessage("Error initializing SD card")
+			self.logger("Error initializing SD card")
 			
 			msgdlg = wx.MessageDialog(self.app, "SD Card not present/failed to initialize",
 					'SD Card Error', wx.OK | wx.ICON_ERROR)
@@ -277,7 +277,7 @@ class SDCard:
 					msgdlg.Destroy()
 					
 					if rc == wx.ID_YES:
-						self.printer.send_now("M30 " + fileList[1].lower())
+						self.printer.sendNow("M30 " + fileList[1].lower())
 						msgdlg = wx.MessageDialog(self.app, "Delete command sent",
 											'Deleted', wx.OK | wx.ICON_INFORMATION)
 						msgdlg.ShowModal()
