@@ -9,7 +9,7 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 
 from cnc import CNC
-from reprapenums import RepRapEventEnums 
+from reprapenums import RepRapEventEnum 
 from gcframe import GcFrame
 from properties import PropertiesDlg
 from propenums import PropertyEnum
@@ -59,6 +59,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.settings = self.parent.settings
 		self.images = self.parent.images
 		self.state = PrintState.idle
+		self.oldState = None
 		self.gcodeLoaded = False
 		self.gcodeFile = None
 		self.printerName = prtName
@@ -238,7 +239,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.settings.propposition = self.propDlg.GetPosition()
 	
 	def isPrinting(self):
-		return self.state == PrintState.printing
+		return self.state in [PrintState.printing, PrintState.sdprintingto, PrintState.sdprintingfrom]
 				
 	def onClose(self, evt):
 		if self.isPrinting():
@@ -347,6 +348,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.changeLayer(0)
 		
 		self.state = PrintState.idle
+		self.oldState = None
 		self.enableButtonsByState()
 		t = self.buildTitle()
 		self.SetTitle(t)
@@ -427,7 +429,7 @@ class PrintMonitorDlg(wx.Frame):
 	def updatePrintPosition(self, position):
 		self.printLayer = self.getLayerByPosition(position)
 		self.printPosition = position
-		if self.state == PrintState.printing:
+		if self.state in [PrintState.printing, PrintState.sdprintingto]:
 			posString = "%d/%d" % (position, self.maxLine)
 			if self.maxLine != 0:
 				pct = float(position) / float(self.maxLine) * 100.0
@@ -458,6 +460,9 @@ class PrintMonitorDlg(wx.Frame):
 				revisedStr += "  (%s behind estimate)" % formatElapsed(tdiff)
 			self.propDlg.setProperty(PropertyEnum.revisedEta, revisedStr)
 			self.updateTimeUntil()
+			
+		elif self.state == PrintState.sdprintingfrom:
+			pass
 
 	def getLayerByPosition(self, pos):
 		for lx in range(len(self.layerMap)):
@@ -535,8 +540,13 @@ class PrintMonitorDlg(wx.Frame):
 
 		
 	def reprapEvent(self, evt):
-		if evt.event == RepRapEventEnums.PRINT_COMPLETE:
+		if evt.event == RepRapEventEnum.PRINT_COMPLETE:
+			if self.state == PrintState.sdprintingto:
+				self.reprap.send_now("M29 %s" % self.sdTargetFile)
+				self.suspendTempProbe(False)
+				self.setSDTargetFile(None)
 			self.state = PrintState.idle
+			self.oldState = None
 			self.propDlg.setPrintStatus(PrintState.idle)
 			self.gcf.setPrintPosition(-1)
 			self.printPosition = None
@@ -550,17 +560,20 @@ class PrintMonitorDlg(wx.Frame):
 			self.log("Total print time of %s - expected print time %s" %
 					(formatElapsed(self.elapsed), formatElapsed(expCmpTime)))
 			self.reprap.printComplete()
-		elif evt.event == RepRapEventEnums.PRINT_STOPPED:
+		elif evt.event == RepRapEventEnum.PRINT_STOPPED:
+			self.oldState = self.state
 			self.state = PrintState.paused
 			self.propDlg.setPrintStatus(PrintState.paused)
 			self.enableButtonsByState()
 			self.reprap.printStopped()
-		elif evt.event == RepRapEventEnums.PRINT_STARTED:
+		elif evt.event == RepRapEventEnum.PRINT_STARTED:
 			pass
-		elif evt.event == RepRapEventEnums.PRINT_RESUMED:
+		elif evt.event == RepRapEventEnum.PRINT_RESUMED:
 			pass
-		elif evt.event == RepRapEventEnums.PRINT_ERROR:
+		elif evt.event == RepRapEventEnum.PRINT_ERROR:
 			self.log("Error communicating with printer")
+		elif evt.event == RepRapEventEnum.PRINT_SENDGCODE:
+			self.log(evt.msg)
 		else:
 			print "unknown reprap event: ", evt.event
 				
@@ -644,7 +657,7 @@ class PrintMonitorDlg(wx.Frame):
 			else:
 				self.bPrint.Enable(False)
 				self.bPause.Enable(False)
-		elif self.state == PrintState.printing:
+		elif self.state in [PrintState.printing, PrintState.sdprintingto]:
 			self.bImport.Enable(False)
 			self.bOpen.Enable(False)
 			self.bPrint.Enable(False)
@@ -655,6 +668,8 @@ class PrintMonitorDlg(wx.Frame):
 				self.bSdPrintTo.Enable(False)
 				self.bSdPrintFrom.Enable(False)
 				self.bSdDelete.Enable(False)
+		elif self.state == PrintState.sdprintingfrom:
+			pass
 		elif self.state == PrintState.paused:
 			self.bImport.Enable(True)
 			self.bOpen.Enable(True)
@@ -668,7 +683,7 @@ class PrintMonitorDlg(wx.Frame):
 				self.bSdDelete.Enable()
 			
 	def emulatePrintButton(self):
-		if self.state == PrintState.printing:
+		if self.state in [PrintState.printing, PrintState.sdprintingto, PrintState.sdprintingfrom]:
 			self.log("Already printing")
 		elif not self.bPrint.IsEnabled():
 			self.log("Unable to print right now")
@@ -677,6 +692,9 @@ class PrintMonitorDlg(wx.Frame):
 			
 	def reset(self):
 		self.state = PrintState.idle
+		self.oldState = None
+		self.suspendTempProbe(False)
+		self.setSDTargetFile(None)
 		self.propDlg.setPrintStatus(PrintState.idle)
 		self.enableButtonsByState()
 			
@@ -747,26 +765,23 @@ class PrintMonitorDlg(wx.Frame):
 
 		
 	def onSdPrintTo(self, evt):
-		print "sd prnt to"
-		
-	def doSDPrintTo(self, evt):
 		self.sdcard.startPrintToSD()
 		
 	def resumeSDPrintTo(self, tfn):
 		self.setSDTargetFile(tfn[1].lower())
-		#self.suspendTempProbe(True)
+		self.reprap.suspendTempProbe(True)
 		self.reprap.send_now("M28 %s" % self.sdTargetFile)
 		self.printPos = 0
 		self.startTime = time.time()
 		self.endTime = None
-		#self.reprap.startPrint(self.model)
-		#self.logger.LogMessage("Print to SD: %s started at %s" % (self.sdTargetFile, time.strftime('%H:%M:%S', time.localtime(self.startTime))))
+		self.reprap.startPrint(self.gcode)
+		self.logger("Print to SD: %s started at %s" % (self.sdTargetFile, time.strftime('%H:%M:%S', time.localtime(self.startTime))))
 		#self.origEta = self.startTime + self.model.duration
 		#self.countGLines = len(self.model)
 		#self.infoPane.setMode(MODE_TO_SD)
 		#self.infoPane.showFileInfo()
 		#self.infoPane.setStartTime(self.startTime)
-		self.state = PrintState.printing
+		self.state = PrintState.sdprintingto
 		self.enableButtonsByState()
 		
 	def setSDTargetFile(self, tfn):
@@ -797,11 +812,14 @@ class PrintMonitorDlg(wx.Frame):
 	
 	def onPause(self, evt):
 		if self.state == PrintState.paused:
-			self.state = PrintState.printing
-			self.propDlg.setPrintStatus(PrintState.printing)
+			self.state = self.oldState
+			if self.state is None:
+				self.state = PrintState.printing
+			self.propDlg.setPrintStatus(self.state)
 			self.enableButtonsByState()
 			self.reprap.resumePrint()
 		else:
+			self.oldState = self.state
 			self.state = PrintState.paused
 			self.propDlg.setPrintStatus(PrintState.paused)
 			self.enableButtonsByState()

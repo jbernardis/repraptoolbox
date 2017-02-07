@@ -14,7 +14,7 @@ TRACE = False
 (SDCardEvent, EVT_SD_CARD) = wx.lib.newevent.NewEvent()
 (PrtMonEvent, EVT_PRINT_MONITOR) = wx.lib.newevent.NewEvent()
 
-from reprapenums import RepRapEventEnums, RepRapCmdEnums
+from reprapenums import RepRapEventEnum, RepRapCmdEnum, RepRapLogEnum
 from sdenums import SdEventEnum
 
 MAX_EXTRUDERS = 1
@@ -67,6 +67,8 @@ class SendThread:
 		self.priQ = priQ
 		self.mainQ = mainQ
 		
+		self.logLevel = RepRapLogEnum.LOG_NONE
+		
 		self.isPrinting = False
 		self.isRunning = False
 		self.endOfLife = False
@@ -79,6 +81,9 @@ class SendThread:
 		self.resends = 0
 		self.sentCache = MsgCache(CACHE_SIZE)
 		thread.start_new_thread(self.Run, ())
+		
+	def setLogLevel(self, level):
+		self.logLevel = level
 		
 	def kill(self):
 		self.isRunning = False
@@ -131,7 +136,7 @@ class SendThread:
 					else:
 						self.resends += 1
 						self.resendFrom += 1
-						self.processCmd(RepRapCmdEnums.CMD_GCODE, string, False, True, False)
+						self.processCmd(RepRapCmdEnum.CMD_GCODE, string, False, True, False)
 					
 				elif not self.okWait:
 					if not self.mainQ.empty():
@@ -156,7 +161,7 @@ class SendThread:
 		self.printer = None
 				
 	def processCmd(self, cmd, string, calcCS, setOK, PriQ):
-		if cmd == RepRapCmdEnums.CMD_GCODE:
+		if cmd == RepRapCmdEnum.CMD_GCODE:
 			if calcCS:
 				self.printIndex += 1
 				
@@ -176,17 +181,18 @@ class SendThread:
 			if TRACE:
 				print "==>", self.okWait, string
 				
-			#evt = RepRapEvent(event = PRINT_MESSAGE, msg = string, primary=PriQ, immediate=False)
-			#wx.PostEvent(self.win, evt)
+			if self.logLevel == RepRapLogEnum.LOG_ALL or (self.logLevel == RepRapLogEnum.LOG_CMD and PriQ):
+				evt = RepRapEvent(event = RepRapEventEnum.PRINT_SENDGCODE, msg = string, primary=PriQ, immediate=False)
+				wx.PostEvent(self.win, evt)
 				
 			try:
 				self.prtport.write(str(string+"\n"))
 			except:
-				evt = RepRapEvent(event = RepRapEventEnums.PRINT_ERROR, msg="Unable to write to printer")
+				evt = RepRapEvent(event = RepRapEventEnum.PRINT_ERROR, msg="Unable to write to printer")
 				wx.PostEvent(self.win, evt)
 				self.killPrint()
 			
-		elif cmd == RepRapCmdEnums.CMD_STARTPRINT:
+		elif cmd == RepRapCmdEnum.CMD_STARTPRINT:
 			string = "M110"
 			if self.checksum:
 				prefix = "N-1 " + string
@@ -197,7 +203,7 @@ class SendThread:
 			try:
 				self.prtport.write(str(string+"\n"))
 			except:
-				evt = RepRapEvent(event = RepRapEventEnums.PRINT_ERROR, msg="Unable to write to printer")
+				evt = RepRapEvent(event = RepRapEventEnum.PRINT_ERROR, msg="Unable to write to printer")
 				wx.PostEvent(self.win, evt)
 				self.killPrint()
 				
@@ -208,32 +214,32 @@ class SendThread:
 			self.sentCache.reinit()
 			self.resendFrom = None
 			self.isPrinting = True
-			evt = RepRapEvent(event = RepRapEventEnums.PRINT_STARTED)
+			evt = RepRapEvent(event = RepRapEventEnum.PRINT_STARTED)
 			wx.PostEvent(self.win, evt)
 			
-		elif cmd == RepRapCmdEnums.CMD_RESUMEPRINT:
+		elif cmd == RepRapCmdEnum.CMD_RESUMEPRINT:
 			self.sentCache.reinit()
 			self.resendFrom = None
 			self.isPrinting = True
-			evt = RepRapEvent(event = RepRapEventEnums.PRINT_RESUMED)
+			evt = RepRapEvent(event = RepRapEventEnum.PRINT_RESUMED)
 			wx.PostEvent(self.win, evt)
 			
-		elif cmd == RepRapCmdEnums.CMD_STOPPRINT:
+		elif cmd == RepRapCmdEnum.CMD_STOPPRINT:
 			self.isPrinting = False
 			self.sentCache.reinit()
 			self.resendFrom = None
-			evt = RepRapEvent(event = RepRapEventEnums.PRINT_STOPPED)
+			evt = RepRapEvent(event = RepRapEventEnum.PRINT_STOPPED)
 			wx.PostEvent(self.win, evt)
 			
-		elif cmd == RepRapCmdEnums.CMD_ENDOFPRINT:
-			evt = RepRapEvent(event = RepRapEventEnums.PRINT_COMPLETE)
+		elif cmd == RepRapCmdEnum.CMD_ENDOFPRINT:
+			evt = RepRapEvent(event = RepRapEventEnum.PRINT_COMPLETE)
 			self.sentCache.reinit()
 			self.resendFrom = None
 			wx.PostEvent(self.win, evt)
 			
-		elif cmd == RepRapCmdEnums.CMD_DRAINQUEUE:
+		elif cmd == RepRapCmdEnum.CMD_DRAINQUEUE:
 			self.drainQueue()
-			evt = RepRapEvent(event = RepRapEventEnums.QUEUE_DRAINED)
+			evt = RepRapEvent(event = RepRapEventEnum.QUEUE_DRAINED)
 			wx.PostEvent(self.win, evt)
 			
 	def killPrint(self):
@@ -247,7 +253,7 @@ class SendThread:
 		self.resendFrom = None
 		while True:
 			try:
-				if self.mainQ.get(False)[0] == RepRapCmdEnums.CMD_ENDOFPRINT:
+				if self.mainQ.get(False)[0] == RepRapCmdEnum.CMD_ENDOFPRINT:
 					break
 			except Queue.Empty:
 				break
@@ -321,7 +327,7 @@ class ListenThread:
 			try:
 				line=self.printerPort.readline()
 			except:
-				evt = RepRapEvent(event = RepRapEventEnums.PRINT_ERROR, msg="Unable to read from printer")
+				evt = RepRapEvent(event = RepRapEventEnum.PRINT_ERROR, msg="Unable to read from printer")
 				wx.PostEvent(self.win, evt)
 				self.disconnect()
 				continue
@@ -359,7 +365,7 @@ class ListenThread:
 				if line.startswith("echo:"):
 					line = line[5:]
 
-				evt = RepRapEvent(event=RepRapEventEnums.RECEIVED_MSG, msg = line.rstrip(), state = 1)
+				evt = RepRapEvent(event=RepRapEventEnum.RECEIVED_MSG, msg = line.rstrip(), state = 1)
 				wx.PostEvent(self.win, evt)
 
 		self.endOfLife = True
@@ -368,7 +374,7 @@ class ListenThread:
 		try:
 			self.printerPort = Serial(self.port, self.baud, timeout=2)
 			self.connected = True
-			evt = RepRapEvent(event=RepRapEventEnums.CONNECTED, prtport=self.printerPort)
+			evt = RepRapEvent(event=RepRapEventEnum.CONNECTED, prtport=self.printerPort)
 			wx.PostEvent(self.win, evt)
 			return True
 		except:
@@ -377,7 +383,7 @@ class ListenThread:
 	
 	def disconnect(self):
 		self.connected = False
-		evt = RepRapEvent(event=RepRapEventEnums.DISCONNECTED)
+		evt = RepRapEvent(event=RepRapEventEnum.DISCONNECTED)
 		wx.PostEvent(self.win, evt)
 
 class RepRapParser:
@@ -729,6 +735,9 @@ class RepRap:
 		self.sender.reportConnection(self.online, self.prtport)
 		self.ready = True
 		
+	def setLogLevel(self, level):
+		self.sender.setLogLevel(level)
+		
 	def reset(self):
 		self.resetting = True
 		self.suspendTempProbe(True)
@@ -832,7 +841,7 @@ class RepRap:
 	def startPrint(self, data):
 		self.sender.resetCounters()
 		self.listener.resetCounters()
-		self._sendCmd(RepRapCmdEnums.CMD_STARTPRINT)
+		self._sendCmd(RepRapCmdEnum.CMD_STARTPRINT)
 		for l in data:
 			if ";" in l:
 				ls = l.split(";")[0].rstrip()
@@ -841,17 +850,17 @@ class RepRap:
 			if ls != "":
 				self._send(ls)
 
-		self._sendCmd(RepRapCmdEnums.CMD_ENDOFPRINT, priority=False)			
+		self._sendCmd(RepRapCmdEnum.CMD_ENDOFPRINT, priority=False)			
 		self.printing = True
 		self.paused = False
 		
 	def pausePrint(self):
-		self._sendCmd(RepRapCmdEnums.CMD_STOPPRINT)
+		self._sendCmd(RepRapCmdEnum.CMD_STOPPRINT)
 		self.printing = False
 		self.paused = True
 		
 	def resumePrint(self):
-		self._sendCmd(RepRapCmdEnums.CMD_RESUMEPRINT)
+		self._sendCmd(RepRapCmdEnum.CMD_RESUMEPRINT)
 		self.printing = True
 		self.paused = False
 		
@@ -863,13 +872,13 @@ class RepRap:
 		self.listener.resetCounters()
 		self.restarting = True
 		self.restartData = data
-		self._sendCmd(RepRapCmdEnums.CMD_DRAINQUEUE)
+		self._sendCmd(RepRapCmdEnum.CMD_DRAINQUEUE)
 		
 	def clearPrint(self):
-		self._sendCmd(RepRapCmdEnums.CMD_DRAINQUEUE)
+		self._sendCmd(RepRapCmdEnum.CMD_DRAINQUEUE)
 		
 	def reprapEvent(self, evt):
-		if evt.event == RepRapEventEnums.QUEUE_DRAINED:
+		if evt.event == RepRapEventEnum.QUEUE_DRAINED:
 			if self.restarting:
 				self.startPrint(self.restartData)
 				self.printing = True
@@ -879,7 +888,7 @@ class RepRap:
 			else:
 				self.printing = False
 				self.paused = False
-		elif evt.event == RepRapEventEnums.CONNECTED:
+		elif evt.event == RepRapEventEnum.CONNECTED:
 			self.online = True
 			self.prtport = evt.prtport
 			if self.ready:
@@ -890,7 +899,7 @@ class RepRap:
 			else:
 				self.resetting = False
 
-		elif evt.event == RepRapEventEnums.DISCONNECTED:
+		elif evt.event == RepRapEventEnum.DISCONNECTED:
 			self.online = False
 			self.prtport = None
 			if self.ready:
@@ -899,7 +908,7 @@ class RepRap:
 			if not self.resetting:
 				self.win.reportConnection(False, self.printerName)
 
-		elif evt.event == RepRapEventEnums.RECEIVED_MSG:
+		elif evt.event == RepRapEventEnum.RECEIVED_MSG:
 			if TRACE:
 				print "==> received message (%s)" % evt.msg
 			if not self.parser.parseMsg(evt.msg):
@@ -948,7 +957,7 @@ class RepRap:
 				if n is not None and self.positionHandler is not None:
 					self.positionHandler(n)
 
-	def suspendTempProbe(self, flag):
+	def suspendTempProbe(self, flag=True):
 		self.suspendM105 = flag
 		
 	def printStopped(self):
@@ -990,9 +999,9 @@ class RepRap:
 			return False
 		
 		if priority:		
-			self.priQ.put((RepRapCmdEnums.CMD_GCODE, command))
+			self.priQ.put((RepRapCmdEnum.CMD_GCODE, command))
 		else:
-			self.mainQ.put((RepRapCmdEnums.CMD_GCODE, command))
+			self.mainQ.put((RepRapCmdEnum.CMD_GCODE, command))
 			
 		return True
 	

@@ -214,7 +214,7 @@ class SDCard:
 					break
 				
 				msgdlg = wx.MessageDialog(self.app, "Please choose a file - not a directory - or cancel",
-					'Choose file', wx.OK | wx.CANCEL | wx.NO_DEFAULT | wx.ICON_INFORMATION)
+					'Choose file', wx.OK | wx.CANCEL | wx.ICON_INFORMATION)
 				rc = msgdlg.ShowModal()
 				msgdlg.Destroy()
 				
@@ -287,7 +287,7 @@ class SDCard:
 						dlg = SDChooseFileDlg(self.app, self.SDroot, "Choose a file to delete")
 				else:	
 					msgdlg = wx.MessageDialog(self.app, "Please choose a file - not a directory - or cancel",
-											'Choose file', wx.OK | wx.CANCEL | wx.NO_DEFAULT | wx.ICON_INFORMATION)
+											'Choose file', wx.OK | wx.CANCEL | wx.ICON_INFORMATION)
 					rc = msgdlg.ShowModal()
 					msgdlg.Destroy()
 				
