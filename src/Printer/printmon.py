@@ -450,6 +450,8 @@ class PrintMonitorDlg(wx.Frame):
 			
 			self.remaining = layersSplit[1] + layerSplit[1]
 			self.propDlg.setProperty(PropertyEnum.remaining, formatElapsed(self.remaining))
+			#TODO - probably don't need all the various time estimates when printing TO CD
+			# BUT IT MAY BREAK LOGIC BELOW (update time until) that rely on these values
 			
 			newEta = time.time() + self.remaining
 			revisedStr = time.strftime('%H:%M:%S', time.localtime(newEta))
@@ -462,6 +464,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.updateTimeUntil()
 			
 		elif self.state == PrintState.sdprintingfrom:
+			#TODO Need to convey print position when printing from SD card
 			pass
 
 	def getLayerByPosition(self, pos):
@@ -541,8 +544,9 @@ class PrintMonitorDlg(wx.Frame):
 		
 	def reprapEvent(self, evt):
 		if evt.event == RepRapEventEnum.PRINT_COMPLETE:
+			# TODO - do I need special consideration here for print FROM SD
 			if self.state == PrintState.sdprintingto:
-				self.reprap.send_now("M29 %s" % self.sdTargetFile)
+				self.reprap.sendNow("M29 %s" % self.sdTargetFile)
 				self.suspendTempProbe(False)
 				self.setSDTargetFile(None)
 			self.state = PrintState.idle
@@ -669,6 +673,7 @@ class PrintMonitorDlg(wx.Frame):
 				self.bSdPrintFrom.Enable(False)
 				self.bSdDelete.Enable(False)
 		elif self.state == PrintState.sdprintingfrom:
+			#TODO - what makes sense here
 			pass
 		elif self.state == PrintState.paused:
 			self.bImport.Enable(True)
@@ -691,6 +696,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.onPrint(None)
 			
 	def reset(self):
+		#TODO - cleanup if was sdprintingfrom
 		self.state = PrintState.idle
 		self.oldState = None
 		self.suspendTempProbe(False)
@@ -753,8 +759,8 @@ class PrintMonitorDlg(wx.Frame):
 		
 	def resumeSDPrintFrom(self, fn):
 		#self.clearModel()
-		self.reprap.send_now("M23 " + fn[1].lower())
-		self.reprap.send_now("M24")
+		self.reprap.sendNow("M23 " + fn[1].lower())
+		self.reprap.sendNow("M24")
 		self.sdprintingfrom = True
 		#self.M27Timer.Start(M27Interval, True)
 		self.sdpaused = False
@@ -770,36 +776,32 @@ class PrintMonitorDlg(wx.Frame):
 	def resumeSDPrintTo(self, tfn):
 		self.setSDTargetFile(tfn[1].lower())
 		self.reprap.suspendTempProbe(True)
-		self.reprap.send_now("M28 %s" % self.sdTargetFile)
+		self.reprap.sendNow("M28 %s" % self.sdTargetFile)
 		self.printPos = 0
 		self.startTime = time.time()
 		self.endTime = None
 		self.reprap.startPrint(self.gcode)
-		self.logger("Print to SD: %s started at %s" % (self.sdTargetFile, time.strftime('%H:%M:%S', time.localtime(self.startTime))))
-		#self.origEta = self.startTime + self.model.duration
-		#self.countGLines = len(self.model)
-		#self.infoPane.setMode(MODE_TO_SD)
-		#self.infoPane.showFileInfo()
-		#self.infoPane.setStartTime(self.startTime)
+		
+		self.origEta = self.startTime + self.totalTime
+		self.elapsed = 0
+		self.remaining = self.totalTime
+				
 		self.state = PrintState.sdprintingto
+				
+		stime = time.strftime('%H:%M:%S', time.localtime(self.startTime))
+		self.propDlg.setProperty(PropertyEnum.startTime, stime)
+		self.propDlg.setProperty(PropertyEnum.origEta, 
+					time.strftime('%H:%M:%S', time.localtime(self.origEta)))
+		self.propDlg.setProperty(PropertyEnum.elapsed, formatElapsed(self.elapsed))
+		self.propDlg.setProperty(PropertyEnum.remaining, formatElapsed(self.remaining))
+		self.propDlg.setProperty(PropertyEnum.revisedEta, "")
+		self.log("Print to SD: %s started at %s" % (self.sdTargetFile, stime))
+
 		self.enableButtonsByState()
 		
 	def setSDTargetFile(self, tfn):
 		self.sdTargetFile = tfn
-		#self.infoPane.setSDTargetFile(tfn)
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		self.propDlg.setSDTargetFile(tfn)
 		
 	def onSdDelete(self, evt):
 		self.sdcard.startDeleteFromSD()

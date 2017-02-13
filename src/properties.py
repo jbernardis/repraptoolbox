@@ -34,6 +34,7 @@ class PropertiesDlg(wx.Frame):
 		self.callback = cb
 		self.log = self.parent.log
 		self.fileName = None
+		self.sdTargetfn = None
 		self.nextruders = parent.settings.nextruders
 		self.printStatus = PrintState.idle
 		self.setTitle()
@@ -107,6 +108,9 @@ class PropertiesDlg(wx.Frame):
 			s = "Printer %s status (%s)" % (self.printerName, st)
 			if self.fileName is not None:
 				s += " - %s" % self.fileName
+			if self.sdTargetfn is not None:
+				s += " -> SD:%s" % self.sdTargetfn
+
 		else:
 			if self.fileName is not None:
 				s = "G Code File %s" % self.fileName
@@ -126,11 +130,23 @@ class PropertiesDlg(wx.Frame):
 			self.log("Unknown property key: %s" % pid)
 			return
 		
-		self.properties[pid].SetValue(value)
-		
 		if pid == PropertyEnum.fileName:
 			self.fileName = value
 			self.setTitle()
+			self.updateFileName()
+		else:
+			self.properties[pid].SetValue(value)
+			
+	def setSDTargetFile(self, tfn):
+		self.sdTargetfn = tfn
+		self.updateFileName()
+		self.setTitle()
+		
+	def updateFileName(self):
+		if self.sdTargetfn is None:
+			self.properties[PropertyEnum.fileName].SetValue(self.fileName)
+		else:
+			self.properties[PropertyEnum.fileName].SetValue("%s->%s" % (self.fileName, self.sdTargetfn))
 			
 	def getStatusReport(self):
 		results = {}
@@ -143,6 +159,7 @@ class PropertiesDlg(wx.Frame):
 		return results
 			
 	def clearAllProperties(self):
+		self.sdTargetfn = None
 		for cat in propertyMap.keys():
 			for prop in propertyMap[cat]:
 				self.properties[prop].SetValue("")
