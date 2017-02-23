@@ -28,6 +28,7 @@ class PrtSettings:
 		self.moveabsolute = True
 		self.extrudeabsolute = True
 		self.useM82 = False
+		self.hasZProbe = False
 		self.speedquery = None
 		defaultBedinfo = [0, 125, 60, 110, 'M140', 'M190']
 		self.bedinfo = defaultBedinfo
@@ -163,6 +164,9 @@ class PrtSettings:
 					else:
 						self.speedquery = value
 						
+				elif opt == 'haszprobe':
+					self.hasZProbe = parseBoolean(value, False)
+						
 				elif opt == 'moveabsolute':
 					self.moveabsolute = parseBoolean(value, True)
 					
@@ -239,6 +243,7 @@ class PrtSettings:
 		self.cfg.set(self.section, "edistance", str(self.edistance))
 		self.cfg.set(self.section, "moveabsolute", str(self.moveabsolute))
 		self.cfg.set(self.section, "extrudeabsolute", str(self.extrudeabsolute))
+		self.cfg.set(self.section, "haszprobe", str(self.hasZProbe))
 		self.cfg.set(self.section, "usem82", str(self.useM82))
 		self.cfg.set(self.section, "hassdcard", str(self.hassdcard))
 		self.cfg.set(self.section, "speedquery", str(self.speedquery))

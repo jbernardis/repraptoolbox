@@ -462,15 +462,19 @@ class MyFrame(wx.Frame):
 		self.dlgPlater = None
 		
 	def doGEdit(self, evt):
-		dlg = GEditDlg(self)
-		self.bGEdit.Enable(False)
-		dlg.Show()
-		if self.settings.gcodeposition is not None:
-			dlg.SetPosition(self.settings.gcodeposition)
-		self.dlgGEdit = dlg
+		if self.dlgGEdit is None:
+			dlg = GEditDlg(self)
+			#self.bGEdit.Enable(False)
+			dlg.Show()
+			if self.settings.gcodeposition is not None:
+				dlg.SetPosition(self.settings.gcodeposition)
+			self.dlgGEdit = dlg
+		else:
+			self.dlgGEdit.Show()
+			self.dlgGEdit.Raise()
 	
 	def GEditClosed(self):
-		self.bGEdit.Enable(True)
+		#self.bGEdit.Enable(True)
 		self.settings.gcodeposition = self.dlgGEdit.GetPosition()
 		self.dlgGEdit.Destroy()
 		self.dlgGEdit = None

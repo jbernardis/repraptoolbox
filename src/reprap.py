@@ -500,6 +500,12 @@ class RepRapParser:
 				self.firmware.m301(P, I, D)
 			return False
 		
+		if 'M851' in msg:
+			Z = self.parseG(msg, 'Z')
+			if self.firmware is not None:
+				self.firmware.m851(Z)
+			return False
+		
 		if "SD card ok" in msg:
 			evt = SDCardEvent(event = SdEventEnum.SD_CARD_OK)
 			self.sendSdEvent(evt)

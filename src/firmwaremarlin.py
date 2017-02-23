@@ -6,7 +6,7 @@ import ConfigParser
 wildcard="Firmware Files (*.fw)|*.fw|All Files (*.*)|*.*"
 
 
-grpinfo = {'m92' : ['Steps per Unit - M92', 4, ['x', 'y', 'z', 'e'], ['X Steps', 'Y Steps', 'Z Steps', 'E Steps']],
+grpinfoBase = {'m92' : ['Steps per Unit - M92', 4, ['x', 'y', 'z', 'e'], ['X Steps', 'Y Steps', 'Z Steps', 'E Steps']],
 		'm201' : ['Max Acceleration (mm/s2) - M201', 4, ['x', 'y', 'z', 'e'], ['X Maximum Acceleration', 'Y Maximum Acceleration', 'Z Maximum Acceleration', 'E Maximum Acceleration']],
 		'm203' : ['Max Feed Rates (mm/s) - M203', 4, ['x', 'y', 'z', 'e'], ['X Maximum Feed Rate', 'Y Maximum Feed Rate', 'Z Maximum Feed Rate', 'E Maximum Feed Rate']],
 		'm204' : ['Acceleration - M204', 3, ['p', 'r', 't'], ['Maximum Print Acceleration', 'Maximum Retraction Acceleration', 'Maximum Travel Acceleration']],
@@ -14,7 +14,13 @@ grpinfo = {'m92' : ['Steps per Unit - M92', 4, ['x', 'y', 'z', 'e'], ['X Steps',
 		'm206' : ['Home offset - M206', 3, ['x', 'y', 'z'], ['X Home Offset', 'Y Home Offset', 'Z Home Offset']],
 		'm301' : ['PID - M301', 3, ['p', 'i', 'd'], ['Proportional Value', 'Integral Value', 'Derivative Value']]}
 
-grporder = ['m92', 'm201', 'm203', 'm204', 'm205', 'm206', 'm301']
+m851info = {
+		'm851' : ['Z Probe Offset - M301', 1, ['z'], ['Z Probe Offset']]}
+
+grporderBase = ['m92', 'm201', 'm203', 'm204', 'm205', 'm206', 'm301']
+
+grpinfo = {}
+grporder = []
 
 EEPROMFILE = "settings.%s.eep"
 
@@ -78,12 +84,24 @@ class FwSettings:
 		return self.values[tag]
 	
 class Firmware:
-	def __init__(self, parent, reprap, pname, cmdfolder):
+	def __init__(self, parent, reprap, pname, psettings, cmdfolder):
 		self.parent = parent
 		self.reprap = reprap
 		self.printerName = pname
+		self.psettings = psettings
+		self.hasZProbe = psettings.hasZProbe
 		self.cmdfolder = cmdfolder
 		self.log = parent.log
+		
+		global grporder
+		grporder = [x for x in grporderBase]
+		if self.hasZProbe:
+			grporder.append("M851")
+			
+		global grpinfo
+		grpinfo = grpinfoBase.copy()
+		if self.hasZProbe:
+			grpinfo.update(m851info)
 		
 		self.dlgVisible = False
 		self.wDlg = None
@@ -95,6 +113,7 @@ class Firmware:
 		self.got205 = False
 		self.got206 = False
 		self.got301 = False
+		self.got851 = not self.hasZProbe
 		
 		self.readingFirmware = False
 		
@@ -115,13 +134,14 @@ class Firmware:
 		self.got205 = False
 		self.got206 = False
 		self.got301 = False
+		self.got851 = not self.hasZProbe
 		
 		self.readingFirmware = True 
 		self.reprap.startFirmwareCollection(self)
 		self.reprap.sendNow("M503")
 		
 	def checkComplete(self):
-		if self.got92 and self.got201 and self.got203 and self.got204 and self.got204 and self.got206 and self.got301:
+		if self.got92 and self.got201 and self.got203 and self.got204 and self.got204 and self.got206 and self.got301 and self.got851:
 			if self.readingFirmware:
 				self.reprap.endFirmwareCollection()
 				self.reportComplete()
@@ -182,6 +202,12 @@ class Firmware:
 		self.flash.setValue('m301_i', i)
 		self.flash.setValue('m301_d', d)
 		self.got301 = True
+		return self.checkComplete()
+
+	def m851(self, z):
+		if self.hasZProbe:
+			self.flash.setValue('m851_z', z)
+			self.got851 = True
 		return self.checkComplete()
 
 	def reportComplete(self):
