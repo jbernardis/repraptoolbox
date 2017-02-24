@@ -124,8 +124,10 @@ class MyFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onLogSave, self.bLogSave)
 
 		self.bStlQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngStlqueue, size=BUTTONDIMWIDE)
-		self.bStlQueue.SetToolTipString("Manage the STL queue")
 		self.Bind(wx.EVT_BUTTON, self.onStlQueue, self.bStlQueue)
+
+		self.bStlNext = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIMWIDE)
+		self.Bind(wx.EVT_BUTTON, self.onStlNext, self.bStlNext)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
 		self.meshButtons = self.createSectionButtons("mesh", self.doMeshButton)
@@ -234,6 +236,8 @@ class MyFrame(wx.Frame):
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bStlQueue)
 		bhsizer.AddSpacer((10, 10))
+		bhsizer.Add(self.bStlNext)
+		bhsizer.AddSpacer((10, 10))
 		bvsizer.AddSpacer((10, 10))
 		bvsizer.Add(bhsizer)
 		bvsizer.AddSpacer((10, 10))
@@ -339,6 +343,7 @@ class MyFrame(wx.Frame):
 			self.httpServer = RepRapServer(self, port=self.settings.port)
 			
 		self.pendant = Pendant(self.pendantConnection, self.pendantCommand, self.settings.pendantport, self.settings.pendantbaud)
+		self.setSliceQLen()
 		
 	def createSectionButtons(self, section, handler):
 		buttons = []
@@ -672,8 +677,7 @@ class MyFrame(wx.Frame):
 	def onStlQueue(self, evt):
 		dlg = SliceQueueDlg(self, self.sliceQueue)
 		if dlg.ShowModal() == wx.ID_OK:
-			n = self.sliceQueue.size()
-			self.setSliceQLen(n)
+			self.setSliceQLen()
 
 		dlg.Destroy();
 		
@@ -689,15 +693,22 @@ class MyFrame(wx.Frame):
 			self.dlgViewStl.Raise()
 		self.dlgViewStl.loadStlFile(fn)
 		
-	def setSliceQLen(self, qlen):
-		pass
-# 		self.tSliceQLen.SetLabel("%d files in queue" % qlen)
-# 		s = "Remove the first file and slice it"
-# 		if qlen != 0:
-# 			s += ": (" + os.path.basename(self.settings.stlqueue[0]) + ")"
-# 		self.bSliceNext.SetToolTipString(s)
-# 		self.bSliceNext.Enable((qlen != 0) and not self.nextSliceProhibited)
-
+	def setSliceQLen(self):
+		n = len(self.sliceQueue.size)
+		text = "Manage the Slicing queue - %d files in queue" % n
+		self.bStlQueue.SetToolTipString(text)
+		
+		if n > 0:
+			nfn = os.path.basename(self.sliceQueue.peek().getFn())
+			self.bStlNext.SetToolTipString("Remove the first file (%s) from the queue", nfn)
+		else:
+			self.bStlNext.SetToolTipString("")
+		self.bStlNext.Enable(n != 0)
+		
+	def onStlNext(self, evt):
+		fn = self.sliceQueue.deQueue().getFn()
+		self.exportStlFile(fn)
+		self.setSliceQLen()
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)
