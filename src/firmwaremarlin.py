@@ -15,7 +15,7 @@ grpinfoBase = {'m92' : ['Steps per Unit - M92', 4, ['x', 'y', 'z', 'e'], ['X Ste
 		'm301' : ['PID - M301', 3, ['p', 'i', 'd'], ['Proportional Value', 'Integral Value', 'Derivative Value']]}
 
 m851info = {
-		'm851' : ['Z Probe Offset - M301', 1, ['z'], ['Z Probe Offset']]}
+		'm851' : ['Z Probe Offset - M851', 1, ['z'], ['Z Probe Offset']]}
 
 grporderBase = ['m92', 'm201', 'm203', 'm204', 'm205', 'm206', 'm301']
 
@@ -96,7 +96,7 @@ class Firmware:
 		global grporder
 		grporder = [x for x in grporderBase]
 		if self.hasZProbe:
-			grporder.append("M851")
+			grporder.append("m851")
 			
 		global grpinfo
 		grpinfo = grpinfoBase.copy()

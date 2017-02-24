@@ -899,7 +899,7 @@ class RepRap:
 			self.prtport = evt.prtport
 			if self.ready:
 				self.sender.reportConnection(True, self.prtport)
-			self.startTimer()
+			wx.CallLater(1000, self.startTimer)
 			if not self.resetting:
 				self.win.reportConnection(True, self.printerName)
 			else:

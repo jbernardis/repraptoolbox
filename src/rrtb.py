@@ -434,29 +434,34 @@ class MyFrame(wx.Frame):
 		self.Destroy()
 
 	def doViewStl(self, evt):
-		dlg = StlViewDlg(self)
-		dlg.Show()
-		if self.settings.viewerposition is not None:
-			dlg.SetPosition(self.settings.viewerposition)
-		self.bStlView.Enable(False);
-		self.dlgViewStl = dlg
+		if self.dlgViewStl is None:
+			dlg = StlViewDlg(self)
+			dlg.Show()
+			if self.settings.viewerposition is not None:
+				dlg.SetPosition(self.settings.viewerposition)
+			self.dlgViewStl = dlg
+		else:
+			self.dlgViewStl.Show()
+			self.dlgViewStl.Raise()
 	
 	def viewStlClosed(self):
-		self.bStlView.Enable(True);
 		self.settings.viewerposition = self.dlgViewStl.GetPosition()
 		self.dlgViewStl.Destroy()
 		self.dlgViewStl = None
 	
 	def doPlater(self, evt):
-		dlg = PlaterDlg(self)
-		self.bPlater.Enable(False);
-		dlg.Show()
-		if self.settings.platerposition is not None:
-			dlg.SetPosition(self.settings.platerposition)
-		self.dlgPlater = dlg
+		if self.dlgPlater is None:
+			dlg = PlaterDlg(self)
+			self.bPlater.Enable(False);
+			dlg.Show()
+			if self.settings.platerposition is not None:
+				dlg.SetPosition(self.settings.platerposition)
+			self.dlgPlater = dlg
+		else:
+			self.dlgPlater.Show()
+			self.dlgPlater.Raise()
 	
 	def platerClosed(self):
-		self.bPlater.Enable(True);
 		self.settings.platerposition = self.dlgPlater.GetPosition()
 		self.dlgPlater.Destroy()
 		self.dlgPlater = None
@@ -464,7 +469,6 @@ class MyFrame(wx.Frame):
 	def doGEdit(self, evt):
 		if self.dlgGEdit is None:
 			dlg = GEditDlg(self)
-			#self.bGEdit.Enable(False)
 			dlg.Show()
 			if self.settings.gcodeposition is not None:
 				dlg.SetPosition(self.settings.gcodeposition)
@@ -474,29 +478,32 @@ class MyFrame(wx.Frame):
 			self.dlgGEdit.Raise()
 	
 	def GEditClosed(self):
-		#self.bGEdit.Enable(True)
 		self.settings.gcodeposition = self.dlgGEdit.GetPosition()
 		self.dlgGEdit.Destroy()
 		self.dlgGEdit = None
 		
 	def doSlic3r(self, evt):
-		dlg = Slic3rDlg(self)
-		self.bSlic3r.Enable(False)
-		dlg.Show()
-		self.dlgSlic3r = dlg
+		if self.dlgSlic3r is None:
+			dlg = Slic3rDlg(self)
+			dlg.Show()
+			self.dlgSlic3r = dlg
+		else:
+			self.dlgSlic3r.Show()
+			self.dlgSlic3r.Raise()
 	
 	def Slic3rClosed(self):
-		self.bSlic3r.Enable(True)
 		self.dlgSlic3r = None
 		
 	def doCuraEngine(self, evt):
-		dlg = CuraEngineDlg(self)
-		self.bCuraEngine.Enable(False)
-		dlg.Show()
-		self.dlgCuraEngine = dlg
+		if self.dlgCuraEngine is None:
+			dlg = CuraEngineDlg(self)
+			dlg.Show()
+			self.dlgCuraEngine = dlg
+		else:
+			self.dlgCuraEngine.Show()
+			self.dlgCuraEngine.Raise()
 	
 	def CuraEngineClosed(self):
-		self.bCuraEngine.Enable(True)
 		self.dlgCuraEngine = None
 		
 	def doPrinter(self, evt):
@@ -510,13 +517,15 @@ class MyFrame(wx.Frame):
 		if pName is None:
 			print "can't determine which button was pressed"
 			return
-		
-		self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
-		self.enablePrinterButton(pName, False)
-		self.assignPendantIf(pName)
+
+		if self.wPrinter[pName] is None:			
+			self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
+			self.assignPendantIf(pName)
+		else:
+			self.wPrinter[pName].Show()
+			self.wPrinter[pName].Raise()
 	
 	def PrinterClosed(self, pName):
-		self.enablePrinterButton(pName, True)
 		self.wPrinter[pName] = None
 		self.wPendant[pName].SetBitmap(self.images.pngPendantclear)
 		self.assignPendant(None)

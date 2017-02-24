@@ -42,6 +42,7 @@ class PrinterDlg(wx.Frame):
 		self.graphDlg = None
 		self.pmonDlg = None
 		self.macroDlg = None
+		self.fwDlg = None
 		
 		self.zEngaged = False
 		
@@ -179,24 +180,28 @@ class PrinterDlg(wx.Frame):
 		return True
 		
 	def onGraph(self, evt):
-		self.graphDlg = TempDlg(self, self.parent, self.settings.nextruders, self.printerName)
-		if not self.settings.tempposition is None:
-			self.graphDlg.SetPosition(self.settings.tempposition)
-		self.bGraph.Enable(False)
+		if self.graphDlg is None:
+			self.graphDlg = TempDlg(self, self.parent, self.settings.nextruders, self.printerName)
+			if not self.settings.tempposition is None:
+				self.graphDlg.SetPosition(self.settings.tempposition)
+		else:
+			self.graphDlg.Show()
+			self.graphDlg.Raise()
 		
 	def closeGraph(self):
 		self.graphDlg = None
-		self.bGraph.Enable(True)
 		
 	def onPrintMon(self, evt):
-		self.pmonDlg = PrintMonitorDlg(self, self.parent, self.reprap, self.printerName)
-		if not self.settings.monposition is None:
-			self.pmonDlg.SetPosition(self.settings.monposition)
-		self.bPrintMon.Enable(False)
+		if self.pmonDlg is None:
+			self.pmonDlg = PrintMonitorDlg(self, self.parent, self.reprap, self.printerName)
+			if not self.settings.monposition is None:
+				self.pmonDlg.SetPosition(self.settings.monposition)
+		else:
+			self.pmonDlg.Show()
+			self.pmonDlg.Raise()
 		
 	def closePrintMon(self):
 		self.pmonDlg = None
-		self.bPrintMon.Enable(True)
 		
 	def onEngageZ(self, evt):
 		print "engage z"
@@ -207,22 +212,25 @@ class PrinterDlg(wx.Frame):
 			self.bEngageZ.SetBitmap(self.images.pngEngagez)
 		
 	def onRunMacro(self, evt):
-		self.macroDlg = MacroDialog(self, self.parent, self.reprap, self.printerName)
-		self.bMacros.Enable(False)
+		if self.macroDlg is None:
+			self.macroDlg = MacroDialog(self, self.parent, self.reprap, self.printerName)
+		else:
+			self.macroDlg.Show()
+			self.macroDlg.Raise()
 		
 	def onMacroExit(self):
 		self.macroDlg.Destroy()
 		self.macroDlg = None
-		self.bMacros.Enable(True)
 		
 	def onFirmware(self, evt):
-		self.fw = self.firmware.Firmware(self, self.reprap, self.printerName, self.settings, cmdFolder)
-		self.bFirmware.Enable(False)
+		if self.fwDlg is None:
+			self.fwDlg = self.firmware.Firmware(self, self.reprap, self.printerName, self.settings, cmdFolder)
+		else:
+			self.fwDlg.Show()
+			self.fwDlg.Raise()
 		
 	def onFirmwareExit(self):
-		self.fw = None
-		self.bFirmware.Enable(True)
-		
+		self.fwDlg = None
 		
 	def onRemember(self, evt):
 		self.settings.ctrlposition = self.GetPosition()
