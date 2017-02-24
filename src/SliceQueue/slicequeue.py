@@ -3,10 +3,12 @@ import os
 import wx
 import inspect
 import pickle
+import time
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
 from images import Images
+from settings import Settings
 
 BUTTONDIM = (48, 48)
 
@@ -17,14 +19,20 @@ VISIBLEQUEUESIZE = 15
 class SliceFileObject:
 	def __init__(self, fn):
 		self.fn = fn
+		self.mt = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(fn)))
 		
 	def getFn(self):
 		return self.fn
+	
+	def getModTime(self):
+		return self.mt
 
 class SliceQueue:
 	def __init__(self):
 		self.fn = os.path.join(cmdFolder, "slice.queue")
-
+		self.reload()
+		
+	def reload(self):
 		try:		
 			fp = open(self.fn, "rb")
 			self.files = pickle.load(fp)
@@ -53,10 +61,20 @@ class SliceQueue:
 	def enQueue(self, f):
 		self.files.append(f)
 		self.save()
+		
+	def delete(self, ix):
+		if ix < 0 or ix >= self.__len__():
+			return
+		del self.files[ix]
 	
-	def setList(self, l):
-		self.files = l[:]
-		self.save()
+	def swap(self, i, j):
+		if i < 0 or i >= self.__len__():
+			return
+		if j < 0 or j >= self.__len__():
+			return
+		t = self.file[i]
+		self.files[i] = self.files[j]
+		self.files[j] = t
 		
 	def save(self):
 		fp = open(self.fn, 'wb')
@@ -90,11 +108,9 @@ class SliceQueueDlg(wx.Dialog):
 		self.sq = sq
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Slicing Queue", size=(800, 804))
 		self.SetBackgroundColour("white")
-		
-		self.stllist = [f for f in sq]
-		self.stldisplay = [self.setDisplayName(x.getFn()) for x in self.stllist]
 
 		self.images = Images(os.path.join(cmdFolder, "images"))
+		self.settings = Settings(cmdFolder)
 
 		dsizer = wx.BoxSizer(wx.VERTICAL)
 		dsizer.AddSpacer((10, 10))
@@ -106,8 +122,8 @@ class SliceQueueDlg(wx.Dialog):
 		
 		lbsizer = wx.BoxSizer(wx.HORIZONTAL)
 		lbsizer.AddSpacer((10, 10))
-		self.lbQueue = wx.ListBox(self, wx.ID_ANY, size=(fontWidth * 90, fontHeight*VISIBLEQUEUESIZE+5), choices=self.stldisplay, style=wx.LB_EXTENDED)
-		self.Bind(wx.EVT_LISTBOX, self.doQueueSelect, self.lbQueue)
+		self.lbQueue = SliceQueueListCtrl(self, self.sq, self.images, self.settings.showstlbasename)
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doQueueSelect, self.lbQueue)
 		lbsizer.Add(self.lbQueue);
 		lbsizer.AddSpacer((10, 10))
 		self.lbQueue.SetFont(f)
@@ -180,19 +196,10 @@ class SliceQueueDlg(wx.Dialog):
 
 		self.SetSizer(dsizer)  
 		dsizer.Fit(self)
-			
-	def setDisplayName(self, nm):
-		if self.settings.showstlbasename:
-			return os.path.basename(nm)
-		else:
-			return nm
 	
 	def checkBasename(self, evt):
 		self.settings.showstlbasename = evt.IsChecked()
-		self.settings.setModified()
-		self.stldisplay = [self.setDisplayName(x.getFn()) for x in self.stllist]
-		self.lbQueue.SetItems(self.stldisplay)
-
+		self.lbQueue.setBaseNameOnly(self.settings.showstlbasename)
 		
 	def doAdd(self, evt):
 		dlg = wx.FileDialog(
@@ -209,16 +216,15 @@ class SliceQueueDlg(wx.Dialog):
 				nd = os.path.split(paths[0])[0]
 				if nd != self.settings.laststldirectory:
 					self.settings.laststldirectory = nd
-					self.settings.setModified()
 				
 			dups = []
 			pathList = [x.getFn() for x in self.stllist]
 			for path in paths:
-				if path in self.pathList:
+				if path in pathList:
 					dups.append(path)
 				else:
-					self.lbQueue.Append(self.setDisplayName(path))
-					self.stllist.append(SliceFileObject(path))
+					self.sq.enQueue(SliceFileObject(path))
+					self.lbQueue.refreshAll()
 					
 			if len(dups) > 0:
 				msg = "Duplicate files removed from queue:\n  " + ",\n  ".join(dups)
@@ -226,7 +232,6 @@ class SliceQueueDlg(wx.Dialog):
 				
 				dlg.ShowModal()
 				dlg.Destroy()
-				
 							
 			if len(dups) != len(paths):
 				self.bSave.Enable(True)
@@ -234,9 +239,9 @@ class SliceQueueDlg(wx.Dialog):
 	def doDel(self, evt):
 		ls = self.lbQueue.GetSelections()
 		for l in ls[::-1]:
-			self.lbQueue.Delete(l)
-			del self.stllist[l]
+			self.sq.delete(l)
 			
+		self.lbQueue.refreshAll()			
 		self.bDel.Enable(False)
 		self.bUp.Enable(False)
 		self.bDown.Enable(False)
@@ -247,15 +252,8 @@ class SliceQueueDlg(wx.Dialog):
 		if len(ls) != 1:
 			return
 		lx = ls[0]
-		s = self.lbQueue.GetString(lx)
-		self.lbQueue.Delete(lx)
-		self.lbQueue.Insert(s, lx-1)
-		self.lbQueue.SetSelection(lx-1)
-		self.lbQueue.EnsureVisible(lx-1)
-		
-		sv = self.stllist[lx]
-		del self.stllist[lx]
-		self.stllist = self.stllist[:lx-1] + [sv] + self.stllist[lx-1:]
+		self.sq.swap(lx, lx-1)
+		self.lbQueue.refreshAll()
 		
 		self.bUp.Enable((lx-1) != 0)
 		self.bDown.Enable(True)
@@ -267,13 +265,8 @@ class SliceQueueDlg(wx.Dialog):
 			return
 
 		lx = ls[0]
-		s = self.lbQueue.GetString(lx+1)
-		self.lbQueue.Delete(lx+1)
-		self.lbQueue.Insert(s, lx)
-		
-		sv = self.stllist[lx]
-		del self.stllist[lx]
-		self.stllist = self.stllist[:lx+1] + [sv] + self.stllist[lx+1:]
+		self.sq.swap(lx, lx+1)
+		self.lbQueue.refreshAll()
 
 		self.lbQueue.SetSelection(lx+1)
 		self.lbQueue.EnsureVisible(lx+1)
@@ -310,10 +303,11 @@ class SliceQueueDlg(wx.Dialog):
 			return
 		lx = ls[0]
 
-		self.parent.displayStlFile(self.stllist[lx].getFn())
+		self.parent.displayStlFile(self.sq[lx].getFn())
 					
 	def doSave(self, evt):
-		self.sq.setList(self.stllist)
+		self.sq.save()
+		self.settings.save()
 		self.EndModal(wx.ID_OK)
 		
 	def doCancel(self, evt):
@@ -325,8 +319,110 @@ class SliceQueueDlg(wx.Dialog):
 			dlg.Destroy()
 
 			if rc == wx.ID_YES:
+				self.settings.save()
+				self.sq.reload()
 				self.EndModal(wx.ID_CANCEL)
 		else:
+			self.settings.save()
+			self.sq.reload()
 			self.EndModal(wx.ID_CANCEL)
+
+class SliceQueueListCtrl(wx.ListCtrl):	
+	def __init__(self, parent, sq, images, basenameonly):
+		
+		f = wx.Font(8,  wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+		dc = wx.ScreenDC()
+		dc.SetFont(f)
+		fontHeight = dc.GetTextExtent("Xy")[1]
+		
+		colWidths = [500, 130]
+		colTitles = ["File", "Modified"]
+		
+		totwidth = 20;
+		for w in colWidths:
+			totwidth += w
+			
+		self.attrModified = wx.ListItemAttr()
+		self.attrModified.SetBackgroundColour(wx.Colour(135, 206, 236))
+
+		self.attrDeleted = wx.ListItemAttr()
+		self.attrDeleted.SetBackgroundColour(wx.Colour(255, 153, 153))
+		
+		wx.ListCtrl.__init__(self, parent, wx.ID_ANY, size=(totwidth, fontHeight*(VISIBLEQUEUESIZE+1)),
+			style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_HRULES|wx.LC_VRULES|wx.LC_SINGLE_SEL
+			)
+
+		self.parent = parent		
+		self.sq = sq
+		self.basenameonly = basenameonly
+		self.selectedItem = None
+		self.selectedExists = False
+		self.il = wx.ImageList(16, 16)
+		self.il.Add(images.pngSelected)
+		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
+
+		self.SetFont(f)
+		for i in range(len(colWidths)):
+			self.InsertColumn(i, colTitles[i])
+			self.SetColumnWidth(i, colWidths[i])
+			
+		self.setArraySize()
+		
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doListSelect)
+
+	def setArraySize(self):		
+		self.SetItemCount(len(self.sq))
+		
+	def getSelectedFile(self):
+		if self.selectedItem is None:
+			return None
+		
+		return self.sq[self.selectedItem].getFn()
+		
+	def doListSelect(self, evt):
+		x = self.selectedItem
+		self.selectedItem = evt.m_itemIndex
+		if x is not None:
+			self.RefreshItem(x)
+			
+		fn = self.sq[self.selectedItem].getFn()
+		if os.path.exists(fn):
+			self.selectedExists = True
+		else:
+			self.selectedExists = False
+		
+	def doesSelectedExist(self):
+		return self.selectedExists
+			
+	def setBaseNameOnly(self, flag):
+		if self.basenameonly == flag:
+			return
+		
+		self.basenameonly = flag
+		
+		self.refreshAll()
+		
+	def refreshAll(self):
+		for i in range(len(self.sq)):
+			self.RefreshItem(i)
+
+	def OnGetItemText(self, item, col):
+		if col == 0:
+			if self.basenameonly:
+				return os.path.basename(self.sq[item].getFn())
+			else:
+				return self.sq[item].getFn()
+		else:
+			return self.sq[item].getModTime()
+
+	def OnGetItemImage(self, item):
+		if item == self.selectedItem:
+			return 0
+		else:
+			return -1
+	
+	def OnGetItemAttr(self, item):
+		return None
+
 
 		

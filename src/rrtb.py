@@ -126,7 +126,7 @@ class MyFrame(wx.Frame):
 		self.bStlQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngStlqueue, size=BUTTONDIMWIDE)
 		self.Bind(wx.EVT_BUTTON, self.onStlQueue, self.bStlQueue)
 
-		self.bStlNext = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIMWIDE)
+		self.bStlNext = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onStlNext, self.bStlNext)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
@@ -694,13 +694,13 @@ class MyFrame(wx.Frame):
 		self.dlgViewStl.loadStlFile(fn)
 		
 	def setSliceQLen(self):
-		n = len(self.sliceQueue.size)
+		n = len(self.sliceQueue)
 		text = "Manage the Slicing queue - %d files in queue" % n
 		self.bStlQueue.SetToolTipString(text)
 		
 		if n > 0:
 			nfn = os.path.basename(self.sliceQueue.peek().getFn())
-			self.bStlNext.SetToolTipString("Remove the first file (%s) from the queue", nfn)
+			self.bStlNext.SetToolTipString("Remove the first file (%s) from the queue" % nfn)
 		else:
 			self.bStlNext.SetToolTipString("")
 		self.bStlNext.Enable(n != 0)
@@ -712,7 +712,6 @@ class MyFrame(wx.Frame):
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)
-
 			
 class App(wx.App):
 	def OnInit(self):
