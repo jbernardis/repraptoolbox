@@ -25,12 +25,14 @@ from reprap import RepRap
 from log import Logger
 from HTTPServer import RepRapServer
 from pendant import Pendant, pendantCommand
+from SliceQueue.slicequeue import SliceQueue, SliceQueueDlg
 
 (PendantCmdEvent, EVT_PENDANT_COMMAND) = wx.lib.newevent.NewEvent()
 (PendantConnEvent, EVT_PENDANT_CONNECT) = wx.lib.newevent.NewEvent()
 
 
 BUTTONDIM = (48, 48)
+BUTTONDIMWIDE = (96, 48)
 PBUTTONDIM = (144, 72)
 
 white = wx.Colour(255, 255, 255)
@@ -73,6 +75,8 @@ class MyFrame(wx.Frame):
 		self.dlgViewStl = None
 		self.dlgPlater = None
 		self.dlgGEdit = None
+		
+		self.sliceQueue = SliceQueue()
 		
 		self.pendantAssignment = None
 		self.pendantConnected = False
@@ -118,6 +122,10 @@ class MyFrame(wx.Frame):
 		self.bLogSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSavelog, size=BUTTONDIM)
 		self.bLogSave.SetToolTipString("Save log contents to a file")
 		self.Bind(wx.EVT_BUTTON, self.onLogSave, self.bLogSave)
+
+		self.bStlQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngStlqueue, size=BUTTONDIMWIDE)
+		self.bStlQueue.SetToolTipString("Manage the STL queue")
+		self.Bind(wx.EVT_BUTTON, self.onStlQueue, self.bStlQueue)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
 		self.meshButtons = self.createSectionButtons("mesh", self.doMeshButton)
@@ -216,7 +224,23 @@ class MyFrame(wx.Frame):
 		szButtonRow.Add(bvsizer)
 		
 		szVFrame.Add(szButtonRow)
-		szVFrame.AddSpacer((30, 30))
+		szVFrame.AddSpacer((20, 20))
+		
+		szButtonRow = wx.BoxSizer(wx.HORIZONTAL)
+		
+		box = wx.StaticBox(self, wx.ID_ANY, " Queue Management ")
+		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
+		bhsizer.AddSpacer((10, 10))
+		bhsizer.Add(self.bStlQueue)
+		bhsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer((10, 10))
+		bvsizer.Add(bhsizer)
+		bvsizer.AddSpacer((10, 10))
+		szButtonRow.Add(bvsizer)
+		
+		szVFrame.Add(szButtonRow)
+		szVFrame.AddSpacer((20, 20))
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " STL File ")
 		bstlvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
@@ -645,6 +669,36 @@ class MyFrame(wx.Frame):
 		
 	def onLogSave(self, evt):
 		self.logger.doSave()
+		
+	def onStlQueue(self, evt):
+		dlg = SliceQueueDlg(self, self.sliceQueue)
+		if dlg.ShowModal() == wx.ID_OK:
+			n = self.sliceQueue.size()
+			self.setSliceQLen(n)
+
+		dlg.Destroy();
+		
+	def displayStlFile(self, fn):
+		if self.dlgViewStl is None:
+			dlg = StlViewDlg(self)
+			dlg.Show()
+			if self.settings.viewerposition is not None:
+				dlg.SetPosition(self.settings.viewerposition)
+			self.dlgViewStl = dlg
+		else:
+			self.dlgViewStl.Show()
+			self.dlgViewStl.Raise()
+		self.dlgViewStl.loadStlFile(fn)
+		
+	def setSliceQLen(self, qlen):
+		pass
+# 		self.tSliceQLen.SetLabel("%d files in queue" % qlen)
+# 		s = "Remove the first file and slice it"
+# 		if qlen != 0:
+# 			s += ": (" + os.path.basename(self.settings.stlqueue[0]) + ")"
+# 		self.bSliceNext.SetToolTipString(s)
+# 		self.bSliceNext.Enable((qlen != 0) and not self.nextSliceProhibited)
+
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)
