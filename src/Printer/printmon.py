@@ -219,6 +219,12 @@ class PrintMonitorDlg(wx.Frame):
 		self.reprap.registerSdEventHandler(self.sdcard)
 		self.wparent.registerPrinterStatusReporter(self.printerName, self)
 		
+	def show(self):
+		self.Show()
+		self.Raise()
+		self.propDlg.Show()
+		self.propDlg.Raise()
+		
 	def getStatusReport(self):
 		r = self.propDlg.getStatusReport()
 		r["PrintStatus"] = PrintState.label[self.state]

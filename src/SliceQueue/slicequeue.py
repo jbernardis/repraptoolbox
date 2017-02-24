@@ -14,6 +14,13 @@ wildcard = "STL (*.stl)|*.stl;*STL|AMF (*.amf.xml, *.amf)|*.amf.xml;*.AMF.XML;*.
 
 VISIBLEQUEUESIZE = 15
 
+class SliceFileObject:
+	def __init__(self, fn):
+		self.fn = fn
+		
+	def getFn(self):
+		return self.fn
+
 class SliceQueue:
 	def __init__(self):
 		self.fn = os.path.join(cmdFolder, "slice.queue")
@@ -55,8 +62,26 @@ class SliceQueue:
 		fp = open(self.fn, 'wb')
 		pickle.dump(self.files, fp)
 		fp.close()
+	
+	def __getitem__(self, ix):
+		if ix < 0 or ix >= self.__len__():
+			return None
 		
-	def size(self):
+		return self.files[ix]
+	
+	def __iter__(self):
+		self.__lindex__ = 0
+		return self
+	
+	def next(self):
+		if self.__lindex__ < self.__len__():
+			i = self.__lindex__
+			self.__lindex__ += 1
+			return self.files[i]
+
+		raise StopIteration
+	
+	def __len__(self):
 		return len(self.files)
 
 class SliceQueueDlg(wx.Dialog):
@@ -66,8 +91,8 @@ class SliceQueueDlg(wx.Dialog):
 		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Slicing Queue", size=(800, 804))
 		self.SetBackgroundColour("white")
 		
-		self.stllist = sq.getList[:]
-		self.stldisplay = [self.setDisplayName(x) for x in self.stllist]
+		self.stllist = [f for f in sq]
+		self.stldisplay = [self.setDisplayName(x.getFn()) for x in self.stllist]
 
 		self.images = Images(os.path.join(cmdFolder, "images"))
 
@@ -165,7 +190,7 @@ class SliceQueueDlg(wx.Dialog):
 	def checkBasename(self, evt):
 		self.settings.showstlbasename = evt.IsChecked()
 		self.settings.setModified()
-		self.stldisplay = [self.setDisplayName(x) for x in self.stllist]
+		self.stldisplay = [self.setDisplayName(x.getFn()) for x in self.stllist]
 		self.lbQueue.SetItems(self.stldisplay)
 
 		
@@ -187,12 +212,13 @@ class SliceQueueDlg(wx.Dialog):
 					self.settings.setModified()
 				
 			dups = []
+			pathList = [x.getFn() for x in self.stllist]
 			for path in paths:
-				if path in self.stllist:
+				if path in self.pathList:
 					dups.append(path)
 				else:
 					self.lbQueue.Append(self.setDisplayName(path))
-					self.stllist.append(path)
+					self.stllist.append(SliceFileObject(path))
 					
 			if len(dups) > 0:
 				msg = "Duplicate files removed from queue:\n  " + ",\n  ".join(dups)
@@ -284,7 +310,7 @@ class SliceQueueDlg(wx.Dialog):
 			return
 		lx = ls[0]
 
-		self.parent.displayStlFile(self.stllist[lx])
+		self.parent.displayStlFile(self.stllist[lx].getFn())
 					
 	def doSave(self, evt):
 		self.sq.setList(self.stllist)

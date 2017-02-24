@@ -476,7 +476,6 @@ class MyFrame(wx.Frame):
 	def doPlater(self, evt):
 		if self.dlgPlater is None:
 			dlg = PlaterDlg(self)
-			self.bPlater.Enable(False);
 			dlg.Show()
 			if self.settings.platerposition is not None:
 				dlg.SetPosition(self.settings.platerposition)

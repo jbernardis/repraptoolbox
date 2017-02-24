@@ -197,8 +197,7 @@ class PrinterDlg(wx.Frame):
 			if not self.settings.monposition is None:
 				self.pmonDlg.SetPosition(self.settings.monposition)
 		else:
-			self.pmonDlg.Show()
-			self.pmonDlg.Raise()
+			self.pmonDlg.show()
 		
 	def closePrintMon(self):
 		self.pmonDlg = None
@@ -226,8 +225,7 @@ class PrinterDlg(wx.Frame):
 		if self.fwDlg is None:
 			self.fwDlg = self.firmware.Firmware(self, self.reprap, self.printerName, self.settings, cmdFolder)
 		else:
-			self.fwDlg.Show()
-			self.fwDlg.Raise()
+			self.fwDlg.show()
 		
 	def onFirmwareExit(self):
 		self.fwDlg = None

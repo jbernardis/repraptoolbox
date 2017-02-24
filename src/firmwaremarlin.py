@@ -221,6 +221,9 @@ class Firmware:
 		
 	def show(self):
 		if self.dlgVisible:
+			if self.wDlg is not None:
+				self.wDlg.Show(True)
+				self.wDlg.Raise()
 			return
 		
 		self.dlgVisible = True
