@@ -115,18 +115,11 @@ class SliceQueueDlg(wx.Dialog):
 		dsizer = wx.BoxSizer(wx.VERTICAL)
 		dsizer.AddSpacer((10, 10))
 		
-		f = wx.Font(12,  wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-		dc = wx.ScreenDC()
-		dc.SetFont(f)
-		fontWidth, fontHeight = dc.GetTextExtent("X")
-		
 		lbsizer = wx.BoxSizer(wx.HORIZONTAL)
 		lbsizer.AddSpacer((10, 10))
 		self.lbQueue = SliceQueueListCtrl(self, self.sq, self.images, self.settings.showstlbasename)
-		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doQueueSelect, self.lbQueue)
 		lbsizer.Add(self.lbQueue);
 		lbsizer.AddSpacer((10, 10))
-		self.lbQueue.SetFont(f)
 		
 		lbbtns = wx.BoxSizer(wx.VERTICAL)
 		lbbtns.AddSpacer((10, 10))
@@ -218,7 +211,7 @@ class SliceQueueDlg(wx.Dialog):
 					self.settings.laststldirectory = nd
 				
 			dups = []
-			pathList = [x.getFn() for x in self.stllist]
+			pathList = [x.getFn() for x in self.sq]
 			for path in paths:
 				if path in pathList:
 					dups.append(path)
@@ -237,9 +230,8 @@ class SliceQueueDlg(wx.Dialog):
 				self.bSave.Enable(True)
 
 	def doDel(self, evt):
-		ls = self.lbQueue.GetSelections()
-		for l in ls[::-1]:
-			self.sq.delete(l)
+		lx = self.lbQueue.getSelection()
+		self.sq.delete(lx)
 			
 		self.lbQueue.refreshAll()			
 		self.bDel.Enable(False)
@@ -248,10 +240,7 @@ class SliceQueueDlg(wx.Dialog):
 		self.bSave.Enable(True)
 		
 	def doUp(self, evt):
-		ls = self.lbQueue.GetSelections()
-		if len(ls) != 1:
-			return
-		lx = ls[0]
+		lx = self.lbQueue.getSelection()
 		self.sq.swap(lx, lx-1)
 		self.lbQueue.refreshAll()
 		
@@ -260,50 +249,32 @@ class SliceQueueDlg(wx.Dialog):
 		self.bSave.Enable(True)
 		
 	def doDown(self, evt):
-		ls = self.lbQueue.GetSelections()
-		if len(ls) != 1:
-			return
-
-		lx = ls[0]
+		lx = self.lbQueue.getSelection()
 		self.sq.swap(lx, lx+1)
 		self.lbQueue.refreshAll()
 
 		self.lbQueue.SetSelection(lx+1)
 		self.lbQueue.EnsureVisible(lx+1)
 		self.bUp.Enable(True)
-		self.bDown.Enable((lx+2) != self.lbQueue.GetCount())
+		self.bDown.Enable((lx+2) != len(self.sq))
 		self.bSave.Enable(True)
 		
-	def doQueueSelect(self, evt):
-		ls = self.lbQueue.GetSelections()
-		if len(ls) == 0:
-			self.bDel.Enable(False)
+	def doQueueSelect(self, lx):
+		self.bDel.Enable(True)
+		if lx == 0:
 			self.bUp.Enable(False)
+		else:
+			self.bUp.Enable(True)
+			
+		if lx == len(self.sq) - 1:
 			self.bDown.Enable(False)
 		else:
-			self.bDel.Enable(True)
-			
-			if len(ls) != 1:
-				self.bUp.Enable(False)
-				self.bDown.Enable(False)
-			else:
-				if ls[0] == 0:
-					self.bUp.Enable(False)
-				else:
-					self.bUp.Enable(True)
-					
-				if ls[0] == self.lbQueue.GetCount()-1:
-					self.bDown.Enable(False)
-				else:
-					self.bDown.Enable(True)
+			self.bDown.Enable(True)
 		
 	def stlView(self, evt):
-		ls = self.lbQueue.GetSelections()
-		if len(ls) != 1:
-			return
-		lx = ls[0]
-
-		self.parent.displayStlFile(self.sq[lx].getFn())
+		lx = self.lbQueue.getSelection()
+		if lx is not None:
+			self.parent.displayStlFile(self.sq[lx].getFn())
 					
 	def doSave(self, evt):
 		self.sq.save()
@@ -342,11 +313,12 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		for w in colWidths:
 			totwidth += w
 			
-		self.attrModified = wx.ListItemAttr()
-		self.attrModified.SetBackgroundColour(wx.Colour(135, 206, 236))
+		
+		self.attrEven = wx.ListItemAttr()
+		self.attrEven.SetBackgroundColour(wx.Colour(255, 255, 255))
 
-		self.attrDeleted = wx.ListItemAttr()
-		self.attrDeleted.SetBackgroundColour(wx.Colour(255, 153, 153))
+		self.attrOdd = wx.ListItemAttr()
+		self.attrOdd.SetBackgroundColour(wx.Colour(220, 220, 220))
 		
 		wx.ListCtrl.__init__(self, parent, wx.ID_ANY, size=(totwidth, fontHeight*(VISIBLEQUEUESIZE+1)),
 			style=wx.LC_REPORT|wx.LC_VIRTUAL|wx.LC_HRULES|wx.LC_VRULES|wx.LC_SINGLE_SEL
@@ -356,7 +328,6 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		self.sq = sq
 		self.basenameonly = basenameonly
 		self.selectedItem = None
-		self.selectedExists = False
 		self.il = wx.ImageList(16, 16)
 		self.il.Add(images.pngSelected)
 		self.SetImageList(self.il, wx.IMAGE_LIST_SMALL)
@@ -373,6 +344,9 @@ class SliceQueueListCtrl(wx.ListCtrl):
 	def setArraySize(self):		
 		self.SetItemCount(len(self.sq))
 		
+	def getSelection(self):
+		return self.selectedItem
+		
 	def getSelectedFile(self):
 		if self.selectedItem is None:
 			return None
@@ -384,15 +358,8 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		self.selectedItem = evt.m_itemIndex
 		if x is not None:
 			self.RefreshItem(x)
-			
-		fn = self.sq[self.selectedItem].getFn()
-		if os.path.exists(fn):
-			self.selectedExists = True
-		else:
-			self.selectedExists = False
-		
-	def doesSelectedExist(self):
-		return self.selectedExists
+		if self.selectedItem is not None:
+			self.parent.doQueueSelect(self.selectedItem)
 			
 	def setBaseNameOnly(self, flag):
 		if self.basenameonly == flag:
@@ -403,6 +370,7 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		self.refreshAll()
 		
 	def refreshAll(self):
+		self.SetItemCount(len(self.sq))
 		for i in range(len(self.sq)):
 			self.RefreshItem(i)
 
@@ -422,7 +390,10 @@ class SliceQueueListCtrl(wx.ListCtrl):
 			return -1
 	
 	def OnGetItemAttr(self, item):
-		return None
+		if item % 2 == 0:
+			return self.attrEven
+		else:
+			return self.attrOdd
 
 
 		
