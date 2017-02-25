@@ -116,6 +116,10 @@ class PrintMonitorDlg(wx.Frame):
 		self.bImport.SetToolTipString("Import G Code file from toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
 		
+		self.bImportQ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
+		self.bImportQ.SetToolTipString("Import G Code file from G Code queue")
+		self.Bind(wx.EVT_BUTTON, self.onImportFromQueue, self.bImportQ)
+		
 		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
 		self.bOpen.SetToolTipString("Open a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.onOpenFile, self.bOpen)
@@ -179,6 +183,8 @@ class PrintMonitorDlg(wx.Frame):
 		szBtn = wx.BoxSizer(wx.HORIZONTAL)
 		szBtn.AddSpacer((10, 10))
 		szBtn.Add(self.bImport)
+		szBtn.AddSpacer((10, 10))
+		szBtn.Add(self.bImportQ)
 		szBtn.AddSpacer((10, 10))
 		szBtn.Add(self.bOpen)
 		szBtn.AddSpacer((20, 20))
@@ -306,6 +312,13 @@ class PrintMonitorDlg(wx.Frame):
 		
 	def onImport(self, evt):
 		fn = self.wparent.importGcFile()
+		if fn is None:
+			return
+		
+		self.loadGFile(fn)
+		
+	def onImportFromQueue(self, evt):
+		fn = self.wparent.importGcFromQueue()
 		if fn is None:
 			return
 		

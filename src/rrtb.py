@@ -26,6 +26,7 @@ from log import Logger
 from HTTPServer import RepRapServer
 from pendant import Pendant, pendantCommand
 from SliceQueue.slicequeue import SliceQueue, SliceQueueDlg
+from GCodeQueue.gcodequeue import GCodeQueue, GCodeQueueDlg
 
 (PendantCmdEvent, EVT_PENDANT_COMMAND) = wx.lib.newevent.NewEvent()
 (PendantConnEvent, EVT_PENDANT_CONNECT) = wx.lib.newevent.NewEvent()
@@ -77,6 +78,7 @@ class MyFrame(wx.Frame):
 		self.dlgGEdit = None
 		
 		self.sliceQueue = SliceQueue()
+		self.gcodeQueue = GCodeQueue()
 		
 		self.pendantAssignment = None
 		self.pendantConnected = False
@@ -128,6 +130,12 @@ class MyFrame(wx.Frame):
 
 		self.bStlNext = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onStlNext, self.bStlNext)
+
+		self.bGCodeQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGcodequeue, size=BUTTONDIMWIDE)
+		self.Bind(wx.EVT_BUTTON, self.onGCodeQueue, self.bGCodeQueue)
+
+		self.bGCodeNext = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
+		self.Bind(wx.EVT_BUTTON, self.onGCodeNext, self.bGCodeNext)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
 		self.meshButtons = self.createSectionButtons("mesh", self.doMeshButton)
@@ -237,6 +245,10 @@ class MyFrame(wx.Frame):
 		bhsizer.Add(self.bStlQueue)
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bStlNext)
+		bhsizer.AddSpacer((20, 20))
+		bhsizer.Add(self.bGCodeQueue)
+		bhsizer.AddSpacer((10, 10))
+		bhsizer.Add(self.bGCodeNext)
 		bhsizer.AddSpacer((10, 10))
 		bvsizer.AddSpacer((10, 10))
 		bvsizer.Add(bhsizer)
@@ -344,6 +356,7 @@ class MyFrame(wx.Frame):
 			
 		self.pendant = Pendant(self.pendantConnection, self.pendantCommand, self.settings.pendantport, self.settings.pendantbaud)
 		self.setSliceQLen()
+		self.setGCodeQLen()
 		
 	def createSectionButtons(self, section, handler):
 		buttons = []
@@ -645,25 +658,47 @@ class MyFrame(wx.Frame):
 					print "Exception occurred trying to spawn tool process"
 				return
 		
-	def exportStlFile(self, fn):
+	def exportStlFile(self, fn, addToQueue=False):
 		self.exportedStlFile = fn
 		if fn is None:
 			self.tcStlFile.SetValue("")
 		else:
 			self.tcStlFile.SetValue(fn)
+			if addToQueue:
+				self.sliceQueue.enQueuePath(fn)
 		
-	def exportGcFile(self, fn):
+	def exportGcFile(self, fn, addToQueue=False):
 		self.exportedGcFile = fn
 		if fn is None:
 			self.tcGcFile.SetValue("")
 		else:
 			self.tcGcFile.SetValue(fn)
+			if addToQueue:
+				self.gcodeQueue.enQueuePath(fn)
 		
 	def importStlFile(self):
 		return self.exportedStlFile
 	
+	def importStlFromQueue(self):
+		fo = self.stlQueue.deQueue()
+		if fo is None:
+			return None
+		fn = fo.getFn()
+		self.exportStlFile(fn)
+		self.setSliceQLen()
+		return fn
+	
 	def importGcFile(self):
 		return self.exportedGcFile
+	
+	def importGcFromQueue(self):
+		fo = self.gcodeQueue.deQueue()
+		if fo is None:
+			return None
+		fn = fo.getFn()
+		self.exportGcFile(fn)
+		self.setGCodeQLen()
+		return fn
 	
 	def onLogHideShow(self, evt):
 		self.logger.toggleVisibility()
@@ -709,6 +744,42 @@ class MyFrame(wx.Frame):
 		fn = self.sliceQueue.deQueue().getFn()
 		self.exportStlFile(fn)
 		self.setSliceQLen()
+		
+	def onGCodeQueue(self, evt):
+		dlg = GCodeQueueDlg(self, self.gcodeQueue)
+		if dlg.ShowModal() == wx.ID_OK:
+			self.setGCodeQLen()
+
+		dlg.Destroy();
+		
+	def displayGCodeFile(self, fn):
+		if self.dlgGEdit is None:
+			dlg = GEditDlg(self)
+			dlg.Show()
+			if self.settings.gcodeposition is not None:
+				dlg.SetPosition(self.settings.gcodeposition)
+			self.dlgGEdit = dlg
+		else:
+			self.dlgGEdit.Show()
+			self.dlgGEdit.Raise()
+		self.dlgGEdit.loadGFile(fn)
+		
+	def setGCodeQLen(self):
+		n = len(self.gcodeQueue)
+		text = "Manage the G Code queue - %d files in queue" % n
+		self.bGCodeQueue.SetToolTipString(text)
+		
+		if n > 0:
+			nfn = os.path.basename(self.gcodeQueue.peek().getFn())
+			self.bGCodeNext.SetToolTipString("Remove the first file (%s) from the queue" % nfn)
+		else:
+			self.bGCodeNext.SetToolTipString("")
+		self.bGCodeNext.Enable(n != 0)
+		
+	def onGCodeNext(self, evt):
+		fn = self.gcodeQueue.deQueue().getFn()
+		self.exportGcFile(fn)
+		self.setGCodeQLen()
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)

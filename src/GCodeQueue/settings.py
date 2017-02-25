@@ -2,7 +2,7 @@ import ConfigParser
 
 import os
 
-INIFILE = "slicequeue.ini"
+INIFILE = "gcodequeue.ini"
 
 def parseBoolean(val, defaultVal):
 	lval = val.lower();
@@ -17,10 +17,10 @@ def parseBoolean(val, defaultVal):
 
 class Settings:
 	def __init__(self, folder):
-		self.section = "slicerqueue"	
+		self.section = "gcodequeue"	
 		
-		self.laststldirectory = "."
-		self.showstlbasename = True
+		self.lastgcodedirectory = "."
+		self.showgcodebasename = True
 		
 		self.inifile = os.path.join(folder, INIFILE)
 		
@@ -32,10 +32,10 @@ class Settings:
 
 		if self.cfg.has_section(self.section):
 			for opt, value in self.cfg.items(self.section):
-				if opt == "laststldirectory":
-					self.laststldirectory = value
-				elif opt == "showstlbasename":
-					self.showstlbasename = parseBoolean(value, True)
+				if opt == "lastgcodedirectory":
+					self.lastgcodedirectory = value
+				elif opt == "showgcodebasename":
+					self.showgcodebasename = parseBoolean(value, True)
 					
 	def save(self):
 		try:
@@ -43,8 +43,8 @@ class Settings:
 		except ConfigParser.DuplicateSectionError:
 			pass
 		
-		self.cfg.set(self.section, "laststldirectory", str(self.laststldirectory))
-		self.cfg.set(self.section, "showstlbasename", str(self.showstlbasename))
+		self.cfg.set(self.section, "lastgcodedirectory", str(self.lastgcodedirectory))
+		self.cfg.set(self.section, "showgcodebasename", str(self.showgcodebasename))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

@@ -9,30 +9,53 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 
 from images import Images
 from settings import Settings
+from gcsuffix import parseGCSuffix
 
 BUTTONDIM = (48, 48)
 
-wildcard = "STL (*.stl)|*.stl;*STL|AMF (*.amf.xml, *.amf)|*.amf.xml;*.AMF.XML;*.amf;*.AMF|All files (*.*)|*.*"
+wildcard = "G Code (*.gcode)|All files (*.*)|*.*"
 
 VISIBLEQUEUESIZE = 15
 
-class SliceFileObject:
+class GCodeFileObject:
 	def __init__(self, fn):
 		self.fn = fn
 		self.refresh()
 		
 	def refresh(self):
 		self.mt = time.strftime('%y/%m/%d-%H:%M:%S', time.localtime(os.path.getmtime(self.fn)))
+
+		try:		
+			fp = open(self.fn, "r")
+			fp.seek(-500, 2)
+			x = [x.rstrip() for x in fp.readlines()]
+			fp.close()
+		except:
+			x = []
+			
+		self.cfg, self.fil, self.the, self.tbed = parseGCSuffix(x)
 		
 	def getFn(self):
 		return self.fn
 	
 	def getModTime(self):
 		return self.mt
+	
+	def getCfg(self):
+		return self.cfg
+	
+	def getFil(self):
+		return self.fil
+	
+	def getTempHE(self):
+		return self.the
+	
+	def getTempBed(self):
+		return self.tbed
 
-class SliceQueue:
+class GCodeQueue:
 	def __init__(self):
-		self.fn = os.path.join(cmdFolder, "slice.queue")
+		self.fn = os.path.join(cmdFolder, "gcode.queue")
 		self.reload()
 		self.save()
 		
@@ -58,11 +81,11 @@ class SliceQueue:
 		for f in self.files:
 			if path == f.getFn():
 				f.refresh()
-
+	
 	def refreshAll(self):
 		for f in self.files:
 			f.refresh()
-
+	
 	def deQueue(self):
 		if len(self.files) == 0:
 			return None
@@ -71,13 +94,13 @@ class SliceQueue:
 		self.files = self.files[1:]
 		self.save()
 		return rv
-	
-	def enqueuePath(self, fn):				
-		pathList = [x.getFn() for x in self.sq]
+		
+	def enqueuePath(self, fn):
+		pathList = [x.getFn() for x in self.gq]
 		if fn in pathList:
-			self.sq.refreshPath(fn)
+			self.gq.refreshPath(fn)
 		else:
-			self.files.append(SliceFileObject(fn))
+			self.files.append(GCodeFileObject(fn))
 		self.save()
 		
 	def delete(self, ix):
@@ -120,13 +143,14 @@ class SliceQueue:
 	def __len__(self):
 		return len(self.files)
 
-class SliceQueueDlg(wx.Dialog):
-	def __init__(self, parent, sq):
+class GCodeQueueDlg(wx.Dialog):
+	def __init__(self, parent, gq):
 		self.parent = parent
-		self.sq = sq
-		self.sq.refreshAll()
-		self.sq.save()
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Slicing Queue", size=(800, 804))
+		self.gq = gq
+		self.gq.refreshAll()
+		self.gq.save()
+		
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, "G Code Queue", size=(800, 804))
 		self.SetBackgroundColour("white")
 
 		self.images = Images(os.path.join(cmdFolder, "images"))
@@ -137,14 +161,14 @@ class SliceQueueDlg(wx.Dialog):
 		
 		lbsizer = wx.BoxSizer(wx.HORIZONTAL)
 		lbsizer.AddSpacer((10, 10))
-		self.lbQueue = SliceQueueListCtrl(self, self.sq, self.images, self.settings.showstlbasename)
+		self.lbQueue = GCodeQueueListCtrl(self, self.gq, self.images, self.settings.showgcodebasename)
 		lbsizer.Add(self.lbQueue);
 		lbsizer.AddSpacer((10, 10))
 		
 		lbbtns = wx.BoxSizer(wx.VERTICAL)
 		lbbtns.AddSpacer((10, 10))
 		self.bAdd = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAdd, size=BUTTONDIM)
-		self.bAdd.SetToolTipString("Add new files to the slicing queue")
+		self.bAdd.SetToolTipString("Add new files to the gcode queue")
 		self.Bind(wx.EVT_BUTTON, self.doAdd, self.bAdd)
 		lbbtns.Add(self.bAdd)
 		
@@ -171,9 +195,9 @@ class SliceQueueDlg(wx.Dialog):
 		lbbtns.AddSpacer((20, 20))
 		
 		self.bView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngView, size=BUTTONDIM)
-		self.bView.SetToolTipString("View STL/AMF file")
+		self.bView.SetToolTipString("View G Code file")
 		lbbtns.Add(self.bView)
-		self.Bind(wx.EVT_BUTTON, self.stlView, self.bView)
+		self.Bind(wx.EVT_BUTTON, self.gcodeView, self.bView)
 		self.bView.Enable(True)
 		
 		lbsizer.Add(lbbtns)
@@ -211,13 +235,13 @@ class SliceQueueDlg(wx.Dialog):
 		dsizer.Fit(self)
 	
 	def checkBasename(self, evt):
-		self.settings.showstlbasename = evt.IsChecked()
-		self.lbQueue.setBaseNameOnly(self.settings.showstlbasename)
+		self.settings.showgcodebasename = evt.IsChecked()
+		self.lbQueue.setBaseNameOnly(self.settings.showgcodebasename)
 		
 	def doAdd(self, evt):
 		dlg = wx.FileDialog(
 						self, message="Choose a file",
-						defaultDir=self.settings.laststldirectory, 
+						defaultDir=self.settings.lastgcodedirectory, 
 						defaultFile="",
 						wildcard=wildcard,
 						style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR)
@@ -227,19 +251,19 @@ class SliceQueueDlg(wx.Dialog):
 			if len(paths) > 0:
 				self.bSave.Enable(True)
 				nd = os.path.split(paths[0])[0]
-				if nd != self.settings.laststldirectory:
-					self.settings.laststldirectory = nd
+				if nd != self.settings.lastgcodedirectory:
+					self.settings.lastgcodedirectory = nd
 				
 			for path in paths:
-				self.sq.enQueuePath(path)
+				self.gq.enQueuePath(path)
 					
 			if len(paths) > 0:
-				self.bSave.Enable(True)
 				self.lbQueue.refreshAll()
+				self.bSave.Enable(True)
 
 	def doDel(self, evt):
 		lx = self.lbQueue.getSelection()
-		self.sq.delete(lx)
+		self.gq.delete(lx)
 			
 		self.lbQueue.refreshAll()			
 		self.bDel.Enable(False)
@@ -249,7 +273,7 @@ class SliceQueueDlg(wx.Dialog):
 		
 	def doUp(self, evt):
 		lx = self.lbQueue.getSelection()
-		self.sq.swap(lx, lx-1)
+		self.gq.swap(lx, lx-1)
 		self.lbQueue.refreshAll()
 		
 		self.lbQueue.setSelection(lx-1)
@@ -260,13 +284,13 @@ class SliceQueueDlg(wx.Dialog):
 		
 	def doDown(self, evt):
 		lx = self.lbQueue.getSelection()
-		self.sq.swap(lx, lx+1)
+		self.gq.swap(lx, lx+1)
 		self.lbQueue.refreshAll()
 
 		self.lbQueue.setSelection(lx+1)
 		self.lbQueue.EnsureVisible(lx+1)
 		self.bUp.Enable(True)
-		self.bDown.Enable((lx+2) != len(self.sq))
+		self.bDown.Enable((lx+2) != len(self.gq))
 		self.bSave.Enable(True)
 		
 	def doQueueSelect(self, lx):
@@ -276,53 +300,52 @@ class SliceQueueDlg(wx.Dialog):
 		else:
 			self.bUp.Enable(True)
 			
-		if lx == len(self.sq) - 1:
+		if lx == len(self.gq) - 1:
 			self.bDown.Enable(False)
 		else:
 			self.bDown.Enable(True)
 		
-	def stlView(self, evt):
+	def gcodeView(self, evt):
 		lx = self.lbQueue.getSelection()
 		if lx is not None:
-			self.parent.displayStlFile(self.sq[lx].getFn())
+			self.parent.displayGCodeFile(self.gq[lx].getFn())
 					
 	def doSave(self, evt):
-		self.sq.save()
+		self.gq.save()
 		self.settings.save()
 		self.EndModal(wx.ID_OK)
 		
 	def doCancel(self, evt):
 		if self.bSave.IsEnabled():
 			dlg = wx.MessageDialog(self, "Exit without saving changes?",
-					'Slicing Queue', wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_INFORMATION)
+					'G Code Queue', wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_INFORMATION)
 			
 			rc = dlg.ShowModal()
 			dlg.Destroy()
 
 			if rc == wx.ID_YES:
 				self.settings.save()
-				self.sq.reload()
+				self.gq.reload()
 				self.EndModal(wx.ID_CANCEL)
 		else:
 			self.settings.save()
-			self.sq.reload()
+			self.gq.reload()
 			self.EndModal(wx.ID_CANCEL)
 
-class SliceQueueListCtrl(wx.ListCtrl):	
-	def __init__(self, parent, sq, images, basenameonly):
+class GCodeQueueListCtrl(wx.ListCtrl):	
+	def __init__(self, parent, gq, images, basenameonly):
 		
 		f = wx.Font(8,  wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		dc = wx.ScreenDC()
 		dc.SetFont(f)
 		fontHeight = dc.GetTextExtent("Xy")[1]
 		
-		colWidths = [500, 130]
-		colTitles = ["File", "Modified"]
+		colWidths = [500, 200, 120, 200, 130]
+		colTitles = ["File", "Config", "Fil Diam", "Temperatures", "Modified"]
 		
 		totwidth = 20;
 		for w in colWidths:
 			totwidth += w
-			
 		
 		self.attrEven = wx.ListItemAttr()
 		self.attrEven.SetBackgroundColour(wx.Colour(255, 255, 255))
@@ -335,7 +358,7 @@ class SliceQueueListCtrl(wx.ListCtrl):
 			)
 
 		self.parent = parent		
-		self.sq = sq
+		self.gq = gq
 		self.basenameonly = basenameonly
 		self.selectedItem = None
 		self.il = wx.ImageList(16, 16)
@@ -352,13 +375,13 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doListSelect)
 
 	def setArraySize(self):		
-		self.SetItemCount(len(self.sq))
+		self.SetItemCount(len(self.gq))
 		
 	def getSelection(self):
 		return self.selectedItem
 	
 	def setSelection(self, lx):
-		if lx < 0 or lx >= len(self.sq):
+		if lx < 0 or lx >= len(self.gq):
 			return
 		
 		self.selectedItem = lx
@@ -369,7 +392,7 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		if self.selectedItem is None:
 			return None
 		
-		return self.sq[self.selectedItem].getFn()
+		return self.gq[self.selectedItem].getFn()
 		
 	def doListSelect(self, evt):
 		x = self.selectedItem
@@ -388,18 +411,28 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		self.refreshAll()
 		
 	def refreshAll(self):
-		self.SetItemCount(len(self.sq))
-		for i in range(len(self.sq)):
+		self.SetItemCount(len(self.gq))
+		for i in range(len(self.gq)):
 			self.RefreshItem(i)
 
 	def OnGetItemText(self, item, col):
 		if col == 0:
 			if self.basenameonly:
-				return os.path.basename(self.sq[item].getFn())
+				return os.path.basename(self.gq[item].getFn())
 			else:
-				return self.sq[item].getFn()
+				return self.gq[item].getFn()
+		
+		elif col == 1:
+			return self.gq[item].getCfg()
+		
+		elif col == 2:
+			return self.gq[item].getFil()
+		
+		elif col == 3:
+			return self.gq[item].getTempHE() + " / " + self.gq[item].getTempBed()
+		
 		else:
-			return self.sq[item].getModTime()
+			return self.gq[item].getModTime()
 
 	def OnGetItemImage(self, item):
 		if item == self.selectedItem:
