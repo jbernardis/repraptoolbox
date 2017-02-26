@@ -95,8 +95,8 @@ class GCodeQueue:
 		self.save()
 		return rv
 		
-	def enqueuePath(self, fn):
-		pathList = [x.getFn() for x in self.gq]
+	def enQueuePath(self, fn):
+		pathList = [x.getFn() for x in self.files]
 		if fn in pathList:
 			self.gq.refreshPath(fn)
 		else:
@@ -226,8 +226,8 @@ class GCodeQueueDlg(wx.Dialog):
 		self.cbBasename = wx.CheckBox(self, wx.ID_ANY, "Show basename only")
 		self.cbBasename.SetToolTipString("Show only the basename of files")
 		self.Bind(wx.EVT_CHECKBOX, self.checkBasename, self.cbBasename)
-		self.cbBasename.SetValue(self.settings.showstlbasename)
-		btnsizer.Add(self.cbBasename, 1, wx.TOP, 5)
+		self.cbBasename.SetValue(self.settings.showgcodebasename)
+		btnsizer.Add(self.cbBasename, 1, wx.TOP, 15)
 		
 		dsizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5)
 
@@ -313,7 +313,7 @@ class GCodeQueueDlg(wx.Dialog):
 	def doSave(self, evt):
 		self.gq.save()
 		self.settings.save()
-		self.EndModal(wx.ID_OK)
+		self.parent.closeGCodeQueue(wx.ID_OK)
 		
 	def doCancel(self, evt):
 		if self.bSave.IsEnabled():
@@ -326,11 +326,11 @@ class GCodeQueueDlg(wx.Dialog):
 			if rc == wx.ID_YES:
 				self.settings.save()
 				self.gq.reload()
-				self.EndModal(wx.ID_CANCEL)
+				self.parent.closeGCodeQueue(wx.ID_CANCEL)
 		else:
 			self.settings.save()
 			self.gq.reload()
-			self.EndModal(wx.ID_CANCEL)
+			self.parent.closeGCodeQueue(wx.ID_CANCEL)
 
 class GCodeQueueListCtrl(wx.ListCtrl):	
 	def __init__(self, parent, gq, images, basenameonly):

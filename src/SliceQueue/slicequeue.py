@@ -72,8 +72,8 @@ class SliceQueue:
 		self.save()
 		return rv
 	
-	def enqueuePath(self, fn):				
-		pathList = [x.getFn() for x in self.sq]
+	def enQueuePath(self, fn):				
+		pathList = [x.getFn() for x in self.files]
 		if fn in pathList:
 			self.sq.refreshPath(fn)
 		else:
@@ -203,7 +203,7 @@ class SliceQueueDlg(wx.Dialog):
 		self.cbBasename.SetToolTipString("Show only the basename of files")
 		self.Bind(wx.EVT_CHECKBOX, self.checkBasename, self.cbBasename)
 		self.cbBasename.SetValue(self.settings.showstlbasename)
-		btnsizer.Add(self.cbBasename, 1, wx.TOP, 5)
+		btnsizer.Add(self.cbBasename, 1, wx.TOP, 15)
 		
 		dsizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5)
 
@@ -289,7 +289,7 @@ class SliceQueueDlg(wx.Dialog):
 	def doSave(self, evt):
 		self.sq.save()
 		self.settings.save()
-		self.EndModal(wx.ID_OK)
+		self.parent.closeStlQueue(wx.ID_OK)
 		
 	def doCancel(self, evt):
 		if self.bSave.IsEnabled():
@@ -302,11 +302,11 @@ class SliceQueueDlg(wx.Dialog):
 			if rc == wx.ID_YES:
 				self.settings.save()
 				self.sq.reload()
-				self.EndModal(wx.ID_CANCEL)
+				self.parent.closeStlQueue(wx.ID_CANCEL)
 		else:
 			self.settings.save()
 			self.sq.reload()
-			self.EndModal(wx.ID_CANCEL)
+			self.parent.closeStlQueue(wx.ID_CANCEL)
 
 class SliceQueueListCtrl(wx.ListCtrl):	
 	def __init__(self, parent, sq, images, basenameonly):

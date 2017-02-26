@@ -76,6 +76,8 @@ class MyFrame(wx.Frame):
 		self.dlgViewStl = None
 		self.dlgPlater = None
 		self.dlgGEdit = None
+		self.dlgGcQueue = None
+		self.dlgStlQueue = None
 		
 		self.sliceQueue = SliceQueue()
 		self.gcodeQueue = GCodeQueue()
@@ -130,12 +132,20 @@ class MyFrame(wx.Frame):
 
 		self.bStlNext = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onStlNext, self.bStlNext)
+		
+		self.bStlToQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
+		self.bStlToQueue.SetToolTipString("Add the current STL file to the slice queue")
+		self.Bind(wx.EVT_BUTTON, self.onStlToQueue, self.bStlToQueue)
 
 		self.bGCodeQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGcodequeue, size=BUTTONDIMWIDE)
 		self.Bind(wx.EVT_BUTTON, self.onGCodeQueue, self.bGCodeQueue)
 
 		self.bGCodeNext = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onGCodeNext, self.bGCodeNext)
+		
+		self.bGcToQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
+		self.bGcToQueue.SetToolTipString("Add the current G Code file to the print queue")
+		self.Bind(wx.EVT_BUTTON, self.onGcToQueue, self.bGcToQueue)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
 		self.meshButtons = self.createSectionButtons("mesh", self.doMeshButton)
@@ -264,6 +274,8 @@ class MyFrame(wx.Frame):
 		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
 		bstlsizer.AddSpacer((20, 20))
 		bstlsizer.Add(self.tcStlFile)
+		bstlsizer.AddApacer((10, 10))
+		bstlsizer.Add(self.bStlToQueue)
 		bstlsizer.AddSpacer((20, 20))
 		bstlvsizer.AddSpacer((20, 20))
 		bstlvsizer.Add(bstlsizer)
@@ -277,6 +289,8 @@ class MyFrame(wx.Frame):
 		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
 		bgcsizer.AddSpacer((20, 20))
 		bgcsizer.Add(self.tcGcFile)
+		bgcsizer.AddApacer((10, 10))
+		bgcsizer.Add(self.bGcToQueue)
 		bgcsizer.AddSpacer((20, 20))
 		bgcvsizer.AddSpacer((20, 20))
 		bgcvsizer.Add(bgcsizer)
@@ -562,6 +576,7 @@ class MyFrame(wx.Frame):
 		if self.wPrinter[pName] is None:			
 			self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
 			self.assignPendantIf(pName)
+			self.setGCodeQLen()
 		else:
 			self.wPrinter[pName].Show()
 			self.wPrinter[pName].Raise()
@@ -666,6 +681,10 @@ class MyFrame(wx.Frame):
 			self.tcStlFile.SetValue(fn)
 			if addToQueue:
 				self.sliceQueue.enQueuePath(fn)
+				
+	def exportStlToQueue(self):
+		if not self.exportedStlFile is None:
+			self.sliceQueue.enQueuePath(self.exportedStlFile)
 		
 	def exportGcFile(self, fn, addToQueue=False):
 		self.exportedGcFile = fn
@@ -675,6 +694,10 @@ class MyFrame(wx.Frame):
 			self.tcGcFile.SetValue(fn)
 			if addToQueue:
 				self.gcodeQueue.enQueuePath(fn)
+				
+	def exportGcToQueue(self):
+		if not self.exportedGcFile is None:
+			self.gcodeQueue.enQueuePath(self.exportedGcFile)
 		
 	def importStlFile(self):
 		return self.exportedStlFile
@@ -710,12 +733,20 @@ class MyFrame(wx.Frame):
 		self.logger.doSave()
 		
 	def onStlQueue(self, evt):
-		dlg = SliceQueueDlg(self, self.sliceQueue)
-		if dlg.ShowModal() == wx.ID_OK:
-			self.setSliceQLen()
+		if self.dlgStlQueue is None:
+			dlg = SliceQueueDlg(self, self.sliceQueue)
+			dlg.Show()
+			self.dlgStlQueue = dlg
+		else:
+			self.dlgStlQueue.Show()
+			self.dlgStlQueue.Raise()
 
-		dlg.Destroy();
-		
+	def closeStlQueue(self, rc):
+		if rc == wx.ID_OK:
+			self.setSliceQLen()
+		self.dlgStlQueue.Destroy();
+		self.dlgStlQueue = None
+
 	def displayStlFile(self, fn):
 		if self.dlgViewStl is None:
 			dlg = StlViewDlg(self)
@@ -745,12 +776,23 @@ class MyFrame(wx.Frame):
 		self.exportStlFile(fn)
 		self.setSliceQLen()
 		
+	def onStlToQueue(self, evt):
+		self.exportStlToQueue()
+		
 	def onGCodeQueue(self, evt):
-		dlg = GCodeQueueDlg(self, self.gcodeQueue)
-		if dlg.ShowModal() == wx.ID_OK:
-			self.setGCodeQLen()
+		if self.dlgGcQueue is None:
+			dlg = GCodeQueueDlg(self, self.gcodeQueue)
+			dlg.Show()
+			self.dlgGcQueue = dlg
+		else:
+			self.dlgGcQueue.Show()
+			self.dlgGcQueue.Raise()
 
-		dlg.Destroy();
+	def closeGCodeQueue(self, rc):
+		if rc == wx.ID_OK:
+			self.setGCodeQLen()
+		self.dlgGcQueue.Destroy();
+		self.dlgGcQueue = None
 		
 	def displayGCodeFile(self, fn):
 		if self.dlgGEdit is None:
@@ -772,14 +814,25 @@ class MyFrame(wx.Frame):
 		if n > 0:
 			nfn = os.path.basename(self.gcodeQueue.peek().getFn())
 			self.bGCodeNext.SetToolTipString("Remove the first file (%s) from the queue" % nfn)
+			pmMsg = "Import first file (%s) from G Code queue" % nfn
 		else:
 			self.bGCodeNext.SetToolTipString("")
+			pmMsg = None
+			
+		for pn in self.wPrinter.keys():
+			p = self.wPrinter[pn]
+			if p is not None:
+				p.setImportButton(pmMsg)
+				
 		self.bGCodeNext.Enable(n != 0)
 		
 	def onGCodeNext(self, evt):
 		fn = self.gcodeQueue.deQueue().getFn()
 		self.exportGcFile(fn)
 		self.setGCodeQLen()
+		
+	def onGcToQueue(self, evt):
+		self.exportGcToQueue()
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)

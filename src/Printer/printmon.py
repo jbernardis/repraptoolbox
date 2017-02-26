@@ -64,6 +64,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.gcodeFile = None
 		self.printerName = prtName
 		self.layerMap = []
+		self.okToImport = False
 		
 		self.currentLayer = 0
 		self.maxTool = 0
@@ -117,7 +118,6 @@ class PrintMonitorDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
 		
 		self.bImportQ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
-		self.bImportQ.SetToolTipString("Import G Code file from G Code queue")
 		self.Bind(wx.EVT_BUTTON, self.onImportFromQueue, self.bImportQ)
 		
 		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
@@ -323,6 +323,16 @@ class PrintMonitorDlg(wx.Frame):
 			return
 		
 		self.loadGFile(fn)
+		
+	def setImportButton(self, msg):
+		if msg is None:
+			self.okToImport = False
+			self.bImportQ.SetToolTipString("")
+			self.bImportQ.Enable(False)
+		else:
+			self.okToImport = True
+			self.bImportQ.SetToolTipString(msg)
+			self.bImportQ.Enable(self.bImport.IsEnabled())
 		
 	def onOpenFile(self, evt):
 		wildcard = "GCode (*.gcode)|*.gcode|"	 \
@@ -666,6 +676,7 @@ class PrintMonitorDlg(wx.Frame):
 	def enableButtonsByState(self):
 		if self.state == PrintState.idle:
 			self.bImport.Enable(True)
+			self.bImportQ.Enable(True)
 			self.bOpen.Enable(True)
 			if self.sdcard:
 				self.bSdPrintTo.Enable(self.gcodeLoaded)
@@ -682,6 +693,7 @@ class PrintMonitorDlg(wx.Frame):
 				self.bPause.Enable(False)
 		elif self.state in [PrintState.printing, PrintState.sdprintingto]:
 			self.bImport.Enable(False)
+			self.bImportQ.Enable(False)
 			self.bOpen.Enable(False)
 			self.bPrint.Enable(False)
 			self.bPrint.setPrint()
@@ -696,6 +708,7 @@ class PrintMonitorDlg(wx.Frame):
 			pass
 		elif self.state == PrintState.paused:
 			self.bImport.Enable(True)
+			self.bImportQ.Enable(True)
 			self.bOpen.Enable(True)
 			self.bPrint.Enable(True)
 			self.bPrint.setRestart()
