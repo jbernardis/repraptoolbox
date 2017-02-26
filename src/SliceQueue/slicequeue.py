@@ -63,22 +63,24 @@ class SliceQueue:
 		for f in self.files:
 			f.refresh()
 
-	def deQueue(self):
+	def deQueue(self, save=True):
 		if len(self.files) == 0:
 			return None
 		
 		rv = self.files[0]
 		self.files = self.files[1:]
-		self.save()
+		if save:
+			self.save()
 		return rv
 	
-	def enQueuePath(self, fn):				
+	def enQueuePath(self, fn, save=True):				
 		pathList = [x.getFn() for x in self.files]
 		if fn in pathList:
-			self.sq.refreshPath(fn)
+			self.refreshPath(fn)
 		else:
 			self.files.append(SliceFileObject(fn))
-		self.save()
+		if save:
+			self.save()
 		
 	def delete(self, ix):
 		if ix < 0 or ix >= self.__len__():
@@ -231,7 +233,7 @@ class SliceQueueDlg(wx.Dialog):
 					self.settings.laststldirectory = nd
 				
 			for path in paths:
-				self.sq.enQueuePath(path)
+				self.sq.enQueuePath(path, False)
 					
 			if len(paths) > 0:
 				self.bSave.Enable(True)

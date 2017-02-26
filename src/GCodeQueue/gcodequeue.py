@@ -13,7 +13,7 @@ from gcsuffix import parseGCSuffix
 
 BUTTONDIM = (48, 48)
 
-wildcard = "G Code (*.gcode)|All files (*.*)|*.*"
+wildcard = "G Code (*.gcode)|*.gcode|All files (*.*)|*.*"
 
 VISIBLEQUEUESIZE = 15
 
@@ -86,22 +86,24 @@ class GCodeQueue:
 		for f in self.files:
 			f.refresh()
 	
-	def deQueue(self):
+	def deQueue(self, save=True):
 		if len(self.files) == 0:
 			return None
 		
 		rv = self.files[0]
 		self.files = self.files[1:]
-		self.save()
+		if save:
+			self.save()
 		return rv
 		
-	def enQueuePath(self, fn):
+	def enQueuePath(self, fn, save=True):
 		pathList = [x.getFn() for x in self.files]
 		if fn in pathList:
-			self.gq.refreshPath(fn)
+			self.refreshPath(fn)
 		else:
 			self.files.append(GCodeFileObject(fn))
-		self.save()
+		if save:
+			self.save()
 		
 	def delete(self, ix):
 		if ix < 0 or ix >= self.__len__():
@@ -255,7 +257,7 @@ class GCodeQueueDlg(wx.Dialog):
 					self.settings.lastgcodedirectory = nd
 				
 			for path in paths:
-				self.gq.enQueuePath(path)
+				self.gq.enQueuePath(path, False)
 					
 			if len(paths) > 0:
 				self.lbQueue.refreshAll()

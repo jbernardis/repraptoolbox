@@ -273,8 +273,8 @@ class MyFrame(wx.Frame):
 		bstlsizer = wx.BoxSizer(wx.HORIZONTAL)
 		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
 		bstlsizer.AddSpacer((20, 20))
-		bstlsizer.Add(self.tcStlFile)
-		bstlsizer.AddApacer((10, 10))
+		bstlsizer.Add(self.tcStlFile, 1, wx.TOP, 12)
+		bstlsizer.AddSpacer((10, 10))
 		bstlsizer.Add(self.bStlToQueue)
 		bstlsizer.AddSpacer((20, 20))
 		bstlvsizer.AddSpacer((20, 20))
@@ -288,8 +288,8 @@ class MyFrame(wx.Frame):
 		bgcsizer = wx.BoxSizer(wx.HORIZONTAL)
 		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
 		bgcsizer.AddSpacer((20, 20))
-		bgcsizer.Add(self.tcGcFile)
-		bgcsizer.AddApacer((10, 10))
+		bgcsizer.Add(self.tcGcFile, 1, wx.TOP, 12)
+		bgcsizer.AddSpacer((10, 10))
 		bgcsizer.Add(self.bGcToQueue)
 		bgcsizer.AddSpacer((20, 20))
 		bgcvsizer.AddSpacer((20, 20))
@@ -542,6 +542,7 @@ class MyFrame(wx.Frame):
 			dlg = Slic3rDlg(self)
 			dlg.Show()
 			self.dlgSlic3r = dlg
+			self.setSliceQLen()
 		else:
 			self.dlgSlic3r.Show()
 			self.dlgSlic3r.Raise()
@@ -554,6 +555,7 @@ class MyFrame(wx.Frame):
 			dlg = CuraEngineDlg(self)
 			dlg.Show()
 			self.dlgCuraEngine = dlg
+			self.setSliceQLen()
 		else:
 			self.dlgCuraEngine.Show()
 			self.dlgCuraEngine.Raise()
@@ -767,8 +769,15 @@ class MyFrame(wx.Frame):
 		if n > 0:
 			nfn = os.path.basename(self.sliceQueue.peek().getFn())
 			self.bStlNext.SetToolTipString("Remove the first file (%s) from the queue" % nfn)
+			slMsg = "Import first file (%s) from Slice queue" % nfn
 		else:
 			self.bStlNext.SetToolTipString("")
+			slMsg = None
+			
+		for s in [self.dlgCuraEngine, self.dlgSlic3r]:
+			if s is not None:
+				s.setImportButton(slMsg)
+				
 		self.bStlNext.Enable(n != 0)
 		
 	def onStlNext(self, evt):

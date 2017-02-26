@@ -157,6 +157,9 @@ class CuraEngineDlg(wx.Frame):
 		self.bImport.SetToolTipString("Import a model file from toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onBImport, self.bImport)
 		
+		self.bImportQ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
+		self.Bind(wx.EVT_BUTTON, self.onBImportFromQueue, self.bImportQ)
+		
 		self.cbGcDir = wx.CheckBox(self, wx.ID_ANY, "Use STL directory for G Code file")
 		self.cbGcDir.SetToolTipString("Use the directory from the STL file for the resulting G Code file")
 		self.cbGcDir.SetValue(self.settings.usestldir)
@@ -224,6 +227,8 @@ class CuraEngineDlg(wx.Frame):
 		vsz.Add(self.bOpen)
 		vsz.AddSpacer((5, 5))
 		vsz.Add(self.bImport)
+		vsz.AddSpacer((5, 5))
+		vsz.Add(self.bImportQ)
 		szStl.Add(vsz)
 		szStl.AddSpacer((10, 10))
 
@@ -383,6 +388,14 @@ class CuraEngineDlg(wx.Frame):
 		self.Fit()
 		if self.settings.dlgposition is not None:
 			self.SetPosition(self.settings.dlgposition)
+			
+	def setImportButton(self, msg):
+		if msg is None:
+			self.bImportQ.SetToolTipString("")
+			self.bImportQ.Enable(False)
+		else:
+			self.bImportQ.SetToolTipString(msg)
+			self.bImportQ.Enable(True)
 		
 	def getExtruderCount(self, cfgfn):
 		d = loadProfile(cfgfn, self.log, self.curasettings)
@@ -680,6 +693,15 @@ class CuraEngineDlg(wx.Frame):
 			self.gcDir = None
 			self.gcFn = None
 
+		self.updateFileDisplay()			
+		self.enableButtons()
+
+	def onBImportFromQueue(self, evt):
+		self.stlFn = self.parent.importStlFromQueue()
+		if self.stlFn is None:
+			self.gcDir = None
+			self.gcFn = None
+		
 		self.updateFileDisplay()			
 		self.enableButtons()
 	
