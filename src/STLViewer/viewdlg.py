@@ -326,6 +326,7 @@ class StlViewDlg(wx.Frame):
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
 		self.bImport.SetToolTipString("Import the current STL file from the toolbox for viewing")
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
+		self.bImport.Enable(False)
 		bsizer.Add(self.bImport)
 		
 		bsizer.AddSpacer((20, 20))
@@ -341,6 +342,14 @@ class StlViewDlg(wx.Frame):
 		
 		self.SetSizer(sizer)
 		self.Fit()
+			
+	def setImportFile(self, fn):
+		if fn is None:
+			self.bImport.SetToolTipString("")
+			self.bImport.Enable(False)
+		else:
+			self.bImport.SetToolTipString("Import model file (%s)" % fn)
+			self.bImport.Enable(True)
 		
 	def setTitle(self):
 		s = "STL Viewer"

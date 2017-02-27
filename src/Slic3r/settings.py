@@ -29,6 +29,7 @@ class Settings:
 		self.printerchoice = "prism"
 		self.filamentchoice = ["PLA", "PLA", "PLA", "PLA"]
 		self.autoexport = True
+		self.autoenqueue = False
 		self.dlgposition = None
 		
 		self.inifile = os.path.join(folder, INIFILE)
@@ -57,6 +58,8 @@ class Settings:
 					self.printerchoice = value
 				elif opt == "autoexport":
 					self.autoexport = parseBoolean(value, True)
+				elif opt == "autoenqueue":
+					self.autoenqueue = parseBoolean(value, False)
 				elif opt == "filamentchoice":
 					self.filamentchoice = re.split("\s*,\s*", value)
 				elif opt == 'dlgposition':
@@ -82,6 +85,7 @@ class Settings:
 		self.cfg.set(self.section, "printerchoice", str(self.printerchoice))
 		self.cfg.set(self.section, "filamentchoice", ",".join(self.filamentchoice))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
+		self.cfg.set(self.section, "autoenqueue", str(self.autoenqueue))
 		self.cfg.set(self.section, "dlgposition", str(self.dlgposition))
 
 		try:		

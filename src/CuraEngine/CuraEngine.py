@@ -782,7 +782,7 @@ class CuraEngineDlg(wx.Frame):
 				self.sliceComplete = True
 				self.addGcSuffix()
 				if self.settings.autoexport:
-					self.parent.exportGcFile(self.gcFn)
+					self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
 				
 			self.updateFileDisplay()
 			self.enableButtons()
@@ -834,5 +834,5 @@ class CuraEngineDlg(wx.Frame):
 		for ex in range(self.nExtruders):
 			cmaterial.append(self.chMaterial[ex].GetString(self.chMaterial[ex].GetSelection()))
 			
-		result = "%s/%s/%s" % (cprint, cprinter, ",".join(cmaterial))
+		result = "Cura(%s/%s/%s)" % (cprint, cprinter, ",".join(cmaterial))
 		return result

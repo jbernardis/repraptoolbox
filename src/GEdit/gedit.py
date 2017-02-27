@@ -53,6 +53,7 @@ class GEditDlg(wx.Frame):
 		self.shiftY = 0
 		self.modified = False
 		self.filename = None
+		self.importFileName = None
 		
 		self.gObj = self.loadGCode(self.filename)
 		if self.gObj is not None:
@@ -134,6 +135,7 @@ class GEditDlg(wx.Frame):
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
 		self.bImport.SetToolTipString("Import the current toolbox G Code file")
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
+		self.bImport.Enable(False)
 		
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
 		self.bExport.SetToolTipString("Export the current toolbox G Code file")
@@ -268,6 +270,15 @@ class GEditDlg(wx.Frame):
 		
 		if self.gObj is not None:
 			self.enableButtons()
+			
+	def setImportFile(self, fn):
+		self.importFileName = fn
+		if fn is None:
+			self.bImport.SetToolTipString("")
+			self.bImport.Enable(False)
+		else:
+			self.bImport.SetToolTipString("Import G Code file (%s)" % fn)
+			self.bImport.Enable(True)
 			
 	def onBracketStart(self, evt):
 		b = self.lcGCode.setBracketStart()
@@ -492,7 +503,10 @@ class GEditDlg(wx.Frame):
 		self.bBracketEnd.Enable(flag)
 		self.enableBracketDel()
 		if openButtons:
-			self.bImport.Enable(flag)
+			if flag and self.importFileName is not None:
+				self.bImport.Enable(True)
+			else:
+				self.bImport.Enable(False)
 			self.bOpen.Enable(flag)
 			
 	def doShiftModel(self, evt):

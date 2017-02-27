@@ -31,6 +31,7 @@ class Settings:
 		self.printerchoice = "prism"
 		self.materialchoice = ["PLA", "PLA", "PLA", "PLA"]
 		self.autoexport = True
+		self.autoenqueue = False
 		self.centerobject = True
 		self.dlgposition = None
 		self.cfgdlgposition = None
@@ -70,6 +71,8 @@ class Settings:
 					self.printerchoice = value
 				elif opt == "autoexport":
 					self.autoexport = parseBoolean(value, True)
+				elif opt == "autoenqueue":
+					self.autoenqueue = parseBoolean(value, False)
 				elif opt == "materialchoice":
 					self.materialchoice = re.split("\s*,\s*", value)
 				elif opt == 'dlgposition':
@@ -107,6 +110,7 @@ class Settings:
 		self.cfg.set(self.section, "printerchoice", str(self.printerchoice))
 		self.cfg.set(self.section, "materialchoice", ",".join(self.materialchoice))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
+		self.cfg.set(self.section, "autoenqueue", str(self.autoenqueue))
 		self.cfg.set(self.section, "centerobject", str(self.centerobject))
 		self.cfg.set(self.section, "addsettingstogcode", str(self.addsettingstogcode))
 		self.cfg.set(self.section, "dlgposition", str(self.dlgposition))

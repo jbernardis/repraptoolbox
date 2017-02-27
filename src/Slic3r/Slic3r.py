@@ -553,7 +553,7 @@ class Slic3rDlg(wx.Frame):
 				self.sliceComplete = True
 				self.addGcSuffix()
 				if self.settings.autoexport:
-					self.parent.exportGcFile(self.gcFn)
+					self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
 				
 			self.tcLog.AppendText("Deleting temporary config file '%s'" % self.cfgTempFn)
 			os.unlink(self.cfgTempFn)
@@ -602,7 +602,7 @@ class Slic3rDlg(wx.Frame):
 		for ex in range(self.nExtruders):
 			cfilament.append(self.chFilament[ex].GetString(self.chFilament[ex].GetSelection()))
 			
-		result = "%s/%s/%s" % (cprint, cprinter, ",".join(cfilament))
+		result = "Slic3r(%s/%s/%s)" % (cprint, cprinter, ",".join(cfilament))
 		return result
 
 	def mergeConfigFiles(self):		
