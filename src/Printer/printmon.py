@@ -332,7 +332,15 @@ class PrintMonitorDlg(wx.Frame):
 		else:
 			self.okToImport = True
 			self.bImportQ.SetToolTipString(msg)
-			self.bImportQ.Enable(self.bImport.IsEnabled())
+			self.bImportQ.Enable(self.bOpen.IsEnabled())
+		
+	def setImportFile(self, fn):
+		if fn is None:
+			self.bImport.Enable(False)
+			self.bImport.SetToolTipString("")
+		else:
+			self.bImport.Enable(self.bOpen.IsEnabled())
+			self.bImport.SetToolTipString("IMport G Code file (%s)" % fn)
 		
 	def onOpenFile(self, evt):
 		wildcard = "GCode (*.gcode)|*.gcode|"	 \

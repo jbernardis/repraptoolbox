@@ -122,17 +122,18 @@ class SliceQueue:
 	def __len__(self):
 		return len(self.files)
 
-class SliceQueueDlg(wx.Dialog):
+class SliceQueueDlg(wx.Frame):
 	def __init__(self, parent, sq):
 		self.parent = parent
 		self.sq = sq
 		self.sq.refreshAll()
 		self.sq.save()
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Slicing Queue", size=(800, 804))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "Slicing Queue", size=(800, 804))
 		self.SetBackgroundColour("white")
 
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		self.settings = Settings(cmdFolder)
+		self.Bind(wx.EVT_CLOSE, self.doCancel)
 
 		dsizer = wx.BoxSizer(wx.VERTICAL)
 		dsizer.AddSpacer((10, 10))
@@ -176,7 +177,7 @@ class SliceQueueDlg(wx.Dialog):
 		self.bView.SetToolTipString("View STL/AMF file")
 		lbbtns.Add(self.bView)
 		self.Bind(wx.EVT_BUTTON, self.stlView, self.bView)
-		self.bView.Enable(True)
+		self.bView.Enable(False)
 		
 		lbsizer.Add(lbbtns)
 		lbsizer.AddSpacer((10, 10))
@@ -244,6 +245,7 @@ class SliceQueueDlg(wx.Dialog):
 		self.sq.delete(lx)
 			
 		self.lbQueue.refreshAll()			
+		self.lbQueue.setSelection(None)
 		self.bDel.Enable(False)
 		self.bUp.Enable(False)
 		self.bDown.Enable(False)
@@ -272,16 +274,23 @@ class SliceQueueDlg(wx.Dialog):
 		self.bSave.Enable(True)
 		
 	def doQueueSelect(self, lx):
-		self.bDel.Enable(True)
-		if lx == 0:
+		if lx is None:
+			self.bView.Enable(False)
+			self.bDel.Enable(False)
 			self.bUp.Enable(False)
-		else:
-			self.bUp.Enable(True)
-			
-		if lx == len(self.sq) - 1:
 			self.bDown.Enable(False)
 		else:
-			self.bDown.Enable(True)
+			self.bView.Enable(True)
+			self.bDel.Enable(True)
+			if lx == 0:
+				self.bUp.Enable(False)
+			else:
+				self.bUp.Enable(True)
+				
+			if lx == len(self.sq) - 1:
+				self.bDown.Enable(False)
+			else:
+				self.bDown.Enable(True)
 		
 	def stlView(self, evt):
 		lx = self.lbQueue.getSelection()
@@ -360,8 +369,9 @@ class SliceQueueListCtrl(wx.ListCtrl):
 		return self.selectedItem
 	
 	def setSelection(self, lx):
-		if lx < 0 or lx >= len(self.sq):
-			return
+		if lx is not None:
+			if lx < 0 or lx >= len(self.sq):
+				return
 		
 		self.selectedItem = lx
 		self.refreshAll()

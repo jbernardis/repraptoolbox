@@ -543,6 +543,7 @@ class MyFrame(wx.Frame):
 			dlg.Show()
 			self.dlgSlic3r = dlg
 			self.setSliceQLen()
+			self.dlgSlic3r.setImportFile(self.exportedStlFile)
 		else:
 			self.dlgSlic3r.Show()
 			self.dlgSlic3r.Raise()
@@ -556,6 +557,7 @@ class MyFrame(wx.Frame):
 			dlg.Show()
 			self.dlgCuraEngine = dlg
 			self.setSliceQLen()
+			self.dlgCuraEngine.setImportFile(self.exportedStlFile)
 		else:
 			self.dlgCuraEngine.Show()
 			self.dlgCuraEngine.Raise()
@@ -579,6 +581,7 @@ class MyFrame(wx.Frame):
 			self.wPrinter[pName] = PrinterDlg(self, pName, self.reprap[pName])
 			self.assignPendantIf(pName)
 			self.setGCodeQLen()
+			self.wPrinter[pName].setImportFile(self.exportedGcFile)
 		else:
 			self.wPrinter[pName].Show()
 			self.wPrinter[pName].Raise()
@@ -678,11 +681,17 @@ class MyFrame(wx.Frame):
 	def exportStlFile(self, fn, addToQueue=False):
 		self.exportedStlFile = fn
 		if fn is None:
+			self.bStlToQueue.Enable(False)
 			self.tcStlFile.SetValue("")
 		else:
+			self.bStlToQueue.Enable(True)
 			self.tcStlFile.SetValue(fn)
 			if addToQueue:
 				self.sliceQueue.enQueuePath(fn)
+			
+		for s in [self.dlgCuraEngine, self.dlgSlic3r]:
+			if s is not None:
+				s.setImportFile(fn)
 				
 	def exportStlToQueue(self):
 		if not self.exportedStlFile is None:
@@ -691,11 +700,18 @@ class MyFrame(wx.Frame):
 	def exportGcFile(self, fn, addToQueue=False):
 		self.exportedGcFile = fn
 		if fn is None:
+			self.bGcToQueue.Enable(False)
 			self.tcGcFile.SetValue("")
 		else:
+			self.bGcToQueue.Enable(True)
 			self.tcGcFile.SetValue(fn)
 			if addToQueue:
 				self.gcodeQueue.enQueuePath(fn)
+			
+		for pn in self.wPrinter.keys():
+			p = self.wPrinter[pn]
+			if p is not None:
+				p.setImportFile(fn)
 				
 	def exportGcToQueue(self):
 		if not self.exportedGcFile is None:
@@ -705,7 +721,7 @@ class MyFrame(wx.Frame):
 		return self.exportedStlFile
 	
 	def importStlFromQueue(self):
-		fo = self.stlQueue.deQueue()
+		fo = self.sliceQueue.deQueue()
 		if fo is None:
 			return None
 		fn = fo.getFn()
@@ -768,7 +784,7 @@ class MyFrame(wx.Frame):
 		
 		if n > 0:
 			nfn = os.path.basename(self.sliceQueue.peek().getFn())
-			self.bStlNext.SetToolTipString("Remove the first file (%s) from the queue" % nfn)
+			self.bStlNext.SetToolTipString("Remove the first file (%s) from the queue and make it current" % nfn)
 			slMsg = "Import first file (%s) from Slice queue" % nfn
 		else:
 			self.bStlNext.SetToolTipString("")
@@ -822,7 +838,7 @@ class MyFrame(wx.Frame):
 		
 		if n > 0:
 			nfn = os.path.basename(self.gcodeQueue.peek().getFn())
-			self.bGCodeNext.SetToolTipString("Remove the first file (%s) from the queue" % nfn)
+			self.bGCodeNext.SetToolTipString("Remove the first file (%s) from the queue and make it current" % nfn)
 			pmMsg = "Import first file (%s) from G Code queue" % nfn
 		else:
 			self.bGCodeNext.SetToolTipString("")

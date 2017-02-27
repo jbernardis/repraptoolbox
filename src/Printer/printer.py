@@ -45,7 +45,8 @@ class PrinterDlg(wx.Frame):
 		self.fwDlg = None
 		
 		self.importMessage = "Import G Code file from G Code Queue"
-		
+		self.importFile = None
+			
 		self.zEngaged = False
 		
 		self.moveAxis = ManualCtl(self, reprap, printerName)				
@@ -160,6 +161,11 @@ class PrinterDlg(wx.Frame):
 		if self.pmonDlg is not None:
 			self.pmonDlg.setImportButton(self.importMessage)
 	
+	def setImportFile(self, fn):
+		self.importFile = fn
+		if self.pmonDlg is not None:
+			self.pmonDlg.setImportFile(self.importFile)
+	
 	def onBReset(self, evt):
 		dlg = wx.MessageDialog(self,
 				"Are you sure you want to\nreset the %s connection?" % self.printerName,
@@ -202,6 +208,7 @@ class PrinterDlg(wx.Frame):
 		if self.pmonDlg is None:
 			self.pmonDlg = PrintMonitorDlg(self, self.parent, self.reprap, self.printerName)
 			self.pmonDlg.setImportButton(self.importMessage)
+			self.pmonDlg.setImportFile(self.importFile)
 			if not self.settings.monposition is None:
 				self.pmonDlg.SetPosition(self.settings.monposition)
 		else:

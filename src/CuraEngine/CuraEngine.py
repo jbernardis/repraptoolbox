@@ -219,18 +219,23 @@ class CuraEngineDlg(wx.Frame):
 			
 		self.updateFileDisplay()
 
-		szStl = wx.BoxSizer(wx.HORIZONTAL)
+		szStl = wx.BoxSizer(wx.VERTICAL)
+		szStl.AddSpacer((5, 5))
+		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz.AddSpacer((10, 10))
+		hsz.Add(self.tcStl)
+		hsz.AddSpacer((10, 10))
+		szStl.Add(hsz)
 		szStl.AddSpacer((10, 10))
-		szStl.Add(self.tcStl, 1, wx.TOP, 38)
-		szStl.AddSpacer((10, 10))
-		vsz = wx.BoxSizer(wx.VERTICAL)
-		vsz.Add(self.bOpen)
-		vsz.AddSpacer((5, 5))
-		vsz.Add(self.bImport)
-		vsz.AddSpacer((5, 5))
-		vsz.Add(self.bImportQ)
-		szStl.Add(vsz)
-		szStl.AddSpacer((10, 10))
+		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz.AddSpacer((10, 10))
+		hsz.Add(self.bOpen)
+		hsz.AddSpacer((5, 5))
+		hsz.Add(self.bImport)
+		hsz.AddSpacer((5, 5))
+		hsz.Add(self.bImportQ)
+		szStl.Add(hsz)
+		szStl.AddSpacer((5, 5))
 
 		szUseStl = wx.BoxSizer(wx.HORIZONTAL)
 		szUseStl.AddSpacer((20, 10))
@@ -395,7 +400,15 @@ class CuraEngineDlg(wx.Frame):
 			self.bImportQ.Enable(False)
 		else:
 			self.bImportQ.SetToolTipString(msg)
-			self.bImportQ.Enable(True)
+			self.bImportQ.Enable(True)			
+			
+	def setImportFile(self, fn):
+		if fn is None:
+			self.bImport.SetToolTipString("")
+			self.bImport.Enable(False)
+		else:
+			self.bImport.SetToolTipString("Import model file (%s)" % fn)
+			self.bImport.Enable(True)
 		
 	def getExtruderCount(self, cfgfn):
 		d = loadProfile(cfgfn, self.log, self.curasettings)

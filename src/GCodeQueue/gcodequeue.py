@@ -145,15 +145,16 @@ class GCodeQueue:
 	def __len__(self):
 		return len(self.files)
 
-class GCodeQueueDlg(wx.Dialog):
+class GCodeQueueDlg(wx.Frame):
 	def __init__(self, parent, gq):
 		self.parent = parent
 		self.gq = gq
 		self.gq.refreshAll()
 		self.gq.save()
 		
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "G Code Queue", size=(800, 804))
+		wx.Frame.__init__(self, None, wx.ID_ANY, "G Code Queue", size=(800, 804))
 		self.SetBackgroundColour("white")
+		self.Bind(wx.EVT_CLOSE, self.doCancel)
 
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		self.settings = Settings(cmdFolder)
@@ -200,7 +201,7 @@ class GCodeQueueDlg(wx.Dialog):
 		self.bView.SetToolTipString("View G Code file")
 		lbbtns.Add(self.bView)
 		self.Bind(wx.EVT_BUTTON, self.gcodeView, self.bView)
-		self.bView.Enable(True)
+		self.bView.Enable(False)
 		
 		lbsizer.Add(lbbtns)
 		lbsizer.AddSpacer((10, 10))
