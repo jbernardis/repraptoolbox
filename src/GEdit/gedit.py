@@ -142,6 +142,11 @@ class GEditDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onExport, self.bExport)
 		self.bExport.Enable(False)
 		
+		self.bEnqueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
+		self.bEnqueue.SetToolTipString("Enqueue the current G Code file on the end of the G Code queue")
+		self.Bind(wx.EVT_BUTTON, self.onEnqueue, self.bEnqueue)
+		self.bEnqueue.Enable(False)
+		
 		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFilesave, size=BUTTONDIM)
 		self.bSave.SetToolTipString("Save G Code to the current file")
 		self.Bind(wx.EVT_BUTTON, self.onSave, self.bSave)
@@ -206,12 +211,14 @@ class GEditDlg(wx.Frame):
 		btnszr.Add(optszr)
 		btnszr.AddSpacer((70, 10))
 		btnszr.Add(self.bSaveLayers)
-		btnszr.AddSpacer((105, 10))
+		btnszr.AddSpacer((95, 10))
 		btnszr.Add(self.bOpen)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bImport)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bExport)
+		btnszr.AddSpacer((10, 10))
+		btnszr.Add(self.bEnqueue)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bSave)
 		btnszr.AddSpacer((10, 10))
@@ -337,7 +344,7 @@ class GEditDlg(wx.Frame):
 		if self.modified:
 			dlg = wx.MessageDialog(self,
 				"You have unsaved changes.\nAre you sure you want to export?",
-				"Confirm Expo With Pending Changes",
+				"Confirm Export With Pending Changes",
 				wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
 			rc = dlg.ShowModal()
 			dlg.Destroy()
@@ -345,6 +352,19 @@ class GEditDlg(wx.Frame):
 				return
 		
 		self.parent.exportGcFile(self.filename)
+		
+	def onEnqueue(self, evt):
+		if self.modified:
+			dlg = wx.MessageDialog(self,
+				"You have unsaved changes.\nAre you sure you want to enqueue?",
+				"Confirm Enqueue With Pending Changes",
+				wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
+			rc = dlg.ShowModal()
+			dlg.Destroy()
+			if rc != wx.ID_YES:
+				return
+		
+		self.parent.exportGcFile(self.filename, True)
 		
 	def onImport(self, evt):
 		fn = self.parent.importGcFile()
@@ -498,6 +518,7 @@ class GEditDlg(wx.Frame):
 		self.bSave.Enable(flag)
 		self.bSaveAs.Enable(flag)
 		self.bExport.Enable(flag)
+		self.bEnqueue.Enable(flag)
 		self.bFilChange.Enable(flag)
 		self.bBracketStart.Enable(flag)
 		self.bBracketEnd.Enable(flag)

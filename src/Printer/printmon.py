@@ -223,7 +223,6 @@ class PrintMonitorDlg(wx.Frame):
 		self.reprap.registerPositionHandler(self.updatePrintPosition)
 		self.reprap.registerEventHandler(self.reprapEvent)
 		self.reprap.registerSdEventHandler(self.sdcard)
-		self.wparent.registerPrinterStatusReporter(self.printerName, self)
 		
 	def show(self):
 		self.Show()
@@ -340,7 +339,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.bImport.SetToolTipString("")
 		else:
 			self.bImport.Enable(self.bOpen.IsEnabled())
-			self.bImport.SetToolTipString("IMport G Code file (%s)" % fn)
+			self.bImport.SetToolTipString("Import G Code file (%s)" % fn)
 		
 	def onOpenFile(self, evt):
 		wildcard = "GCode (*.gcode)|*.gcode|"	 \

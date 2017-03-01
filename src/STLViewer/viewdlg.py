@@ -334,7 +334,16 @@ class StlViewDlg(wx.Frame):
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
 		self.bExport.SetToolTipString("Export the current STL file to the toolbox for downstream")
 		self.Bind(wx.EVT_BUTTON, self.onExport, self.bExport)
+		self.bExport.Enable(False)
 		bsizer.Add(self.bExport)
+		
+		bsizer.AddSpacer((20, 20))
+		
+		self.bEnqueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
+		self.bEnqueue.SetToolTipString("Enqueue the current STL file to the end of the slice queue")
+		self.Bind(wx.EVT_BUTTON, self.onEnqueue, self.bEnqueue)
+		self.bEnqueue.Enable(False)
+		bsizer.Add(self.bEnqueue)
 		
 		sizer.AddSpacer((10, 10))
 		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
@@ -354,10 +363,15 @@ class StlViewDlg(wx.Frame):
 	def setTitle(self):
 		s = "STL Viewer"
 		if self.fileName is not None:
+			self.bExport.Enable(True)
+			self.bEnqueue.Enable(True)
 			if len(self.fileName) > 50:
 				s += " - %s" % os.path.basename(self.fileName)
 			else:
 				s += " - %s" % self.fileName
+		else:
+			self.bExport.Enable(False)
+			self.bEnqueue.Enable(False)
 				
 		self.SetTitle(s)
 		
@@ -368,6 +382,9 @@ class StlViewDlg(wx.Frame):
 		
 	def onExport(self, evt):
 		self.parent.exportStlFile(self.fileName)
+		
+	def onEnqueue(self, evt):
+		self.parent.exportStlFile(self.fileName, True)
 		
 	def onOpen(self, evt):
 		self.stlFileDialog()

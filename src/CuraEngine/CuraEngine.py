@@ -177,6 +177,16 @@ class CuraEngineDlg(wx.Frame):
 		self.bExport.SetToolTipString("Export G Code file to toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onBExport, self.bExport)
 		
+		self.cbAutoExport = wx.CheckBox(self, wx.ID_ANY, "Auto-export")
+		self.cbAutoExport.SetToolTipString("Automatically export the G code file when finished")
+		self.Bind(wx.EVT_CHECKBOX, self.onAutoExport, self.cbAutoExport)
+		self.cbAutoExport.SetValue(self.settings.autoexport)
+		
+		self.cbAutoEnqueue = wx.CheckBox(self, wx.ID_ANY, "Auto-enqueue")
+		self.cbAutoEnqueue.SetToolTipString("Automatically enqueue the G code file when exporting")
+		self.Bind(wx.EVT_CHECKBOX, self.onAutoEnqueue, self.cbAutoEnqueue)
+		self.cbAutoEnqueue.SetValue(self.settings.autoenqueue)
+		
 		self.loadConfigFiles()
 		
 		self.chProfile = wx.Choice(self, wx.ID_ANY, size = (225,-1), choices = self.choicesProfile)
@@ -248,12 +258,26 @@ class CuraEngineDlg(wx.Frame):
 		szGcDir.Add(self.bGcDir)
 		szGcDir.AddSpacer((10, 10))
 
-		szGc = wx.BoxSizer(wx.HORIZONTAL)
-		szGc.AddSpacer((10, 10))
-		szGc.Add(self.tcGc, 1, wx.TOP, 8)
-		szGc.AddSpacer((10, 10))
-		szGc.Add(self.bExport)
-		szGc.AddSpacer((10, 10))
+		szGc = wx.BoxSizer(wx.VERTICAL)
+		szGcH = wx.BoxSizer(wx.HORIZONTAL)
+		szGcH.AddSpacer((10, 10))
+		szGcH.Add(self.tcGc, 1, wx.TOP, 8)
+		szGcH.AddSpacer((10, 10))
+		szGcH.Add(self.bExport)
+		szGcH.AddSpacer((10, 10))
+		szGc.Add(szGcH)
+		
+		szGcH = wx.BoxSizer(wx.HORIZONTAL)
+		szGcH.AddSpacer((10, 10))
+		szGcH.Add(self.cbAutoExport)
+		szGcH.AddSpacer((10, 10))
+		szGc.Add(szGcH)
+		
+		szGcH = wx.BoxSizer(wx.HORIZONTAL)
+		szGcH.AddSpacer((10, 10))
+		szGcH.Add(self.cbAutoEnqueue)
+		szGcH.AddSpacer((10, 10))
+		szGc.Add(szGcH)
 				
 		szCfgL = wx.BoxSizer(wx.VERTICAL)
 		szCfgR = wx.BoxSizer(wx.VERTICAL)
@@ -528,7 +552,7 @@ class CuraEngineDlg(wx.Frame):
 		
 	def enableButtons(self):
 		self.bSlice.Enable(not self.slicing and self.stlFn is not None)
-		self.bExport.Enable(self.sliceComplete and self.gcFn is not None)
+		self.bExport.Enable(self.sliceComplete and self.gcFn is not None and not self.settings.autoexport)
 		
 	def onBGcDir(self, evt):
 		dlg = wx.DirDialog(self,
@@ -719,7 +743,14 @@ class CuraEngineDlg(wx.Frame):
 		self.enableButtons()
 	
 	def onBExport(self, evt):
-		self.parent.exportGcFile(self.gcFn)
+		self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
+		
+	def onAutoExport(self, evt):
+		self.settings.autoexport = self.cbAutoExport.GetValue()
+		self.enableButtons()
+		
+	def onAutoEnqueue(self, evt):
+		self.settings.autoenqueue = self.cbAutoEnqueue.GetValue()
 		
 	def onBOpen(self, evt):
 		wildcard = "STL (*.stl)|*.stl|"	 \

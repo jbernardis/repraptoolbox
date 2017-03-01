@@ -690,14 +690,16 @@ class MyFrame(wx.Frame):
 			self.tcStlFile.SetValue(fn)
 			if addToQueue:
 				self.sliceQueue.enQueuePath(fn)
+				self.setSliceQLen()
 			
-		for s in [self.dlgCuraEngine, self.dlgSlic3rxx]:
+		for s in [self.dlgCuraEngine, self.dlgSlic3r, self.dlgViewStl]:
 			if s is not None:
 				s.setImportFile(fn)
 				
 	def exportStlToQueue(self):
 		if not self.exportedStlFile is None:
 			self.sliceQueue.enQueuePath(self.exportedStlFile)
+			self.setSliceQLen()
 		
 	def exportGcFile(self, fn, addToQueue=False):
 		self.exportedGcFile = fn
@@ -709,6 +711,7 @@ class MyFrame(wx.Frame):
 			self.tcGcFile.SetValue(fn)
 			if addToQueue:
 				self.gcodeQueue.enQueuePath(fn)
+				self.setGCodeQLen()
 			
 		for pn in self.wPrinter.keys():
 			p = self.wPrinter[pn]
@@ -721,6 +724,7 @@ class MyFrame(wx.Frame):
 	def exportGcToQueue(self):
 		if not self.exportedGcFile is None:
 			self.gcodeQueue.enQueuePath(self.exportedGcFile)
+			self.setGCodeQLen()
 		
 	def importStlFile(self):
 		return self.exportedStlFile
@@ -795,7 +799,7 @@ class MyFrame(wx.Frame):
 			self.bStlNext.SetToolTipString("")
 			slMsg = None
 			
-		for s in [self.dlgCuraEngine, self.dlgSlic3r, self.dlgViewStl]:
+		for s in [self.dlgCuraEngine, self.dlgSlic3r]:
 			if s is not None:
 				s.setImportButton(slMsg)
 				

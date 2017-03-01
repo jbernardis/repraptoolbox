@@ -159,6 +159,11 @@ class PlaterDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.doExport, self.bExport)
 		self.bExport.Enable(False)
 		
+		self.bEnqueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
+		self.bEnqueue.SetToolTipString("Export the plate to the slice queue")
+		self.Bind(wx.EVT_BUTTON, self.doEnqueue, self.bEnqueue)
+		self.bExport.Enqueue(False)
+		
 		self.bView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngView, size=BUTTONDIM)
 		self.bView.SetToolTipString("View the currently selected object")
 		self.Bind(wx.EVT_BUTTON, self.doView, self.bView)
@@ -242,9 +247,10 @@ class PlaterDlg(wx.Frame):
 		szBtnLn3.Add(self.bRotate)
 		szBtnLn3.Add(self.bTranslate)
 		szBtnLn3.Add(self.bScale)
-		szBtnLn3.AddSpacer([BUTTONDIM[0]*2, BUTTONDIM[1]])
+		szBtnLn3.AddSpacer(BUTTONDIM)
 		szBtnLn3.Add(self.bSaveAs)
 		szBtnLn3.Add(self.bExport)
+		szBtnLn3.Add(self.bEnqueue)
 		
 		szBtn.Add(szBtnLn1)
 		szBtn.Add(szBtnLn2)
@@ -303,6 +309,7 @@ class PlaterDlg(wx.Frame):
 		self.bCenter.Enable(v)
 		self.bSaveAs.Enable(v)
 		self.bExport.Enable(v and self.savedfile is not None)
+		self.bEnqueue.Enable(v and self.savedfile is not None)
 		self.bViewPlate.Enable(v)
 		
 	def disableButtons(self):
@@ -321,6 +328,7 @@ class PlaterDlg(wx.Frame):
 		self.bCenter.Enable(False)
 		self.bSaveAs.Enable(False)
 		self.bExport.Enable(False)
+		self.bEnqueue.Enable(False)
 		self.bViewPlate.Enable(False)
 		
 	def onScMargin(self, evt):
@@ -543,6 +551,9 @@ class PlaterDlg(wx.Frame):
 
 	def doExport(self, evt):
 		self.parent.exportStlFile(self.savedfile)
+		
+	def doEnqueue(self, evt):
+		self.parent.exportStlFile(self.savedfile, True)
 		
 	def doSaveAs(self, evt):
 		wildcard = "STL (*.stl)|*.stl"

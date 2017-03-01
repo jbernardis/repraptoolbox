@@ -44,6 +44,11 @@ class PrinterDlg(wx.Frame):
 		self.macroDlg = None
 		self.fwDlg = None
 		
+		self.bedTemps = {"actual": "??", "target": "??"}
+		self.heTemps = {}
+		for i in range(self.settings.nextruders):
+			self.heTemps["HE%d" % i] = {"actual": "??", "target": "??"}
+		
 		self.importMessage = "Import G Code file from G Code Queue"
 		self.importFile = None
 			
@@ -128,8 +133,25 @@ class PrinterDlg(wx.Frame):
 			self.SetPosition(self.settings.ctrlposition)
 		
 		self.reprap.registerTempHandler(self.tempHandler)
+		self.parent.registerPrinterStatusReporter(self.printerName, self)
+
+	def getStatusReport(self):
+		if self.pmonDlg is None:
+			r = {}
+		else:
+			r = self.pmonDlg.getStatusReport()
+		r["bedTemps"] = "%s/%s" % (self.bedTemps['actual'], self.bedTemps['target'])
+		for i in range(self.settings.nextruders):
+			hek = "HE%d" % i
+			r["he%dTemps" % i] = "%s/%s" % (self.heTemps[hek]['actual'], self.heTemps[hek]['target'])
+		return r
 		
 	def tempHandler(self, actualOrTarget, hName, tool, value):
+		if hName == "Bed":
+			self.bedTemps[actualOrTarget] = value
+		else:
+			self.heTemps["HE%d" % tool][actualOrTarget] = value
+			
 		self.heaters.tempHandler(actualOrTarget, hName, tool, value)
 		try:
 			self.graphDlg.tempHandler(actualOrTarget, hName, tool, value)
