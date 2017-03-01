@@ -440,6 +440,19 @@ class MyFrame(wx.Frame):
 		return {"status": report}
 		
 	def onClose(self, evt):
+		self.sliceQueue.save()
+		self.gcodeQueue.save()
+
+		if self.dlgStlQueue is None:
+			if not self.dlgStlQueue.terminate():
+				return
+			self.dlgStlQueue.Destroy()
+			
+		if self.dlgGcQueue is None:
+			if not self.dlgGcQueue.terminate():
+				return
+			self.dlgGcQueue.Destroy()
+			
 		for p in self.wPrinter.keys():
 			if self.wPrinter[p] is not None:
 				if self.wPrinter[p].isPrinting():

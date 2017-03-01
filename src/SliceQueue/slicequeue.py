@@ -14,6 +14,7 @@ BUTTONDIM = (48, 48)
 
 wildcard = "STL (*.stl)|*.stl;*STL|AMF (*.amf.xml, *.amf)|*.amf.xml;*.AMF.XML;*.amf;*.AMF|All files (*.*)|*.*"
 
+MAX_Q_LEN = 50
 VISIBLEQUEUESIZE = 15
 
 class SliceFileObject:
@@ -79,6 +80,9 @@ class SliceQueue:
 			self.refreshPath(fn)
 		else:
 			self.files.append(SliceFileObject(fn))
+			if len(self.files) > MAX_Q_LEN:
+				sx = MAX_Q_LEN - len(self.files)
+				self.files = self.files[sx:]
 		if save:
 			self.save()
 		
@@ -303,6 +307,11 @@ class SliceQueueDlg(wx.Frame):
 		self.parent.closeStlQueue(wx.ID_OK)
 		
 	def doCancel(self, evt):
+		if self.terminate():
+			self.sq.reload()
+			self.parent.closeStlQueue(wx.ID_CANCEL)
+
+	def terminate(self):
 		if self.bSave.IsEnabled():
 			dlg = wx.MessageDialog(self, "Exit without saving changes?",
 					'Slicing Queue', wx.YES_NO | wx.NO_DEFAULT | wx.CANCEL | wx.ICON_INFORMATION)
@@ -312,12 +321,13 @@ class SliceQueueDlg(wx.Frame):
 
 			if rc == wx.ID_YES:
 				self.settings.save()
-				self.sq.reload()
-				self.parent.closeStlQueue(wx.ID_CANCEL)
+				return True
+			else:
+				return False
 		else:
 			self.settings.save()
-			self.sq.reload()
-			self.parent.closeStlQueue(wx.ID_CANCEL)
+			return True
+		
 
 class SliceQueueListCtrl(wx.ListCtrl):	
 	def __init__(self, parent, sq, images, basenameonly):
