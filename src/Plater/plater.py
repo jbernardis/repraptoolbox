@@ -162,7 +162,7 @@ class PlaterDlg(wx.Frame):
 		self.bEnqueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
 		self.bEnqueue.SetToolTipString("Export the plate to the slice queue")
 		self.Bind(wx.EVT_BUTTON, self.doEnqueue, self.bEnqueue)
-		self.bExport.Enqueue(False)
+		self.bEnqueue.Enable(False)
 		
 		self.bView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngView, size=BUTTONDIM)
 		self.bView.SetToolTipString("View the currently selected object")
