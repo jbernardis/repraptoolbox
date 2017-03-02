@@ -304,7 +304,6 @@ class StlViewDlg(wx.Frame):
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "stlview.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
 		self.fileName = None
-		self.setTitle()
 		
 		self.gl = StlCanvas(self)
 		sizer = wx.BoxSizer(wx.VERTICAL)
@@ -349,6 +348,7 @@ class StlViewDlg(wx.Frame):
 		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		sizer.AddSpacer((10, 10))
 		
+		self.setTitle()
 		self.SetSizer(sizer)
 		self.Fit()
 			
