@@ -136,6 +136,11 @@ class MyFrame(wx.Frame):
 		self.bStlToQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
 		self.bStlToQueue.SetToolTipString("Add the current STL file to the slice queue")
 		self.Bind(wx.EVT_BUTTON, self.onStlToQueue, self.bStlToQueue)
+		self.bStlToQueue.Enable(False)
+
+		self.bStlClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
+		self.bStlClear.SetToolTipString("Clear the current STL file name")
+		self.Bind(wx.EVT_BUTTON, self.onStlClear, self.bStlClear)
 
 		self.bGCodeQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGcodequeue, size=BUTTONDIMWIDE)
 		self.Bind(wx.EVT_BUTTON, self.onGCodeQueue, self.bGCodeQueue)
@@ -146,6 +151,11 @@ class MyFrame(wx.Frame):
 		self.bGcToQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
 		self.bGcToQueue.SetToolTipString("Add the current G Code file to the print queue")
 		self.Bind(wx.EVT_BUTTON, self.onGcToQueue, self.bGcToQueue)
+		self.bGcToQueue.Enable(False)
+
+		self.bGcClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
+		self.bGcClear.SetToolTipString("Clear the current G Code file name")
+		self.Bind(wx.EVT_BUTTON, self.onGcClear, self.bGcClear)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
 		self.meshButtons = self.createSectionButtons("mesh", self.doMeshButton)
@@ -271,11 +281,13 @@ class MyFrame(wx.Frame):
 		box = wx.StaticBox(self, wx.ID_ANY, " STL File ")
 		bstlvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bstlsizer = wx.BoxSizer(wx.HORIZONTAL)
-		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
+		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1), style=wx.TE_READONLY)
 		bstlsizer.AddSpacer((20, 20))
 		bstlsizer.Add(self.tcStlFile, 1, wx.TOP, 12)
 		bstlsizer.AddSpacer((10, 10))
 		bstlsizer.Add(self.bStlToQueue)
+		bstlsizer.AddSpacer((10, 10))
+		bstlsizer.Add(self.bStlClear)
 		bstlsizer.AddSpacer((20, 20))
 		bstlvsizer.AddSpacer((20, 20))
 		bstlvsizer.Add(bstlsizer)
@@ -286,11 +298,13 @@ class MyFrame(wx.Frame):
 		box = wx.StaticBox(self, wx.ID_ANY, " G Code File ")
 		bgcvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bgcsizer = wx.BoxSizer(wx.HORIZONTAL)
-		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1))
+		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1), style=wx.TE_READONLY)
 		bgcsizer.AddSpacer((20, 20))
 		bgcsizer.Add(self.tcGcFile, 1, wx.TOP, 12)
 		bgcsizer.AddSpacer((10, 10))
 		bgcsizer.Add(self.bGcToQueue)
+		bgcsizer.AddSpacer((10, 10))
+		bgcsizer.Add(self.bGcClear)
 		bgcsizer.AddSpacer((20, 20))
 		bgcvsizer.AddSpacer((20, 20))
 		bgcvsizer.Add(bgcsizer)
@@ -443,12 +457,12 @@ class MyFrame(wx.Frame):
 		self.sliceQueue.save()
 		self.gcodeQueue.save()
 
-		if self.dlgStlQueue is None:
+		if self.dlgStlQueue is not None:
 			if not self.dlgStlQueue.terminate():
 				return
 			self.dlgStlQueue.Destroy()
 			
-		if self.dlgGcQueue is None:
+		if self.dlgGcQueue is not None:
 			if not self.dlgGcQueue.terminate():
 				return
 			self.dlgGcQueue.Destroy()
@@ -692,6 +706,9 @@ class MyFrame(wx.Frame):
 				except:
 					print "Exception occurred trying to spawn tool process"
 				return
+			
+	def onStlClear(self, evt):
+		self.exportStlFile(None)
 		
 	def exportStlFile(self, fn, addToQueue=False):
 		self.exportedStlFile = fn
@@ -713,6 +730,9 @@ class MyFrame(wx.Frame):
 		if not self.exportedStlFile is None:
 			self.sliceQueue.enQueuePath(self.exportedStlFile)
 			self.setSliceQLen()
+
+	def onGcClear(self, evt):
+		self.exportGcFile(None)
 		
 	def exportGcFile(self, fn, addToQueue=False):
 		self.exportedGcFile = fn

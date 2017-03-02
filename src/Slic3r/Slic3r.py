@@ -81,7 +81,6 @@ class SlicerThread:
 
 	def Run(self):
 		args = [self.executable, "--load", self.cfgFile, self.stlFile, "-o", self.gcFile]
-		print args
 		try:
 			p = subprocess.Popen(args, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 		except:
@@ -246,13 +245,13 @@ class Slic3rDlg(wx.Frame):
 		szGc.Add(szGcH)
 		
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer((50, 10))
 		szGcH.Add(self.cbAutoExport)
 		szGcH.AddSpacer((10, 10))
 		szGc.Add(szGcH)
 		
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer((50, 10))
 		szGcH.Add(self.cbAutoEnqueue)
 		szGcH.AddSpacer((10, 10))
 		szGc.Add(szGcH)

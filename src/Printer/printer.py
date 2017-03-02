@@ -140,17 +140,26 @@ class PrinterDlg(wx.Frame):
 			r = {}
 		else:
 			r = self.pmonDlg.getStatusReport()
-		r["bedTemps"] = "%s/%s" % (self.bedTemps['actual'], self.bedTemps['target'])
+			
+		t = {}
+		t["bed"] = "%s/%s" % (self.bedTemps['actual'], self.bedTemps['target'])
 		for i in range(self.settings.nextruders):
 			hek = "HE%d" % i
-			r["he%dTemps" % i] = "%s/%s" % (self.heTemps[hek]['actual'], self.heTemps[hek]['target'])
+			t["he%d" % i] = "%s/%s" % (self.heTemps[hek]['actual'], self.heTemps[hek]['target'])
+			
+		r["Temps"] = t
+		
 		return r
 		
 	def tempHandler(self, actualOrTarget, hName, tool, value):
 		if hName == "Bed":
 			self.bedTemps[actualOrTarget] = value
 		else:
-			self.heTemps["HE%d" % tool][actualOrTarget] = value
+			if tool is None:
+				k = "HE0"
+			else:
+				k = "HE%d" % tool
+			self.heTemps[k][actualOrTarget] = value
 			
 		self.heaters.tempHandler(actualOrTarget, hName, tool, value)
 		try:
