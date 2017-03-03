@@ -24,6 +24,7 @@ from Printer.printer import PrinterDlg
 from reprap import RepRap
 from log import Logger
 from HTTPServer import RepRapServer
+from History.history import History
 from pendant import Pendant, pendantCommand
 from SliceQueue.slicequeue import SliceQueue, SliceQueueDlg
 from GCodeQueue.gcodequeue import GCodeQueue, GCodeQueueDlg
@@ -81,6 +82,8 @@ class MyFrame(wx.Frame):
 		
 		self.sliceQueue = SliceQueue()
 		self.gcodeQueue = GCodeQueue()
+		
+		self.history = History()
 		
 		self.pendantAssignment = None
 		self.pendantConnected = False
@@ -456,6 +459,7 @@ class MyFrame(wx.Frame):
 	def onClose(self, evt):
 		self.sliceQueue.save()
 		self.gcodeQueue.save()
+		self.history.save()
 
 		if self.dlgStlQueue is not None:
 			if not self.dlgStlQueue.terminate():

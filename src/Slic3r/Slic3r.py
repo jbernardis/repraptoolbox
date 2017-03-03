@@ -18,6 +18,7 @@ import tempfile
 from settings import Settings
 from images import Images
 from gcsuffix import buildGCSuffix
+from History.history import SliceComplete
 
 (SlicerEvent, EVT_SLIC3R_UPDATE) = wx.lib.newevent.NewEvent()
 SLIC3R_MESSAGE = 1
@@ -122,6 +123,7 @@ class Slic3rDlg(wx.Frame):
 
 		self.parent = parent
 		self.log = self.parent.log
+		self.history = parent.history
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
@@ -519,6 +521,9 @@ class Slic3rDlg(wx.Frame):
 		elif "bed_temperature" in cfg.keys():
 			tempsBed = cfg["bed_temperature"]
 		
+		self.sufCfg = slCfg
+		self.sufFilSiz = filSiz
+		self.sufTemps = tempsHE + "/" + tempsBed
 		return buildGCSuffix(slCfg, filSiz, tempsHE, tempsBed)
 		
 	def onBImport(self, evt):
@@ -582,6 +587,10 @@ class Slic3rDlg(wx.Frame):
 			if evt.state == SLIC3R_FINISHED:
 				self.sliceComplete = True
 				self.addGcSuffix()
+				self.history.addEvent(SliceComplete(
+					self.history.addFile(self.gcFn),
+					self.history.addFile(self.stlFn),
+					self.sufCfg, self.sufFilSiz, self.sufTemps))
 				if self.settings.autoexport:
 					self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
 				

@@ -17,6 +17,7 @@ from printstateenum import PrintState
 from tools import formatElapsed
 from gcsuffix import parseGCSuffix
 from sdcard import SDCard
+from History.history import PrintStarted, PrintCompleted
 
 BUTTONDIM = (48, 48)
 BUTTONDIMWIDE = (96, 48)
@@ -585,6 +586,10 @@ class PrintMonitorDlg(wx.Frame):
 				self.reprap.sendNow("M29 %s" % self.sdTargetFile)
 				self.suspendTempProbe(False)
 				self.setSDTargetFile(None)
+				
+			if self.state == PrintState.printing:
+				self.history.addEvent(PrintCompleted(self.history.addFile(self.gcodeFile), ""))
+
 			self.state = PrintState.idle
 			self.oldState = None
 			self.propDlg.setPrintStatus(PrintState.idle)
@@ -761,6 +766,9 @@ class PrintMonitorDlg(wx.Frame):
 		else:
 			action = "started"
 			self.reprap.startPrint(self.gcode)
+			
+		self.history.addEvent(PrintStarted(self.history.addFile(self.gcodeFile), ""))
+		
 		stime = time.strftime('%H:%M:%S', time.localtime(self.startTime))
 		self.propDlg.setProperty(PropertyEnum.startTime, stime)
 		self.propDlg.setProperty(PropertyEnum.origEta, 

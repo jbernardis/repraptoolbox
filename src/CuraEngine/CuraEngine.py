@@ -18,6 +18,7 @@ from images import Images
 from gcsuffix import buildGCSuffix
 from curadefinitions import CuraDefinitions
 from curacfg import CuraCfgDlg
+from History.history import SliceComplete
 
 (SlicerEvent, EVT_CURA_UPDATE) = wx.lib.newevent.NewEvent()
 CURA_MESSAGE = 1
@@ -128,6 +129,7 @@ class CuraEngineDlg(wx.Frame):
 
 		self.parent = parent
 		self.log = self.parent.log
+		self.history = parent.history
 		self.settings = Settings(cmdFolder)
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		
@@ -721,6 +723,9 @@ class CuraEngineDlg(wx.Frame):
 			else:
 				tempsBed.append(str(self.curasettings.getDefinition("material_bed_temperature_layer_0").getDefault()))
 		
+		self.sufCfg = slCfg
+		self.sufFilSiz = ",".join(filSiz)
+		self.sufTemps = ",".join(tempsHE) + "/" + ",".join(tempsBed)
 		return buildGCSuffix(slCfg, ",".join(filSiz), ",".join(tempsHE), ",".join(tempsBed))
 
 		
@@ -812,6 +817,10 @@ class CuraEngineDlg(wx.Frame):
 			if evt.state == CURA_FINISHED:
 				self.sliceComplete = True
 				self.addGcSuffix()
+				self.history.addEvent(SliceComplete(
+					self.history.addFile(self.gcFn),
+					self.history.addFile(self.stlFn),
+					self.sufCfg, self.sufFilSiz, self.sufTemps))
 				if self.settings.autoexport:
 					self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
 				

@@ -1,3 +1,10 @@
+import os
+import inspect
+import pickle
+import time
+
+cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+
 from historyeventenum import HistoryEventEnum
 
 MAX_HIST = 100
@@ -14,11 +21,14 @@ class HistoryFile:
 		return self.modTime
 		
 	def refresh(self):
-		self.modTime = "file mod time:"
+		try:
+			self.modTime = os.path.getmtime(self.fn)
+		except:
+			self.modTime = None # file most likely doesn't exist
 
 class HistoryEvent:
 	def __init__(self):
-		pass
+		self.timeStamp = time.time()
 	
 	def getEventType(self):
 		return self.eventType
@@ -114,8 +124,28 @@ class PrintCompleted (HistoryEvent):
 	
 class History:
 	def __init__(self):
-		self.histFiles = {}
-		self.events = []
+		self.fn = os.path.join(cmdFolder, "rrtb.history")
+		self.reload()
+		self.save()
+		
+	def reload(self):
+		try:		
+			fp = open(self.fn, "rb")
+			(self.histFiles, self.events) = pickle.load(fp)
+			fp.close()
+			self.refreshAll()
+		except:
+			self.histFiles = {}
+			self.events = []
+		
+	def save(self):
+		fp = open(self.fn, 'wb')
+		pickle.dump((self.histFiles, self.events), fp)
+		fp.close()
+		
+	def refreshAll(self):
+		for hk in self.histFiles.keys():
+			self.histFiles[hk].refresh()
 		
 	def addFile(self, fn):
 		if fn in self.histFiles.keys():
@@ -145,8 +175,4 @@ class History:
 				
 		for f in dlist:
 			del(self.histFiles[f])
-			
-h = History()
-
-h.addEvent(OpenEdit(HistoryFile("xx.gcode"), "Open Edit"))
 
