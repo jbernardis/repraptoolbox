@@ -891,6 +891,9 @@ class MyFrame(wx.Frame):
 			if p is not None:
 				p.setImportButton(pmMsg)
 				
+		if self.dlgGEdit is not None:
+			self.dlgGEdit.setImportButton(pmMsg)
+				
 		self.bGCodeNext.Enable(n != 0)
 		
 	def onGCodeNext(self, evt):

@@ -54,6 +54,7 @@ class GEditDlg(wx.Frame):
 		self.modified = False
 		self.filename = None
 		self.importFileName = None
+		self.okToImport = False
 		
 		self.gObj = self.loadGCode(self.filename)
 		if self.gObj is not None:
@@ -137,6 +138,11 @@ class GEditDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
 		self.bImport.Enable(False)
 		
+		self.bImportQ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
+		self.bImportQ.SetToolTipString("Import the next G Code file from the queue")
+		self.Bind(wx.EVT_BUTTON, self.onImportFromQueue, self.bImportQ)
+		self.bImportQ.Enable(False)
+		
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
 		self.bExport.SetToolTipString("Export the current toolbox G Code file")
 		self.Bind(wx.EVT_BUTTON, self.onExport, self.bExport)
@@ -209,12 +215,14 @@ class GEditDlg(wx.Frame):
 		optszr.AddSpacer((5,5))
 		optszr.Add(self.cbShowPrevious)
 		btnszr.Add(optszr)
-		btnszr.AddSpacer((70, 10))
+		btnszr.AddSpacer((20, 10))
 		btnszr.Add(self.bSaveLayers)
-		btnszr.AddSpacer((95, 10))
+		btnszr.AddSpacer((20, 10))
 		btnszr.Add(self.bOpen)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bImport)
+		btnszr.AddSpacer((10, 10))
+		btnszr.Add(self.bImportQ)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bExport)
 		btnszr.AddSpacer((10, 10))
@@ -373,6 +381,23 @@ class GEditDlg(wx.Frame):
 		
 		self.loadGFile(fn)
 		
+	def onImportFromQueue(self, evt):
+		fn = self.parent.importGcFromQueue()
+		if fn is None:
+			return
+		
+		self.loadGFile(fn)
+		
+	def setImportButton(self, msg):
+		if msg is None:
+			self.okToImport = False
+			self.bImportQ.SetToolTipString("")
+			self.bImportQ.Enable(False)
+		else:
+			self.okToImport = True
+			self.bImportQ.SetToolTipString(msg)
+			self.bImportQ.Enable(self.bOpen.IsEnabled())
+		
 	def onOpen(self, evt):
 		if self.modified:
 			dlg = wx.MessageDialog(self,
@@ -528,6 +553,10 @@ class GEditDlg(wx.Frame):
 				self.bImport.Enable(True)
 			else:
 				self.bImport.Enable(False)
+			if flag and self.okToImport:
+				self.bImportQ.Enable(True)
+			else:
+				self.bImportQ.Enable(False)
 			self.bOpen.Enable(flag)
 			
 	def doShiftModel(self, evt):

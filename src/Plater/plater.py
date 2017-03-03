@@ -159,11 +159,6 @@ class PlaterDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.doExport, self.bExport)
 		self.bExport.Enable(False)
 		
-		self.bEnqueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
-		self.bEnqueue.SetToolTipString("Export the plate to the slice queue")
-		self.Bind(wx.EVT_BUTTON, self.doEnqueue, self.bEnqueue)
-		self.bEnqueue.Enable(False)
-		
 		self.bView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngView, size=BUTTONDIM)
 		self.bView.SetToolTipString("View the currently selected object")
 		self.Bind(wx.EVT_BUTTON, self.doView, self.bView)
@@ -181,6 +176,14 @@ class PlaterDlg(wx.Frame):
 		self.cbCenterOnArrange = wx.CheckBox(self, wx.ID_ANY, "Center Plate After Arrange")
 		self.cbCenterOnArrange.SetValue(self.settings.centeronarrange)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbCenterOnArrange, self.cbCenterOnArrange)
+		
+		self.cbAutoExport = wx.CheckBox(self, wx.ID_ANY, "Automatically export when saving")
+		self.cbAutoExport.SetValue(self.settings.autoexport)
+		self.Bind(wx.EVT_CHECKBOX, self.onCbAutoExport, self.cbAutoExport)
+		
+		self.cbAutoEnqueue = wx.CheckBox(self, wx.ID_ANY, "Automatically enqueue the file when exporting")
+		self.cbAutoEnqueue.SetValue(self.settings.autoenqueue)
+		self.Bind(wx.EVT_CHECKBOX, self.onCbAutoEnqueue, self.cbAutoEnqueue)
 		
 		self.strategyList = ['column', 'row', 'spiral']
 		self.rbStrategy = wx.RadioBox(
@@ -250,7 +253,6 @@ class PlaterDlg(wx.Frame):
 		szBtnLn3.AddSpacer(BUTTONDIM)
 		szBtnLn3.Add(self.bSaveAs)
 		szBtnLn3.Add(self.bExport)
-		szBtnLn3.Add(self.bEnqueue)
 		
 		szBtn.Add(szBtnLn1)
 		szBtn.Add(szBtnLn2)
@@ -262,6 +264,10 @@ class PlaterDlg(wx.Frame):
 		szOptionsL.Add(self.cbPreview)
 		szOptionsL.AddSpacer((5, 5))
 		szOptionsL.Add(self.cbCenterOnArrange)
+		szOptionsL.AddSpacer((5, 10))
+		szOptionsL.Add(self.cbAutoExport)
+		szOptionsL.AddSpacer((5, 5))
+		szOptionsL.Add(self.cbAutoEnqueue)
 
 		szOptionsR.Add(self.rbStrategy)
 		szOptionsR.AddSpacer((5, 5))
@@ -308,8 +314,7 @@ class PlaterDlg(wx.Frame):
 		self.bArrange.Enable(v)
 		self.bCenter.Enable(v)
 		self.bSaveAs.Enable(v)
-		self.bExport.Enable(v and self.savedfile is not None)
-		self.bEnqueue.Enable(v and self.savedfile is not None)
+		self.bExport.Enable(v and not self.settings.autoexport and self.savedfile is not None)
 		self.bViewPlate.Enable(v)
 		
 	def disableButtons(self):
@@ -328,7 +333,6 @@ class PlaterDlg(wx.Frame):
 		self.bCenter.Enable(False)
 		self.bSaveAs.Enable(False)
 		self.bExport.Enable(False)
-		self.bEnqueue.Enable(False)
 		self.bViewPlate.Enable(False)
 		
 	def onScMargin(self, evt):
@@ -548,12 +552,16 @@ class PlaterDlg(wx.Frame):
 			self.enableButtons()
 		else:
 			self.disableButtons()
+			
+	def onCbAutoEnqueue(self, evt):
+		self.settings.autoenqueue = self.cbAutoEnqueue.GetValue()
+		
+	def onCbAutoExport(self, evt):
+		self.settings.autoexport = self.cbAutoExport.GetValue()
+		self.bExport.Enable(not self.settings.autoExport and self.savedfile is not None)
 
 	def doExport(self, evt):
-		self.parent.exportStlFile(self.savedfile)
-		
-	def doEnqueue(self, evt):
-		self.parent.exportStlFile(self.savedfile, True)
+		self.parent.exportStlFile(self.savedfile, self.settings.autoenqueue)
 		
 	def doSaveAs(self, evt):
 		wildcard = "STL (*.stl)|*.stl"

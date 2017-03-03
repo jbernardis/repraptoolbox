@@ -74,15 +74,16 @@ class SliceQueue:
 			self.save()
 		return rv
 	
-	def enQueuePath(self, fn, save=True):				
-		pathList = [x.getFn() for x in self.files]
-		if fn in pathList:
-			self.refreshPath(fn)
-		else:
-			self.files.append(SliceFileObject(fn))
-			if len(self.files) > MAX_Q_LEN:
-				sx = MAX_Q_LEN - len(self.files)
-				self.files = self.files[sx:]
+	def enQueuePath(self, fn, save=True):	
+		if os.path.isfile(fn):			
+			pathList = [x.getFn() for x in self.files]
+			if fn in pathList:
+				self.refreshPath(fn)
+			else:
+				self.files.append(SliceFileObject(fn))
+				if len(self.files) > MAX_Q_LEN:
+					sx = MAX_Q_LEN - len(self.files)
+					self.files = self.files[sx:]
 		if save:
 			self.save()
 		
