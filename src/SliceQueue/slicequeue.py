@@ -82,7 +82,7 @@ class SliceQueue:
 			else:
 				self.files.append(SliceFileObject(fn))
 				if len(self.files) > MAX_Q_LEN:
-					sx = MAX_Q_LEN - len(self.files)
+					sx = len(self.files) - MAX_Q_LEN
 					self.files = self.files[sx:]
 		if save:
 			self.save()

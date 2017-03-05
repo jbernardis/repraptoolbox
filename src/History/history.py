@@ -30,6 +30,9 @@ class HistoryEvent:
 	def __init__(self):
 		self.timeStamp = time.time()
 	
+	def dump(self):
+		print self.eventType, self.timeStamp, self.gcfn.getFn(), self.text
+	
 	def getEventType(self):
 		return self.eventType
 	
@@ -45,6 +48,9 @@ class SliceComplete (HistoryEvent):
 		self.slcfg = slcfg
 		self.slfil = slfil
 		self.sltemp = sltemp
+		
+	def dump(self):
+		print self.eventType, self.timeStamp, self.gcfn.getFn(), self.stlfn.getFn(), self.slcfg, self.slfil, self.sltemp
 		
 	def getString(self):
 		pass
@@ -143,6 +149,16 @@ class History:
 		pickle.dump((self.histFiles, self.events), fp)
 		fp.close()
 		
+	def dump(self):
+		print "Events:"
+		for e in self.events:
+			e.dump()
+			
+		print ""
+		print "files:"
+		for hf in self.histFiles.keys():
+			print hf, " : ", self.histFiles[hf].getModTime()
+
 	def refreshAll(self):
 		for hk in self.histFiles.keys():
 			self.histFiles[hk].refresh()
@@ -159,7 +175,7 @@ class History:
 	def addEvent(self, evt):
 		self.events.append(evt)
 		if len(self.events) > MAX_HIST:
-			sx = MAX_HIST - len(self.events)
+			sx = len(self.events) - MAX_HIST
 			self.events = self.events[sx:]
 			self.prune()
 			
