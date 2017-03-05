@@ -21,6 +21,7 @@ from tools import formatElapsed
 from gcsuffix import parseGCSuffix, modifyGCSuffix
 from properties import PropertiesDlg
 from propenums import PropertyEnum
+from History.history import ShiftModel, TempChange, SpeedChange, FilamentChange, OpenEdit
 
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 BUTTONDIM = (48, 48)
@@ -36,6 +37,7 @@ reE = re.compile("(.*[eE])([0-9\.]+)(.*)")
 class GEditDlg(wx.Frame):
 	def __init__(self, parent):
 		self.parent = parent
+		self.history = parent.history
 		wx.Frame.__init__(self, None, wx.ID_ANY, TITLE_PREFIX, size=(600, 600))
 		self.Show()
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "geditico.png"), wx.BITMAP_TYPE_PNG)
@@ -577,6 +579,8 @@ class GEditDlg(wx.Frame):
 
 	def applyShift(self):
 		self.gcode = [self.applyAxisShift(self.applyAxisShift(l, 'y', self.shiftY), 'x', self.shiftX) for l in self.gcode]
+		if self.filename is not None:
+			self.history.addEvent(ShiftModel(self.history.addFile(self.filename), "dx=%f dy=%d" % (self.shiftx, self.shifty)))
 
 		self.shiftX = 0
 		self.shiftY = 0
@@ -629,6 +633,8 @@ class GEditDlg(wx.Frame):
 	def applyTempChange(self, bed, hes):
 		self.currentTool = 0
 		self.gcode = [self.applySingleTempChange(l, bed, hes) for l in self.gcode]
+		if self.filename is not None:
+			self.history.addEvent(TempChange(self.history.addFile(self.filename), "bed=%f he=%s" % (bed, str(hes))))
 
 		self.setModified(True)
 		self.gObj = self.buildModel()
@@ -700,6 +706,8 @@ class GEditDlg(wx.Frame):
 
 	def applySpeedChange(self, speeds):
 		self.gcode = [self.applySingleSpeedChange(l, speeds) for l in self.gcode]
+		if self.filename is not None:
+			self.history.addEvent(SpeedChange(self.history.addFile(self.filename), "print=%f move=%f" % (speeds[0], speeds[1])))
 
 		self.setModified(True)
 		self.gObj = self.buildModel()
@@ -737,7 +745,10 @@ class GEditDlg(wx.Frame):
 		dlg.Destroy()
 		if rc != wx.ID_OK:
 			return
-		
+	
+		if self.filename is not None:
+			self.history.addEvent(FilamentChange(self.history.addFile(self.filename), "insertion point: %d" % insertPoint))
+			
 		if insertPoint == 0:
 			self.gcode = ngc + self.gcode
 		else:
@@ -766,6 +777,9 @@ class GEditDlg(wx.Frame):
 		if rc != wx.ID_OK:
 			return
 
+		if self.filename is not None:
+			self.history.addEvent(OpenEdit(self.history.addFile(self.filename), ""))
+			
 		self.gcode = data[:]
 		self.setModified(True)
 		self.gObj = self.buildModel()

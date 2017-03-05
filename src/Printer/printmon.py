@@ -56,6 +56,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.parent = parent
 		self.wparent = wparent
 		self.log = self.parent.log
+		self.history = wparent.history
 		self.reprap = reprap
 		self.settings = self.parent.settings
 		self.images = self.parent.images

@@ -28,6 +28,7 @@ class PrinterDlg(wx.Frame):
 		self.SetIcon(ico)
 
 		self.parent = parent
+		self.history = parent.history
 		self.log = parent.log
 		self.printerName = printerName
 		self.reprap = reprap
