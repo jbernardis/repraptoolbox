@@ -585,7 +585,7 @@ class PrintMonitorDlg(wx.Frame):
 			# TODO - do I need special consideration here for print FROM SD
 			if self.state == PrintState.sdprintingto:
 				self.reprap.sendNow("M29 %s" % self.sdTargetFile)
-				self.suspendTempProbe(False)
+				self.reprap.suspendTempProbe(False)
 				self.setSDTargetFile(None)
 				
 			if self.state == PrintState.printing:
@@ -607,10 +607,11 @@ class PrintMonitorDlg(wx.Frame):
 					(formatElapsed(self.elapsed), formatElapsed(expCmpTime)))
 			self.reprap.printComplete()
 		elif evt.event == RepRapEventEnum.PRINT_STOPPED:
-			self.oldState = self.state
-			self.state = PrintState.paused
-			self.propDlg.setPrintStatus(PrintState.paused)
-			self.enableButtonsByState()
+			if self.state != PrintState.paused:
+				self.oldState = self.state
+				self.state = PrintState.paused
+				self.propDlg.setPrintStatus(PrintState.paused)
+				self.enableButtonsByState()
 			self.reprap.printStopped()
 		elif evt.event == RepRapEventEnum.PRINT_STARTED:
 			pass
@@ -744,7 +745,7 @@ class PrintMonitorDlg(wx.Frame):
 		#TODO - cleanup if was sdprintingfrom
 		self.state = PrintState.idle
 		self.oldState = None
-		self.suspendTempProbe(False)
+		self.reprap.suspendTempProbe(False)
 		self.setSDTargetFile(None)
 		self.propDlg.setPrintStatus(PrintState.idle)
 		self.enableButtonsByState()
