@@ -758,7 +758,7 @@ class CuraEngineDlg(wx.Frame):
 		self.settings.autoenqueue = self.cbAutoEnqueue.GetValue()
 		
 	def onBOpen(self, evt):
-		wildcard = "STL (*.stl)|*.stl|"	 \
+		wildcard = "STL (*.stl)|*.stl;*.STL|"	 \
 			"All files (*.*)|*.*"
 			
 		dlg = wx.FileDialog(

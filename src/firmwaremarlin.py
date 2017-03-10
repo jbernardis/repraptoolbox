@@ -3,7 +3,7 @@ import wx.lib.newevent
 import ConfigParser
 
 (FirmwareEvent, EVT_FIRMWARE) = wx.lib.newevent.NewEvent()
-wildcard="Firmware Files (*.fw)|*.fw|All Files (*.*)|*.*"
+wildcard="Firmware Files (*.fw)|*.fw;*.FW|All Files (*.*)|*.*"
 
 
 grpinfoBase = {'m92' : ['Steps per Unit - M92', 4, ['x', 'y', 'z', 'e'], ['X Steps', 'Y Steps', 'Z Steps', 'E Steps']],

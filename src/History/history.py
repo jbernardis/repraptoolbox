@@ -5,7 +5,9 @@ import time
 
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
+from images import Images
 from historyeventenum import HistoryEventEnum
+from settings import Settings
 
 MAX_HIST = 100
 
@@ -36,8 +38,17 @@ class HistoryEvent:
 	def getEventType(self):
 		return self.eventType
 	
+	def getEventTypeString(self):
+		return HistoryEventEnum.label[self.eventType]
+	
+	def getTimeStamp(self):
+		return self.timeStamp
+	
 	def getFns(self):
 		return [ self.gcfn.getFn() ]
+	
+	def getString(self):
+		return self.text
 		
 class SliceComplete (HistoryEvent):
 	def __init__(self, gcfn, stlfn, slcfg, slfil, sltemp):
@@ -53,7 +64,10 @@ class SliceComplete (HistoryEvent):
 		print self.eventType, self.timeStamp, self.gcfn.getFn(), self.stlfn.getFn(), self.slcfg, self.slfil, self.sltemp
 		
 	def getString(self):
-		pass
+		return "%s - %s" % (os.path.basename(self.stlfn.getFn()), self.slcfg)
+	
+	def getSlCfg(self):
+		return self.slcfg
 	
 	def getFns(self):
 		return [ self.gcfn.getFn(), self.stlfn.getFn() ]
@@ -64,9 +78,6 @@ class OpenEdit (HistoryEvent):
 		self.eventType = HistoryEventEnum.OpenEdit
 		self.gcfn = gcfn
 		self.text = txt
-		
-	def getString(self):
-		pass
 
 class FilamentChange (HistoryEvent):
 	def __init__(self, gcfn, txt):
@@ -74,9 +85,6 @@ class FilamentChange (HistoryEvent):
 		self.eventType = HistoryEventEnum.FilamentChange
 		self.gcfn = gcfn
 		self.text = txt
-		
-	def getString(self):
-		pass
 
 class ShiftModel (HistoryEvent):
 	def __init__(self, gcfn, txt):
@@ -84,9 +92,6 @@ class ShiftModel (HistoryEvent):
 		self.eventType = HistoryEventEnum.ShiftModel
 		self.gcfn = gcfn
 		self.text = txt
-		
-	def getString(self):
-		pass
 
 class TempChange (HistoryEvent):
 	def __init__(self, gcfn, txt):
@@ -94,9 +99,6 @@ class TempChange (HistoryEvent):
 		self.eventType = HistoryEventEnum.TempChange
 		self.gcfn = gcfn
 		self.text = txt
-		
-	def getString(self):
-		pass
 
 class SpeedChange (HistoryEvent):
 	def __init__(self, gcfn, txt):
@@ -104,9 +106,6 @@ class SpeedChange (HistoryEvent):
 		self.eventType = HistoryEventEnum.SpeedChange
 		self.gcfn = gcfn
 		self.text = txt
-		
-	def getString(self):
-		pass
 
 class PrintStarted (HistoryEvent):
 	def __init__(self, gcfn, txt):
@@ -114,9 +113,6 @@ class PrintStarted (HistoryEvent):
 		self.eventType =  HistoryEventEnum.PrintStarted
 		self.gcfn = gcfn
 		self.text = txt
-		
-	def getString(self):
-		pass
 
 class PrintCompleted (HistoryEvent):
 	def __init__(self, gcfn, txt):
@@ -124,13 +120,12 @@ class PrintCompleted (HistoryEvent):
 		self.eventType = HistoryEventEnum.PrintCompleted
 		self.gcfn = gcfn
 		self.text = txt
-		
-	def getString(self):
-		pass
 	
 class History:
 	def __init__(self):
 		self.fn = os.path.join(cmdFolder, "rrtb.history")
+		self.images = Images(os.path.join(cmdFolder, "images"))
+		self.settings = Settings(cmdFolder)
 		self.reload()
 		self.save()
 		
@@ -148,6 +143,7 @@ class History:
 		fp = open(self.fn, 'wb')
 		pickle.dump((self.histFiles, self.events), fp)
 		fp.close()
+		self.settings.save()
 		
 	def dump(self):
 		print "Events:"
@@ -191,4 +187,25 @@ class History:
 				
 		for f in dlist:
 			del(self.histFiles[f])
+	
+	def __getitem__(self, ix):
+		if ix < 0 or ix >= self.__len__():
+			return None
+		
+		return self.events[ix]
+	
+	def __iter__(self):
+		self.__eindex__ = 0
+		return self
+	
+	def next(self):
+		if self.__eindex__ < self.__len__():
+			i = self.__eindex__
+			self.__eindex__ += 1
+			return self.events[i]
+
+		raise StopIteration
+	
+	def __len__(self):
+		return len(self.events)
 

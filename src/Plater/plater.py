@@ -348,7 +348,7 @@ class PlaterDlg(wx.Frame):
 		self.settings.centeronarrange = self.cbCenterOnArrange.GetValue()
 
 	def doAdd(self, evt):
-		wildcard = "STL (*.stl)|*.stl|"	 \
+		wildcard = "STL (*.stl)|*.stl;*.STL|"	 \
 			"All files (*.*)|*.*"
 			
 		while True:
@@ -564,7 +564,7 @@ class PlaterDlg(wx.Frame):
 		self.parent.exportStlFile(self.savedfile, self.settings.autoenqueue)
 		
 	def doSaveAs(self, evt):
-		wildcard = "STL (*.stl)|*.stl"
+		wildcard = "STL (*.stl)|*.stl;*.STL"
 		dlg = wx.FileDialog(
 			self, message="Save file as ...", defaultDir=self.settings.lastdirectory, 
 			defaultFile="", wildcard=wildcard, style=wx.SAVE | wx.FD_OVERWRITE_PROMPT

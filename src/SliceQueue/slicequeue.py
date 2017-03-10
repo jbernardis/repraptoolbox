@@ -12,7 +12,7 @@ from settings import Settings
 
 BUTTONDIM = (48, 48)
 
-wildcard = "STL (*.stl)|*.stl;*STL|AMF (*.amf.xml, *.amf)|*.amf.xml;*.AMF.XML;*.amf;*.AMF|All files (*.*)|*.*"
+wildcard = "STL (*.stl)|*.stl;*.STL|AMF (*.amf.xml, *.amf)|*.amf.xml;*.AMF.XML;*.amf;*.AMF|All files (*.*)|*.*"
 
 MAX_Q_LEN = 50
 VISIBLEQUEUESIZE = 15

@@ -25,6 +25,7 @@ from reprap import RepRap
 from log import Logger
 from HTTPServer import RepRapServer
 from History.history import History
+from History.historydlg import HistoryDlg
 from pendant import Pendant, pendantCommand
 from SliceQueue.slicequeue import SliceQueue, SliceQueueDlg
 from GCodeQueue.gcodequeue import GCodeQueue, GCodeQueueDlg
@@ -79,6 +80,7 @@ class MyFrame(wx.Frame):
 		self.dlgGEdit = None
 		self.dlgGcQueue = None
 		self.dlgStlQueue = None
+		self.dlgHistory = None
 		
 		self.sliceQueue = SliceQueue()
 		self.gcodeQueue = GCodeQueue()
@@ -159,6 +161,10 @@ class MyFrame(wx.Frame):
 		self.bGcClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
 		self.bGcClear.SetToolTipString("Clear the current G Code file name")
 		self.Bind(wx.EVT_BUTTON, self.onGcClear, self.bGcClear)
+
+		self.bHistory = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHistory, size=BUTTONDIM)
+		self.bHistory.SetToolTipString("Show the history dialog box")
+		self.Bind(wx.EVT_BUTTON, self.onHistory, self.bHistory)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
 		self.meshButtons = self.createSectionButtons("mesh", self.doMeshButton)
@@ -272,6 +278,8 @@ class MyFrame(wx.Frame):
 		bhsizer.Add(self.bGCodeQueue)
 		bhsizer.AddSpacer((10, 10))
 		bhsizer.Add(self.bGCodeNext)
+		bhsizer.AddSpacer((30, 10))
+		bhsizer.Add(self.bHistory)
 		bhsizer.AddSpacer((10, 10))
 		bvsizer.AddSpacer((10, 10))
 		bvsizer.Add(bhsizer)
@@ -465,11 +473,17 @@ class MyFrame(wx.Frame):
 			if not self.dlgStlQueue.terminate():
 				return
 			self.dlgStlQueue.Destroy()
+			self.dlgStlQueue = None
 			
 		if self.dlgGcQueue is not None:
 			if not self.dlgGcQueue.terminate():
 				return
 			self.dlgGcQueue.Destroy()
+			self.dlgGcQueue = None
+			
+		if self.dlgHistory is not None:
+			self.dlgHistory.Destroy()
+			self.dlgHistory = None
 			
 		for p in self.wPrinter.keys():
 			if self.wPrinter[p] is not None:
@@ -482,6 +496,7 @@ class MyFrame(wx.Frame):
 					return
 				else:
 					self.wPrinter[p].terminate()
+					self.wPrinter[p] = None
 					
 		self.settings.tbposition = self.GetPosition()
 		self.settings.logposition = self.logger.GetPosition()
@@ -910,6 +925,18 @@ class MyFrame(wx.Frame):
 		
 	def onGcToQueue(self, evt):
 		self.exportGcToQueue()
+		
+	def onHistory(self, evt):
+		if self.dlgHistory is None:
+			dlg = HistoryDlg(self, self.history)
+			dlg.Show()
+			self.dlgHistory = dlg
+		else:
+			self.dlgHistory.Show()
+			self.dlgHistory.Raise()
+
+	def closeHistory(self):
+		self.dlgHistory = None
 	
 	def log(self, msg):
 		self.logger.LogMessage(msg)

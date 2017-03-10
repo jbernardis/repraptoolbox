@@ -344,7 +344,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.bImport.SetToolTipString("Import G Code file (%s)" % fn)
 		
 	def onOpenFile(self, evt):
-		wildcard = "GCode (*.gcode)|*.gcode|"	 \
+		wildcard = "GCode (*.gcode)|*.gcode;*.GCODE|"	 \
 			"All files (*.*)|*.*"
 			
 		dlg = wx.FileDialog(

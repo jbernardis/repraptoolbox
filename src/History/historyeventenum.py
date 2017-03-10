@@ -8,7 +8,7 @@ class HistoryEventEnum:
 	SpeedChange = 5
 	PrintStarted = 6
 	PrintCompleted = 7
-	labels = {
+	label = {
 		SliceComplete : "Slice Completed",
 		OpenEdit : "Open Edit Completed",
 		FilamentChange: "Filament Change",

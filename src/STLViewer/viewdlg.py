@@ -397,7 +397,7 @@ class StlViewDlg(wx.Frame):
 		self.loadStlFile(path)
 		
 	def stlFileDialog(self):
-		wildcard = "STL (*.stl)|*.stl|"	 \
+		wildcard = "STL (*.stl)|*.stl;*.STL|"	 \
 			"All files (*.*)|*.*"
 			
 		dlg = wx.FileDialog(

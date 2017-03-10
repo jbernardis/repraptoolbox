@@ -5,7 +5,7 @@ from __builtin__ import file
 from GEdit.editgcode import EditGCodeDlg
 
 
-wildcard = "G Code files (*.gcode)|*.gcode|"  "All files (*.*)|*.*"
+wildcard = "G Code files (*.gcode)|*.gcode;*.GCODE|"  "All files (*.*)|*.*"
 
 BUTTONDIM = (64, 64)
 VISIBLEQUEUESIZE = 23

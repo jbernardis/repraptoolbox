@@ -51,7 +51,7 @@ class Logger(wx.Frame):
 		self.t.Clear()
 		
 	def doSave(self):
-		wildcard = "Log File |*.log"
+		wildcard = "Log File |*.log;*.LOG"
 		dlg = wx.FileDialog(
 			self, message="Save as ...", defaultDir=self.settings.lastlogdirectory, 
 			defaultFile="", wildcard=wildcard, style=wx.FD_SAVE|wx.FD_OVERWRITE_PROMPT)

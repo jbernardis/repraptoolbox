@@ -478,7 +478,7 @@ class GEditDlg(wx.Frame):
 			self.propDlg.setProperty(PropertyEnum.timeUntil, formatElapsed(t))
 		
 	def gcodeFileDialog(self):
-		wildcard = "GCode (*.gcode)|*.gcode|"	 \
+		wildcard = "GCode (*.gcode)|*.gcode;*.GCODE|"	 \
 			"All files (*.*)|*.*"
 			
 		dlg = wx.FileDialog(
@@ -928,7 +928,7 @@ class GEditDlg(wx.Frame):
 			print "exception: ", self.paramStr
 	
 	def onSaveAs(self, evt):
-		wildcard = "GCode (*.gcode)|*.gcode"
+		wildcard = "GCode (*.gcode)|*.gcode;*.GCODE"
 
 		dlg = wx.FileDialog(
 			self, message="Save as ...", defaultDir=self.settings.lastdirectory, 
@@ -988,7 +988,7 @@ class GEditDlg(wx.Frame):
 		startLine = self.gObj.getGCodeLines(sx)[0]
 		endLine = self.gObj.getGCodeLines(ex)[1]
 		
-		wildcard = "GCode (*.gcode)|*.gcode"
+		wildcard = "GCode (*.gcode)|*.gcode;*.GCODE"
 
 		dlg = wx.FileDialog(
 			self, message="Save as ...", defaultDir=self.settings.lastdirectory, 

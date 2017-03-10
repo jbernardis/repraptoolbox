@@ -13,7 +13,7 @@ from gcsuffix import parseGCSuffix
 
 BUTTONDIM = (48, 48)
 
-wildcard = "G Code (*.gcode)|*.gcode|All files (*.*)|*.*"
+wildcard = "G Code (*.gcode)|*.gcode;*.GCODE|All files (*.*)|*.*"
 
 MAX_Q_LEN = 50
 
