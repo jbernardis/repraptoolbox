@@ -22,6 +22,7 @@ class HistoryDlg(wx.Frame):
 		
 		self.gcFn = None
 		self.stlFn = None
+		self.filterEvent = None
 
 		self.images = self.history.images
 		self.settings = self.history.settings
@@ -31,12 +32,10 @@ class HistoryDlg(wx.Frame):
 		self.hcHistory = HistoryCtrl(self, self.history);
 		
 		self.bReprint = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPrinter, size=BUTTONDIM)
-		self.bReprint.SetToolTipString("Export the selected G Code file")
 		self.Bind(wx.EVT_BUTTON, self.onReprint, self.bReprint)
 		self.bReprint.Enable(False)
 		
 		self.bReslice = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlice, size=BUTTONDIM)
-		self.bReslice.SetToolTipString("Export the selected STL file")
 		self.Bind(wx.EVT_BUTTON, self.onReslice, self.bReslice)
 		self.bReslice.Enable(False)
 		
@@ -45,10 +44,28 @@ class HistoryDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onRefresh, self.bRefresh)
 		self.bRefresh.Enable(True)
 		
+		self.bFilter = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFilter, size=BUTTONDIM)
+		self.bFilter.SetToolTipString("Filter the output to show a single file")
+		self.Bind(wx.EVT_BUTTON, self.onFilter, self.bFilter)
+		self.bRefresh.Enable(False)
+		
 		self.cbBasename = wx.CheckBox(self, wx.ID_ANY, "Show basename only")
 		self.cbBasename.SetToolTipString("Show only the basename of G Code files")
 		self.Bind(wx.EVT_CHECKBOX, self.checkBasename, self.cbBasename)
 		self.cbBasename.SetValue(self.settings.basenameonly)
+		
+		self.cbEnqueueGC = wx.CheckBox(self, wx.ID_ANY, "Enqueue G Code file")
+		self.cbEnqueueGC.SetToolTipString("Add the G Code file to the print queue when exporting")
+		self.Bind(wx.EVT_CHECKBOX, self.checkEnqueueGC, self.cbEnqueueGC)
+		self.cbEnqueueGC.SetValue(self.settings.enqueuegc)
+		
+		self.cbEnqueueStl = wx.CheckBox(self, wx.ID_ANY, "Enqueue STL file")
+		self.cbEnqueueStl.SetToolTipString("Add the STL file to the slice queue when exporting")
+		self.Bind(wx.EVT_CHECKBOX, self.checkEnqueueStl, self.cbEnqueueStl)
+		self.cbEnqueueStl.SetValue(self.settings.enqueuestl)
+		
+		self.updateGcHelpText()
+		self.updateStlHelpText()
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
 		sz.AddSpacer((10, 10))
@@ -61,16 +78,22 @@ class HistoryDlg(wx.Frame):
 		
 		sz.AddSpacer((10, 10))
 		
-		sz.Add(self.cbBaseName, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		sz.Add(self.cbBasename, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		
 		sz.AddSpacer((10, 10))
 		
 		szh = wx.BoxSizer(wx.HORIZONTAL)
-		szh.Add(self.bReprint)
-		szh.AddSpacer((10, 10))
 		szh.Add(self.bReslice)
+		szh.AddSpacer((5, 5))
+		szh.Add(self.cbEnqueueSt, 1, wx.TOP, 12)
+		szh.AddSpacer((10, 10))
+		szh.Add(self.bReprint)
+		szh.AddSpacer((5, 5))
+		szh.Add(self.cbEnqueueGC, 1, wx.TOP, 12)
 		szh.AddSpacer((20, 10))
 		szh.Add(self.bRefresh)
+		szh.AddSpacer((20, 10))
+		szh.Add(self.bFilter)
 		sz.Add(szh, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		
 		sz.AddSpacer((10, 10))
@@ -89,21 +112,65 @@ class HistoryDlg(wx.Frame):
 		
 	def onRefresh(self, evt):
 		self.history.refreshAll()
-		self.hcHistory.refresh()
+		self.hcHistory.refreshAll()
 		
-	def checkBaseName(self, evt):
+	def checkBasename(self, evt):
 		self.settings.basenameonly = evt.IsChecked()
-		self.hcHistory.setBaseNameOnly(self.settings.basenameonly)
+		self.hcHistory.setBasenameOnly(self.settings.basenameonly)
+		
+	def checkEnqueueGC(self, evt):
+		self.settings.enqueuegc = evt.IsCkecked()
+		self.updateGcHelpText()
+		
+	def checkEnqueueStl(self, evt):
+		self.settings.enqueuestl = evt.IsCkecked()
+		self.updateStlHelpText()
 		
 	def GCodeFileExists(self, flag, evt):
 		self.bReprint.Enable(flag)
 		if flag:
 			self.gcFn = evt.getFns()[0]
+		self.updateGcHelpText()
 		
 	def StlFileExists(self, flag, evt):
 		self.bReslice.Enable(flag)
 		if flag:
-			self.gcFn = evt.getFns()[1]
+			self.stlFn = evt.getFns()[1]
+		self.updateStlHelpText()
+		
+	def updateGcHelpText(self):
+		if self.bReprint.IsEnabled():
+			ht = "Export "
+			if self.settings.enqueuegc:
+				ht += "(and enqueue) "
+			ht += "G Code file (%s)" % self.gcFn
+			self.bReprint.SetToolTipString(ht)
+		else:
+			self.bReprint.SetToolTipString("")
+		
+	def updateStlHelpText(self):
+		if self.bReslice.IsEnabled():
+			ht = "Export "
+			if self.settings.enqueuestl:
+				ht += "(and enqueue) "
+			ht += "STL file (%s)" % self.stlFn
+			self.bReslice.SetToolTipString(ht)
+		else:
+			self.bReslice.SetToolTipString("")
+			
+	def onFilter(self, evt):
+		if self.filterEvent is None:
+			return
+		
+		fn = self.filterEvent.getFns()[0]
+		print "Filtering view based on file (%s)" % fn
+		
+	def itemSelected(self, flag, evt):
+		self.bFilter.Enable(flag)
+		if flag:
+			self.filterEvent = evt
+		else:
+			self.filterEvent = None
 
 class HistoryCtrl(wx.ListCtrl):	
 	def __init__(self, parent, history):
@@ -149,8 +216,17 @@ class HistoryCtrl(wx.ListCtrl):
 			self.InsertColumn(i, colTitles[i])
 			self.SetColumnWidth(i, colWidths[i])
 			
+		self.applyFilter()
+			
+		self.setArraySize()
+		
+		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doListSelect)
+
+	def applyFilter(self):
+		self.filteredEvents =  [e for e in self.history]
+
 		self.eventFlags = []
-		for e in self.history:
+		for e in self.filteredEvents:
 			et = e.getEventType()
 			fns = e.getFns()
 			try:
@@ -177,23 +253,16 @@ class HistoryCtrl(wx.ListCtrl):
 			else:
 				self.eventFlags.append("")
 				
-		self.setArraySize()
-		
-		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doListSelect)
+
 
 	def setArraySize(self):		
-		self.SetItemCount(len(self.history))
+		self.SetItemCount(len(self.filteredEvents))
 		
 	def refreshAll(self):
-		self.SetItemCount(len(self.history))
-		for i in range(len(self.history)):
+		self.applyFilter()
+		self.SetItemCount(len(self.filteredEvents))
+		for i in range(len(self.filteredEvents)):
 			self.RefreshItem(i)
-		
-	def getSelectedFile(self):
-		if self.selectedItem is None:
-			return None
-		
-		return self.history[self.selectedItem][0]
 		
 	def doListSelect(self, evt):
 		x = self.selectedItem
@@ -201,20 +270,20 @@ class HistoryCtrl(wx.ListCtrl):
 		if x is not None:
 			self.RefreshItem(x)
 			
-		e = self.history[self.selectedItem]
+			
+		e = self.filteredList[self.selectedItem]
+		self.parent.itemSelected(x is not None, e)
+		
 		fn = e.getFns()[0]
 		if os.path.exists(fn):
 			self.selectedExists = True
-			print " %s exists" % fn
 		else:
 			self.selectedExists = False
-			print "%s does not exist" % fn
 		
 		self.parent.GCodeFileExists(self.selectedExists, e)
 		
 		ex = False
 		if e.getEventType() == HistoryEventEnum.SliceComplete:
-			print "check for stl file"
 			fn = e.getFns()[1]
 			if os.path.exists(fn):
 				ex = True
@@ -225,23 +294,23 @@ class HistoryCtrl(wx.ListCtrl):
 	def doesSelectedExist(self):
 		return self.selectedExists
 			
-	def setBaseNameOnly(self, flag):
+	def setBasenameOnly(self, flag):
 		if self.basenameonly == flag:
 			return
 		
 		self.basenameonly = flag
-		for i in range(len(self.history)):
+		for i in range(len(self.filteredEvents)):
 			self.RefreshItem(i)
 
 	def OnGetItemText(self, item, col):
-		e = self.history[item]
+		e = self.filteredEvents[item]
 		if e is None:
 			return "????"
 		
 		if col == 0:
 			fn = e.getFns()[0]
 			if item != 0:
-				ofn = self.history[item-1].getFns()[0]
+				ofn = self.filteredEvents[item-1].getFns()[0]
 				if ofn == fn:
 					return ""
 				

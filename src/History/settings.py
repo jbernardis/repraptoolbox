@@ -20,6 +20,8 @@ class Settings:
 		self.section = "history"	
 		
 		self.basenameonly = True
+		self.enqueuegc = True
+		self.enqueuestl = True
 		
 		self.inifile = os.path.join(folder, INIFILE)
 		
@@ -33,6 +35,10 @@ class Settings:
 			for opt, value in self.cfg.items(self.section):
 				if opt == "basenameonly":
 					self.basenameonly = parseBoolean(value, True)
+				elif opt == "enqueuegc":
+					self.enqueuegc = parseBoolean(value, True)
+				elif opt == "enqueuestl":
+					self.enqueuestl = parseBoolean(value, True)
 
 	def save(self):
 		try:
@@ -41,6 +47,8 @@ class Settings:
 			pass
 		
 		self.cfg.set(self.section, "basenameonly", str(self.basenameonly))
+		self.cfg.set(self.section, "enqueuegc", str(self.enqueuegc))
+		self.cfg.set(self.section, "enqueuestl", str(self.enqueuestl))
 
 		try:		
 			cfp = open(self.inifile, 'wb')
