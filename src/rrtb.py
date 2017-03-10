@@ -936,6 +936,7 @@ class MyFrame(wx.Frame):
 			self.dlgHistory.Raise()
 
 	def closeHistory(self):
+		self.dlgHistory.Destroy()
 		self.dlgHistory = None
 	
 	def log(self, msg):

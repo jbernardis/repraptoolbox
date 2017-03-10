@@ -158,6 +158,7 @@ class History:
 	def refreshAll(self):
 		for hk in self.histFiles.keys():
 			self.histFiles[hk].refresh()
+		self.save()
 		
 	def addFile(self, fn):
 		if fn in self.histFiles.keys():
@@ -174,6 +175,7 @@ class History:
 			sx = len(self.events) - MAX_HIST
 			self.events = self.events[sx:]
 			self.prune()
+		self.save()
 			
 	def prune(self):
 		fns = []

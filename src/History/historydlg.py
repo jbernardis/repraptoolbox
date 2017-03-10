@@ -9,6 +9,7 @@ import time
 from historyeventenum import HistoryEventEnum
 
 VISIBLEQUEUESIZE = 15
+BUTTONDIM = (48, 48)
 
 class HistoryDlg(wx.Frame):
 	def __init__(self, parent, history):
@@ -17,15 +18,62 @@ class HistoryDlg(wx.Frame):
 
 		self.parent = parent		
 		self.history = history
+		self.history.refreshAll()
+		
+		self.gcFn = None
+		self.stlFn = None
 
 		self.images = self.history.images
 		self.settings = self.history.settings
 
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
-		s = HistoryCtrl(self, self.history);
+		self.hcHistory = HistoryCtrl(self, self.history);
+		
+		self.bReprint = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPrinter, size=BUTTONDIM)
+		self.bReprint.SetToolTipString("Export the selected G Code file")
+		self.Bind(wx.EVT_BUTTON, self.onReprint, self.bReprint)
+		self.bReprint.Enable(False)
+		
+		self.bReslice = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlice, size=BUTTONDIM)
+		self.bReslice.SetToolTipString("Export the selected STL file")
+		self.Bind(wx.EVT_BUTTON, self.onReslice, self.bReslice)
+		self.bReslice.Enable(False)
+		
+		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRefresh, size=BUTTONDIM)
+		self.bRefresh.SetToolTipString("Refresh the printing history")
+		self.Bind(wx.EVT_BUTTON, self.onRefresh, self.bRefresh)
+		self.bRefresh.Enable(True)
+		
+		self.cbBasename = wx.CheckBox(self, wx.ID_ANY, "Show basename only")
+		self.cbBasename.SetToolTipString("Show only the basename of G Code files")
+		self.Bind(wx.EVT_CHECKBOX, self.checkBasename, self.cbBasename)
+		self.cbBasename.SetValue(self.settings.basenameonly)
+		
 		sz = wx.BoxSizer(wx.VERTICAL)
-		sz.Add(s)
+		sz.AddSpacer((10, 10))
+		
+		szh = wx.BoxSizer(wx.HORIZONTAL)
+		szh.AddSpacer((10, 10))
+		szh.Add(self.hcHistory)
+		szh.AddSpacer((10, 10))
+		sz.Add(szh)
+		
+		sz.AddSpacer((10, 10))
+		
+		sz.Add(self.cbBaseName, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		
+		sz.AddSpacer((10, 10))
+		
+		szh = wx.BoxSizer(wx.HORIZONTAL)
+		szh.Add(self.bReprint)
+		szh.AddSpacer((10, 10))
+		szh.Add(self.bReslice)
+		szh.AddSpacer((20, 10))
+		szh.Add(self.bRefresh)
+		sz.Add(szh, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		
+		sz.AddSpacer((10, 10))
 		
 		self.SetSizer(sz)
 		self.Fit()
@@ -33,13 +81,29 @@ class HistoryDlg(wx.Frame):
 	def onClose(self, evt):
 		self.parent.closeHistory()
 		
+	def onReprint(self, evt):
+		self.parent.exportGcFile(self.gcFn)
+		
+	def onReslice(self, evt):
+		self.parent.exportStlFile(self.stlFn)
+		
+	def onRefresh(self, evt):
+		self.history.refreshAll()
+		self.hcHistory.refresh()
+		
+	def checkBaseName(self, evt):
+		self.settings.basenameonly = evt.IsChecked()
+		self.hcHistory.setBaseNameOnly(self.settings.basenameonly)
+		
 	def GCodeFileExists(self, flag, evt):
-		print "G Code File exists: ", flag
+		self.bReprint.Enable(flag)
+		if flag:
+			self.gcFn = evt.getFns()[0]
 		
 	def StlFileExists(self, flag, evt):
-		print "STL File exists: ", flag
-		if evt.getEventType() == HistoryEventEnum.SliceComplete:
-			print evt.getSlCfg()
+		self.bReslice.Enable(flag)
+		if flag:
+			self.gcFn = evt.getFns()[1]
 
 class HistoryCtrl(wx.ListCtrl):	
 	def __init__(self, parent, history):
@@ -119,6 +183,11 @@ class HistoryCtrl(wx.ListCtrl):
 
 	def setArraySize(self):		
 		self.SetItemCount(len(self.history))
+		
+	def refreshAll(self):
+		self.SetItemCount(len(self.history))
+		for i in range(len(self.history)):
+			self.RefreshItem(i)
 		
 	def getSelectedFile(self):
 		if self.selectedItem is None:
