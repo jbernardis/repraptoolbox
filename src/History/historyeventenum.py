@@ -8,14 +8,16 @@ class HistoryEventEnum:
 	SpeedChange = 5
 	PrintStarted = 6
 	PrintCompleted = 7
+	FileSave = 8
 	label = {
-		SliceComplete : "Slice Completed",
-		OpenEdit : "Open Edit Completed",
+		SliceComplete : "Slice Complete",
+		OpenEdit : "Open Edit",
 		FilamentChange: "Filament Change",
-		ShiftModel: "Model Shifted",
-		TempChange: "Temperatures Changed",
-		SpeedChange: "Speed Changed",
-		PrintStarted: "Print Started",
-		PrintCompleted: "Print Completed"
+		ShiftModel: "Model Shift",
+		TempChange: "Temperatures Change",
+		SpeedChange: "Speed Change",
+		PrintStarted: "Print Start",
+		PrintCompleted: "Print Complete",
+		FileSave: "File Saved"
 	}
 	

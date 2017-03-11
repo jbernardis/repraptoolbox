@@ -48,7 +48,7 @@ class HistoryDlg(wx.Frame):
 		self.bFilter = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFilter, size=BUTTONDIM)
 		self.bFilter.SetToolTipString("Filter the output to show a single file")
 		self.Bind(wx.EVT_BUTTON, self.onFilter, self.bFilter)
-		self.bRefresh.Enable(False)
+		self.bFilter.Enable(False)
 		
 		self.tcFilterFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(200, -1), style=wx.TE_READONLY)
 		
@@ -178,12 +178,9 @@ class HistoryDlg(wx.Frame):
 			self.hcHistory.setFilter(fn)
 			self.tcFilterFile.SetValue(os.path.basename(fn))
 			
-	def itemSelected(self, flag, evt):
+	def itemSelected(self, flag, evt=None):
 		self.bFilter.Enable(flag)
-		if flag:
-			self.filterEvent = evt
-		else:
-			self.filterEvent = None
+		self.filterEvent = evt
 
 class HistoryCtrl(wx.ListCtrl):	
 	def __init__(self, parent, history):
@@ -231,21 +228,19 @@ class HistoryCtrl(wx.ListCtrl):
 			self.InsertColumn(i, colTitles[i])
 			self.SetColumnWidth(i, colWidths[i])
 			
-		self.applyFilter()
-			
-		self.setArraySize()
-		
+		self.refreshAll()
+
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doListSelect)
 		
 	def setFilter(self, filtFn):
 		self.filtFn = filtFn
-		self.applyFilter()
+		self.refreshAll()
 
 	def applyFilter(self):
 		if self.filtFn is None:
 			self.filteredEvents =  [e for e in self.history]
 		else:
-			self.filteredEvents =  [e for e in self.history if e.getFns[0] == self.filtFn]
+			self.filteredEvents =  [e for e in self.history if e.getFns()[0] == self.filtFn]
 
 		self.eventFlags = []
 		for e in self.filteredEvents:
@@ -275,9 +270,6 @@ class HistoryCtrl(wx.ListCtrl):
 			else:
 				self.eventFlags.append("")
 				
-
-
-	def setArraySize(self):		
 		self.SetItemCount(len(self.filteredEvents))
 		
 	def refreshAll(self):
@@ -291,10 +283,10 @@ class HistoryCtrl(wx.ListCtrl):
 		self.selectedItem = evt.m_itemIndex
 		if x is not None:
 			self.RefreshItem(x)
-			
-			
-		e = self.filteredEvents[self.selectedItem]
-		self.parent.itemSelected(x is not None, e)
+			e = self.filteredEvents[self.selectedItem]
+			self.parent.itemSelected(True, e)
+		else:
+			self.parent.itemSelected(False)
 		
 		fn = e.getFns()[0]
 		if os.path.exists(fn):

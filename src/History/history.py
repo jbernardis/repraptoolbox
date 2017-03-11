@@ -56,6 +56,7 @@ class SliceComplete (HistoryEvent):
 		self.eventType = HistoryEventEnum.SliceComplete
 		self.gcfn = gcfn
 		self.stlfn = stlfn
+		self.slcfg = slcfg
 		
 	def dump(self):
 		print self.eventType, self.timeStamp, self.gcfn.getFn(), self.stlfn.getFn(), self.slcfg
@@ -115,6 +116,13 @@ class PrintCompleted (HistoryEvent):
 	def __init__(self, gcfn, txt):
 		HistoryEvent.__init__(self)
 		self.eventType = HistoryEventEnum.PrintCompleted
+		self.gcfn = gcfn
+		self.text = txt
+	
+class FileSave (HistoryEvent):
+	def __init__(self, gcfn, txt):
+		HistoryEvent.__init__(self)
+		self.eventType = HistoryEventEnum.FileSave
 		self.gcfn = gcfn
 		self.text = txt
 	
