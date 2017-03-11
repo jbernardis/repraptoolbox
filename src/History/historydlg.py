@@ -23,6 +23,7 @@ class HistoryDlg(wx.Frame):
 		self.gcFn = None
 		self.stlFn = None
 		self.filterEvent = None
+		self.filtering = False
 
 		self.images = self.history.images
 		self.settings = self.history.settings
@@ -48,6 +49,8 @@ class HistoryDlg(wx.Frame):
 		self.bFilter.SetToolTipString("Filter the output to show a single file")
 		self.Bind(wx.EVT_BUTTON, self.onFilter, self.bFilter)
 		self.bRefresh.Enable(False)
+		
+		self.tcFilterFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(200, -1), style=wx.TE_READONLY)
 		
 		self.cbBasename = wx.CheckBox(self, wx.ID_ANY, "Show basename only")
 		self.cbBasename.SetToolTipString("Show only the basename of G Code files")
@@ -85,15 +88,17 @@ class HistoryDlg(wx.Frame):
 		szh = wx.BoxSizer(wx.HORIZONTAL)
 		szh.Add(self.bReslice)
 		szh.AddSpacer((5, 5))
-		szh.Add(self.cbEnqueueSt, 1, wx.TOP, 12)
-		szh.AddSpacer((10, 10))
+		szh.Add(self.cbEnqueueStl, 1, wx.TOP, 12)
+		szh.AddSpacer((30, 10))
 		szh.Add(self.bReprint)
 		szh.AddSpacer((5, 5))
 		szh.Add(self.cbEnqueueGC, 1, wx.TOP, 12)
-		szh.AddSpacer((20, 10))
+		szh.AddSpacer((30, 10))
 		szh.Add(self.bRefresh)
-		szh.AddSpacer((20, 10))
+		szh.AddSpacer((30, 10))
 		szh.Add(self.bFilter)
+		szh.AddSpacer((5, 5))
+		szh.Add(self.tcFilterFile, 1, wx.TOP, 12)
 		sz.Add(szh, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		
 		sz.AddSpacer((10, 10))
@@ -119,11 +124,11 @@ class HistoryDlg(wx.Frame):
 		self.hcHistory.setBasenameOnly(self.settings.basenameonly)
 		
 	def checkEnqueueGC(self, evt):
-		self.settings.enqueuegc = evt.IsCkecked()
+		self.settings.enqueuegc = evt.IsChecked()
 		self.updateGcHelpText()
 		
 	def checkEnqueueStl(self, evt):
-		self.settings.enqueuestl = evt.IsCkecked()
+		self.settings.enqueuestl = evt.IsChecked()
 		self.updateStlHelpText()
 		
 	def GCodeFileExists(self, flag, evt):
@@ -162,9 +167,17 @@ class HistoryDlg(wx.Frame):
 		if self.filterEvent is None:
 			return
 		
-		fn = self.filterEvent.getFns()[0]
-		print "Filtering view based on file (%s)" % fn
-		
+		if self.filtering:
+			self.filtering = False
+			self.hcHistory.setFilter(None)
+			self.tcFilterFile.SetValue("")
+		else:
+			self.filtering = True
+			fn = self.filterEvent.getFns()[0]
+			print "Filtering view based on file (%s)" % fn
+			self.hcHistory.setFilter(fn)
+			self.tcFilterFile.SetValue(os.path.basename(fn))
+			
 	def itemSelected(self, flag, evt):
 		self.bFilter.Enable(flag)
 		if flag:
@@ -178,6 +191,8 @@ class HistoryCtrl(wx.ListCtrl):
 		self.history = history
 		self.images = history.images
 		self.settings = history.settings
+		
+		self.filtFn = None
 		
 		f = wx.Font(8,  wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		dc = wx.ScreenDC()
@@ -221,9 +236,16 @@ class HistoryCtrl(wx.ListCtrl):
 		self.setArraySize()
 		
 		self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.doListSelect)
+		
+	def setFilter(self, filtFn):
+		self.filtFn = filtFn
+		self.applyFilter()
 
 	def applyFilter(self):
-		self.filteredEvents =  [e for e in self.history]
+		if self.filtFn is None:
+			self.filteredEvents =  [e for e in self.history]
+		else:
+			self.filteredEvents =  [e for e in self.history if e.getFns[0] == self.filtFn]
 
 		self.eventFlags = []
 		for e in self.filteredEvents:
@@ -271,7 +293,7 @@ class HistoryCtrl(wx.ListCtrl):
 			self.RefreshItem(x)
 			
 			
-		e = self.filteredList[self.selectedItem]
+		e = self.filteredEvents[self.selectedItem]
 		self.parent.itemSelected(x is not None, e)
 		
 		fn = e.getFns()[0]

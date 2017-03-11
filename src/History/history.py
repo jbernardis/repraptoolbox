@@ -51,17 +51,14 @@ class HistoryEvent:
 		return self.text
 		
 class SliceComplete (HistoryEvent):
-	def __init__(self, gcfn, stlfn, slcfg, slfil, sltemp):
+	def __init__(self, gcfn, stlfn, slcfg):
 		HistoryEvent.__init__(self)
 		self.eventType = HistoryEventEnum.SliceComplete
 		self.gcfn = gcfn
 		self.stlfn = stlfn
-		self.slcfg = slcfg
-		self.slfil = slfil
-		self.sltemp = sltemp
 		
 	def dump(self):
-		print self.eventType, self.timeStamp, self.gcfn.getFn(), self.stlfn.getFn(), self.slcfg, self.slfil, self.sltemp
+		print self.eventType, self.timeStamp, self.gcfn.getFn(), self.stlfn.getFn(), self.slcfg
 		
 	def getString(self):
 		return "%s - %s" % (os.path.basename(self.stlfn.getFn()), self.slcfg)

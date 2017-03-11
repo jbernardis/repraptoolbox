@@ -590,7 +590,7 @@ class Slic3rDlg(wx.Frame):
 				self.history.addEvent(SliceComplete(
 					self.history.addFile(self.gcFn),
 					self.history.addFile(self.stlFn),
-					self.sufCfg, self.sufFilSiz, self.sufTemps))
+					self.sufCfg))
 				if self.settings.autoexport:
 					self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
 				
