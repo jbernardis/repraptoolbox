@@ -131,16 +131,24 @@ class HistoryDlg(wx.Frame):
 		self.settings.enqueuestl = evt.IsChecked()
 		self.updateStlHelpText()
 		
-	def GCodeFileExists(self, flag, evt):
-		self.bReprint.Enable(flag)
-		if flag:
+	def GCodeFileExists(self, flag, evt=None):
+		if flag and evt is not None:
+			self.bReprint.Enable(True)
 			self.gcFn = evt.getFns()[0]
+		else:
+			self.bReprint.Enable(False)
+			self.gcFn = None
+			
 		self.updateGcHelpText()
 		
-	def StlFileExists(self, flag, evt):
-		self.bReslice.Enable(flag)
-		if flag:
+	def StlFileExists(self, flag, evt=None):
+		if flag and evt is not None:
+			self.bReslice.Enable(True)
 			self.stlFn = evt.getFns()[1]
+		else:
+			self.bReslice.Enable(False)
+			self.stlFn = None
+			
 		self.updateStlHelpText()
 		
 	def updateGcHelpText(self):
@@ -174,7 +182,6 @@ class HistoryDlg(wx.Frame):
 		else:
 			self.filtering = True
 			fn = self.filterEvent.getFns()[0]
-			print "Filtering view based on file (%s)" % fn
 			self.hcHistory.setFilter(fn)
 			self.tcFilterFile.SetValue(os.path.basename(fn))
 			
@@ -283,10 +290,15 @@ class HistoryCtrl(wx.ListCtrl):
 		self.selectedItem = evt.m_itemIndex
 		if x is not None:
 			self.RefreshItem(x)
-			e = self.filteredEvents[self.selectedItem]
-			self.parent.itemSelected(True, e)
-		else:
+			
+		if self.selectedItem is None:
 			self.parent.itemSelected(False)
+			self.parent.GCodeFileExists(False)
+			self.parent.StlFileExists(False)
+			return
+			
+		e = self.filteredEvents[self.selectedItem]
+		self.parent.itemSelected(True, e)
 		
 		fn = e.getFns()[0]
 		if os.path.exists(fn):
