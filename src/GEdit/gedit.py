@@ -147,14 +147,14 @@ class GEditDlg(wx.Frame):
 		
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
 		self.bExport.SetToolTipString("Export the current toolbox G Code file")
-		self.Bind(wx.EVT_BUTTON, self.onExport, self.bExport)
+		self.Bind(wx.EVT_CHECKBOX, self.onExport, self.bExport)
 		self.bExport.Enable(not self.settings.autoexport)
 		
-		self.cbExport = wx.BitmapButton(self, wx.ID_ANY, "Auto-export")
+		self.cbExport = wx.CheckBox(self, wx.ID_ANY, "Auto-export")
 		self.cbExport.SetToolTipString("Auto-export the current G Code file when saving")
-		self.Bind(wx.EVT_BUTTON, self.oncbExport, self.cbExport)
+		self.Bind(wx.EVT_CHECKBOX, self.onCbExport, self.cbExport)
 		
-		self.cbEnqueue = wx.BitmapButton(self, wx.ID_ANY, "Add to queue")
+		self.cbEnqueue = wx.CheckBox(self, wx.ID_ANY, "Add to queue")
 		self.cbEnqueue.SetToolTipString("Enqueue the current G Code file on the end of the G Code queue when exporting")
 		self.Bind(wx.EVT_BUTTON, self.onEnqueue, self.cbEnqueue)
 		
@@ -212,14 +212,15 @@ class GEditDlg(wx.Frame):
 		btnszr.Add(self.bEdit)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bInfo)
-		btnszr.AddSpacer((70, 10))
+		btnszr.AddSpacer((30, 10))
 		
 		optszr = wx.BoxSizer(wx.VERTICAL)
-		optszr.AddSpacer((5,5))
+		optszr.AddSpacer((3,5))
 		optszr.Add(self.cbShowMoves)
-		optszr.AddSpacer((5,5))
+		optszr.AddSpacer((2,5))
 		optszr.Add(self.cbShowPrevious)
 		btnszr.Add(optszr)
+		
 		btnszr.AddSpacer((20, 10))
 		btnszr.Add(self.bSaveLayers)
 		btnszr.AddSpacer((20, 10))
@@ -231,12 +232,14 @@ class GEditDlg(wx.Frame):
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bExport)
 		btnszr.AddSpacer((5, 5))
+		
 		optszr = wx.BoxSizer(wx.VERTICAL)
-		optszr.AddSpacer((5,5))
+		optszr.AddSpacer((3,5))
 		optszr.Add(self.cbExport)
-		optszr.AddSpacer((5,5))
+		optszr.AddSpacer((2,5))
 		optszr.Add(self.cbEnqueue)
 		btnszr.Add(optszr)
+		
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bSave)
 		btnszr.AddSpacer((10, 10))

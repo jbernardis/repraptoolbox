@@ -67,6 +67,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.printerName = prtName
 		self.layerMap = []
 		self.okToImport = False
+		self.importFile = None
 		
 		self.currentLayer = 0
 		self.maxTool = 0
@@ -336,6 +337,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.bImportQ.Enable(self.bOpen.IsEnabled())
 		
 	def setImportFile(self, fn):
+		self.importFile = fn
 		if fn is None:
 			self.bImport.Enable(False)
 			self.bImport.SetToolTipString("")
@@ -689,9 +691,9 @@ class PrintMonitorDlg(wx.Frame):
 			
 	def enableButtonsByState(self):
 		if self.state == PrintState.idle:
-			self.bImport.Enable(True)
-			self.bImportQ.Enable(True)
 			self.bOpen.Enable(True)
+			self.setImportFile(self.importFile)
+			self.bImportQ.Enable(self.okToImport)
 			if self.sdcard:
 				self.bSdPrintTo.Enable(self.gcodeLoaded)
 				self.bSdPrintFrom.Enable()
@@ -721,9 +723,9 @@ class PrintMonitorDlg(wx.Frame):
 			#TODO - what makes sense here
 			pass
 		elif self.state == PrintState.paused:
-			self.bImport.Enable(True)
-			self.bImportQ.Enable(True)
 			self.bOpen.Enable(True)
+			self.setImportFile(self.importFile)
+			self.bImportQ.Enable(self.okToImport)
 			self.bPrint.Enable(True)
 			self.bPrint.setRestart()
 			self.bPause.Enable(True);
