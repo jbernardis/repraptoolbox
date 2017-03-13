@@ -20,6 +20,7 @@ class Settings:
 		self.section = "stlview"	
 		
 		self.lastdirectory = "C:\\"
+		self.autoenqueue = False
 		
 		self.inifile = os.path.join(folder, INIFILE)
 		
@@ -33,6 +34,8 @@ class Settings:
 			for opt, value in self.cfg.items(self.section):
 				if opt == "lastdirectory":
 					self.lastdirectory = value
+				elif opt == "autoenqueue":
+					self.autoenqueue = parseBoolean(value, False)
 					
 	def save(self):
 		try:
@@ -41,6 +44,7 @@ class Settings:
 			pass
 		
 		self.cfg.set(self.section, "lastdirectory", str(self.lastdirectory))
+		self.cfg.set(self.section, "autoenqueue", str(self.autoenqueue))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

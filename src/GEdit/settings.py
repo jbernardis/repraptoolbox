@@ -28,6 +28,7 @@ class Settings:
 		self.showmoves = True
 		self.uselinenbrs = False
 		self.autoexport = True
+		self.autoenqueue = False
 		self.lastdirectory = "C:\\"
 		self.platemps = [60, 185]
 		self.abstemps = [110, 225]
@@ -104,6 +105,9 @@ class Settings:
 				elif opt == 'autoexport':
 					self.autoexport = parseBoolean(value, True)
 						
+				elif opt == 'autoenqueue':
+					self.autoenqueue = parseBoolean(value, False)
+						
 				else:
 					print("Unknown %s option: %s - ignoring" % (self.section, opt))
 		else:
@@ -121,6 +125,7 @@ class Settings:
 		self.cfg.set(self.section, "showprevious", str(self.showprevious))
 		self.cfg.set(self.section, "showmoves", str(self.showmoves))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
+		self.cfg.set(self.section, "autoenqueue", str(self.autoenqueue))
 		self.cfg.set(self.section, "uselinenbrs", str(self.uselinenbrs))
 		self.cfg.set(self.section, "lastdirectory", str(self.lastdirectory))
 		self.cfg.set(self.section, "platemps", str(self.platemps))

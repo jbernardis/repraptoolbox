@@ -164,7 +164,7 @@ class Heater(wx.Window):
 		self.Fit()
 		
 	def onBPower(self, evt):
-		if self.heaterOn:
+		if self.heaterOn and self.setting == self.slThermostat.GetValue():
 			self.heaterOn = False
 			self.updateSetting(0)
 			cmd = self.htrInfo.setcmd + " S0"

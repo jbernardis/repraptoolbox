@@ -558,7 +558,7 @@ class PlaterDlg(wx.Frame):
 		
 	def onCbAutoExport(self, evt):
 		self.settings.autoexport = self.cbAutoExport.GetValue()
-		self.bExport.Enable(not self.settings.autoExport and self.savedfile is not None)
+		self.bExport.Enable(not self.settings.autoexport and self.savedfile is not None)
 
 	def doExport(self, evt):
 		self.parent.exportStlFile(self.savedfile, self.settings.autoenqueue)

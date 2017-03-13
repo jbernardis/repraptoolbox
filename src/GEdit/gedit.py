@@ -148,12 +148,15 @@ class GEditDlg(wx.Frame):
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
 		self.bExport.SetToolTipString("Export the current toolbox G Code file")
 		self.Bind(wx.EVT_BUTTON, self.onExport, self.bExport)
-		self.bExport.Enable(False)
+		self.bExport.Enable(not self.settings.autoexport)
 		
-		self.bEnqueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
-		self.bEnqueue.SetToolTipString("Enqueue the current G Code file on the end of the G Code queue")
-		self.Bind(wx.EVT_BUTTON, self.onEnqueue, self.bEnqueue)
-		self.bEnqueue.Enable(False)
+		self.cbExport = wx.BitmapButton(self, wx.ID_ANY, "Auto-export")
+		self.cbExport.SetToolTipString("Auto-export the current G Code file when saving")
+		self.Bind(wx.EVT_BUTTON, self.oncbExport, self.cbExport)
+		
+		self.cbEnqueue = wx.BitmapButton(self, wx.ID_ANY, "Add to queue")
+		self.cbEnqueue.SetToolTipString("Enqueue the current G Code file on the end of the G Code queue when exporting")
+		self.Bind(wx.EVT_BUTTON, self.onEnqueue, self.cbEnqueue)
 		
 		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFilesave, size=BUTTONDIM)
 		self.bSave.SetToolTipString("Save G Code to the current file")
@@ -227,8 +230,13 @@ class GEditDlg(wx.Frame):
 		btnszr.Add(self.bImportQ)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bExport)
-		btnszr.AddSpacer((10, 10))
-		btnszr.Add(self.bEnqueue)
+		btnszr.AddSpacer((5, 5))
+		optszr = wx.BoxSizer(wx.VERTICAL)
+		optszr.AddSpacer((5,5))
+		optszr.Add(self.cbExport)
+		optszr.AddSpacer((5,5))
+		optszr.Add(self.cbEnqueue)
+		btnszr.Add(optszr)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bSave)
 		btnszr.AddSpacer((10, 10))
@@ -361,20 +369,14 @@ class GEditDlg(wx.Frame):
 			if rc != wx.ID_YES:
 				return
 		
-		self.parent.exportGcFile(self.filename)
+		self.parent.exportGcFile(self.filename, self.settings.autoenqueue)
+		
+	def onCbExport(self, evt):
+		self.settings.autoexport = evt.IsChecked()
+		self.bExport.Enable(not self.settings.autoexport)
 		
 	def onEnqueue(self, evt):
-		if self.modified:
-			dlg = wx.MessageDialog(self,
-				"You have unsaved changes.\nAre you sure you want to enqueue?",
-				"Confirm Enqueue With Pending Changes",
-				wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION)
-			rc = dlg.ShowModal()
-			dlg.Destroy()
-			if rc != wx.ID_YES:
-				return
-		
-		self.parent.exportGcFile(self.filename, True)
+		self.settings.autoenqueue = evt.IsChecked()
 		
 	def onImport(self, evt):
 		fn = self.parent.importGcFile()
@@ -544,8 +546,7 @@ class GEditDlg(wx.Frame):
 		self.bSaveLayers.Enable(flag)
 		self.bSave.Enable(flag)
 		self.bSaveAs.Enable(flag)
-		self.bExport.Enable(flag)
-		self.bEnqueue.Enable(flag)
+		self.bExport.Enable(flag and (not self.settings.autoexport))
 		self.bFilChange.Enable(flag)
 		self.bBracketStart.Enable(flag)
 		self.bBracketEnd.Enable(flag)
@@ -970,7 +971,7 @@ class GEditDlg(wx.Frame):
 		
 		self.filename = path
 		if self.settings.autoexport:
-			self.parent.exportGcFile(path)
+			self.parent.exportGcFile(path, self.settings.autoenqueue)
 		self.updateTitle()
 		
 		dlg = wx.MessageDialog(self, "G Code file\n" + path + "\nwritten.",

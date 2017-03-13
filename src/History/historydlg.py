@@ -245,9 +245,11 @@ class HistoryCtrl(wx.ListCtrl):
 
 	def applyFilter(self):
 		if self.filtFn is None:
-			self.filteredEvents =  [e for e in self.history]
+			fe =  [e for e in self.history]
 		else:
-			self.filteredEvents =  [e for e in self.history if e.getFns()[0] == self.filtFn]
+			fe =  [e for e in self.history if e.getFns()[0] == self.filtFn]
+			
+		self.filteredEvents = list(reversed(fe))
 
 		self.eventFlags = []
 		for e in self.filteredEvents:
