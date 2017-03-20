@@ -9,7 +9,7 @@ import json
 cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
 
 class PropertiesGrid(wxpg.PropertyGrid):
-	def __init__(self, parent, catOrder, propertyOrder, definitions):
+	def __init__(self, parent, catOrder, propertyOrder, definitions, nExtruders, ignorePerExtruder):
 
 		pgFont = wx.Font(10, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 		wxpg.PropertyGrid.__init__(self, parent, style=wxpg.PG_TOOLBAR)
@@ -23,6 +23,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 		self.propertyOrder = propertyOrder
 		self.definitions = definitions
 		self.log = self.parent.log
+		self.nExtruders = nExtruders
 		
 		self.modified = False
 
@@ -47,114 +48,142 @@ class PropertiesGrid(wxpg.PropertyGrid):
 				if stg is None:
 					self.log("unable to find definition (%s)" % k)
 					continue
-				self.definitionsMap[k] = stg
 				
 				pid = str(stg.getLabel())
-					
 				dt = stg.getDType()
-				if dt == "str":
-					pgp = wxpg.StringProperty(pid, value="")
-					self.Append(pgp)
-					
-				elif dt == "float":
-					pgp = wxpg.FloatProperty(pid, value=0.0)
-					self.Append(pgp)
-					
-				elif dt in ["int", "extruder"]:
-					pgp = wxpg.IntProperty(pid, value=0)
-					self.Append(pgp)
-					
-				elif dt == "bool":
-					pgp = wxpg.BoolProperty(pid, value=False)
-					self.Append(pgp)
-					self.SetPropertyAttribute(pid, "UseCheckbox", True)
-					
-				elif dt == "enum":
-					opts = [str(x) for x in stg.getOptions()]
-					pgp = wxpg.EnumProperty(pid, labels=opts, values=range(len(opts)), value=0)
-					self.Append(pgp)
-					
-				else:
-					self.log("taking default action for unknown data type: %s" % dt)
-					pgp = wxpg.StringProperty(pid, value="")
-					self.Append(pgp)
 				
-				lines += 1
-				self.properties[k] = pgp
+				doPerExtruder = stg.getPerExtruder() and not ignorePerExtruder and self.nExtruders > 1
+				if doPerExtruder:
+					subCat = self.Append(wxpg.StringProperty(pid, value=""))
+					self.SetPropertyReadOnly(pid, set=True, flags=wxpg.PG_DONT_RECURSE)
+					lines += 1
+					for ex in range(self.nExtruders):
+						spid = "Extruder %d" % ex
+						pgp = self.getPropertyForType(stg, spid, dt)
+						self.AppendIn(subCat, pgp)
+						if dt == "bool":
+							fqPid = "%s.%s" % (pid, spid)
+							self.SetPropertyAttribute(fqPid, "UseCheckbox", True)
+						
+						lines += 1
+						sk = "%s.%s" % (k, spid)
+						self.properties[sk] = pgp
+						self.definitionsMap[sk] = stg
+					self.Collapse(pid)
+				else:
+					self.definitionsMap[k] = stg
+					stg.setPerExtruder(False)
+					pgp = self.getPropertyForType(stg, pid, dt)
+					self.Append(pgp)
+					if dt == "bool":
+						self.SetPropertyAttribute(pid, "UseCheckbox", True)
+					
+					lines += 1
+					self.properties[k] = pgp
 
 		self.rowCount = lines
 		
+		for prop in self.Properties:
+			print(prop.GetName(), prop.GetLabel())
+		
 		self.setBaseValues()
 		
-	def setBaseValues(self):
-		for cat in self.catOrder:
-			for k in self.propertyOrder[cat]:
-				if not k in self.definitionsMap.keys():
-					continue
-				
-				stg = self.definitionsMap[k]
-				pid = str(stg.getLabel())
-					
-				dt = stg.getDType()
-				if dt == "str":
-					v = stg.getDefault()
-					if v is not None:
-						v = v.replace("\n", "\\n")
-					v = str(v)
-					self.SetPropertyValue(pid, v)
-					
-				elif dt == "float":
-					v = stg.getDefault()
-					if v is None:
-						v = 0.0
-					try:
-						v = float(v)
-					except:
-						self.log("cannot convert " + str(v) + " to type float")
-						v = 0.0
-							
-					self.SetPropertyValue(pid, v)
-					
-				elif dt in ["int", "extruder"]:
-					v = stg.getDefault()
-					if v is None:
-						v = 0
-					try:
-						v = int(v)
-					except:
-						self.log("cannot convert "+ str(v) + " to type int")
-						v = 0.0
+	def getPropertyForType(self, stg, pid, dt):
+		if dt == "str":
+			pgp = wxpg.StringProperty(pid, value="")
+			
+		elif dt == "float":
+			pgp = wxpg.FloatProperty(pid, value=0.0)
+			
+		elif dt in ["int", "extruder"]:
+			pgp = wxpg.IntProperty(pid, value=0)
+			
+		elif dt == "bool":
+			pgp = wxpg.BoolProperty(pid, value=False)
+			
+		elif dt == "enum":
+			opts = [str(x) for x in stg.getOptions()]
+			pgp = wxpg.EnumProperty(pid, labels=opts, values=range(len(opts)), value=0)
+			
+		else:
+			self.log("taking default action for unknown data type: %s" % dt)
+			pgp = wxpg.StringProperty(pid, value="")
+			
+		return pgp
 
-					self.SetPropertyValue(pid, v)
+		
+	def setBaseValues(self):
+		for k in self.definitionsMap.keys():
+			stg = self.definitionsMap[k]
+			pid = str(stg.getLabel())
+			if stg.getPerExtruder() and self.nExtruders > 1:
+				for ex in range(self.nExtruders):
+					spid = "%s.Extruder %d" % (pid, ex)
+					self.setBaseValue(spid, stg)
+			else:
+				self.setBaseValue(pid, stg)
 					
-				elif dt == "bool":
-					v = stg.getDefault()
-					if v is None:
-						v = False
-						
-					self.SetPropertyValue(pid, v)
+	def setBaseValue(self, pid, stg):				
+		dt = stg.getDType()
+		if dt == "str":
+			v = stg.getDefault()
+			if v is not None:
+				v = v.replace("\n", "\\n")
+			v = str(v)
+			self.SetPropertyValue(pid, v)
+			
+		elif dt == "float":
+			v = stg.getDefault()
+			if v is None:
+				v = 0.0
+			try:
+				v = float(v)
+			except:
+				self.log("cannot convert " + str(v) + " to type float")
+				v = 0.0
 					
-				elif dt == "enum":
-					opts = [str(x) for x in stg.getOptions()]
-					v = stg.getDefault()
-					if v is None:
-						v = opts[0]
-						vx = 0
-					else:
-						try:
-							vx = opts.index(v)
-						except:
-							v = opts[0]
-							vx = 0
-					self.SetPropertyValue(pid, vx)
-					
-				else:
-					self.log("taking default action for unknown data type: %s" % dt)
-					v = str(stg.getDefault())
-					self.SetPropertyValue(pid, v)
-					
-				self.SetPropertyHelpString(pid, self.formHelpText(stg, v))
+			self.SetPropertyValue(pid, v)
+			
+		elif dt in ["int", "extruder"]:
+			v = stg.getDefault()
+			if v is None:
+				v = 0
+			try:
+				v = int(v)
+			except:
+				self.log("cannot convert "+ str(v) + " to type int")
+				v = 0.0
+
+			self.SetPropertyValue(pid, v)
+			
+		elif dt == "bool":
+			v = stg.getDefault()
+			if v is None:
+				v = False
 				
+			self.SetPropertyValue(pid, v)
+			
+		elif dt == "enum":
+			opts = [str(x) for x in stg.getOptions()]
+			v = stg.getDefault()
+			if v is None:
+				v = opts[0]
+				vx = 0
+			else:
+				try:
+					vx = opts.index(v)
+				except:
+					v = opts[0]
+					vx = 0
+			self.SetPropertyValue(pid, vx)
+			
+		else:
+			self.log("taking default action for unknown data type: %s" % dt)
+			v = str(stg.getDefault())
+			self.SetPropertyValue(pid, v)
+			
+		self.SetPropertyHelpString(pid, self.formHelpText(stg, v))
+			
 	def setOverlay(self, fn):
 		self.setModified(False)
 		self.setBaseValues()
@@ -170,6 +199,9 @@ class PropertiesGrid(wxpg.PropertyGrid):
 			
 			stg = self.definitionsMap[opt]
 			pid = str(stg.getLabel())
+			if stg.getPerExtruder() and self.nExtruders > 1:
+				suffix = opt.split(".")[1]
+				pid += "." + suffix
 				
 			dt = stg.getDType()
 			if dt == "str":

@@ -1,5 +1,4 @@
 import json
-import copy
 
 class CuraDefinition():
 	def __init__(self, name):
@@ -138,13 +137,6 @@ class CuraDefinitions():
 		
 		for s in jsSettings.keys():
 			self.parseChildren(s, jsSettings[s])
-			
-		stg = self.getDefinition("machine_nozzle_size")
-		for i in range(3):
-			stg1 = copy.copy(stg)
-			stg1.setName("%s_%d" % (stg.getName(), i+1))
-			stg1.setLabel("%s_%d" % (stg.getLabel(), i+1))
-			self.addDefinition(stg.getCategory(), stg1)
 			
 	def parseChildren(self, category, jsdata):
 		if "children" in jsdata.keys():

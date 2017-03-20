@@ -30,6 +30,7 @@ class Settings:
 		self.profilechoice = "normal"
 		self.printerchoice = "prism"
 		self.materialchoice = ["PLA", "PLA", "PLA", "PLA"]
+		self.nextruders = 4
 		self.autoexport = True
 		self.autoenqueue = False
 		self.centerobject = True
@@ -73,6 +74,12 @@ class Settings:
 					self.autoexport = parseBoolean(value, True)
 				elif opt == "autoenqueue":
 					self.autoenqueue = parseBoolean(value, False)
+				elif opt == "nextruders":
+					try:
+						self.nextruders = int(value)
+					except:
+						self.nextruders = 4
+						print "Non-integer value in ini file for nextruders - defaulting to %d" % self.nextruders
 				elif opt == "materialchoice":
 					self.materialchoice = re.split("\s*,\s*", value)
 				elif opt == 'dlgposition':
@@ -109,6 +116,7 @@ class Settings:
 		self.cfg.set(self.section, "profilechoice", str(self.profilechoice))
 		self.cfg.set(self.section, "printerchoice", str(self.printerchoice))
 		self.cfg.set(self.section, "materialchoice", ",".join(self.materialchoice))
+		self.cfg.set(self.section, "nextruders", str(self.nextruders))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
 		self.cfg.set(self.section, "autoenqueue", str(self.autoenqueue))
 		self.cfg.set(self.section, "centerobject", str(self.centerobject))

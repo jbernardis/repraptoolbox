@@ -447,7 +447,7 @@ class PrintMonitorDlg(wx.Frame):
 			tBed = 0
 		else:
 			try:
-				tBed = int(tempsBed)
+				tBed = int(float(tempsBed))
 			except:
 				tBed = 0
 		
@@ -455,7 +455,7 @@ class PrintMonitorDlg(wx.Frame):
 			tHe = [0] * self.settings.nextruders
 		else:
 			try:
-				x = [int(x) for x in re.split(", *", tempsHE)] + [0]*self.settings.nextruders
+				x = [int(float(x)) for x in re.split(", *", tempsHE)] + [0]*self.settings.nextruders
 				tHe = x[:self.settings.nextruders]
 			except:
 				tHe = [0] * self.settings.nextruders

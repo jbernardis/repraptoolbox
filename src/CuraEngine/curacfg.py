@@ -41,26 +41,25 @@ class ProfileMap:
 
 
 class MaterialMap:
-	CategoryOrder = ["Characteristics", "Temperatures", "Cooling", "Retraction"]
+	CategoryOrder = ["Characteristics", "Temperatures", "Cooling"]
 	PropertyOrder = {
 		"Characteristics": ["material_diameter", "material_flow"],
 		"Temperatures": ["material_print_temperature", "material_print_temperature_layer_0", "material_bed_temperature",
 						"material_bed_temperature_layer_0", "material_standby_temperature"],
 		"Cooling": ["cool_fan_enabled", "cool_fan_speed", "cool_fan_speed_max", "cool_min_layer_time_fan_speed_max",
-				"cool_min_layer_time", "cool_min_speed"],
-		"Retraction": ["retraction_enable", "retract_at_layer_change", "retraction_amount", "retraction_speed",
-					"retraction_extra_prime_amount", "retraction_min_travel", "retraction_combing"]
+				"cool_min_layer_time", "cool_min_speed"]
 		}
 	Directory = "C:\\tmp\\materials"
 
 class PrinterMap:
-	CategoryOrder = ["Printer", "Dual Extrusion"]
+	CategoryOrder = ["Printer", "Retraction", "Dual Extrusion"]
 	PropertyOrder = {
 		"Printer" : [ 
 			"machine_start_gcode", "machine_end_gcode", "machine_width", "machine_depth", "machine_height",
 			"machine_center_is_zero", "machine_heated_bed", "machine_extruder_count",
-			"machine_nozzle_size", "machine_nozzle_size_1", "machine_nozzle_size_2", "machine_nozzle_size_3",
-			"machine_max_acceleration_x", "machine_max_acceleration_y", "machine_acceleration"],
+			"machine_nozzle_size", "machine_max_acceleration_x", "machine_max_acceleration_y", "machine_acceleration"],
+		"Retraction": ["retraction_enable", "retract_at_layer_change", "retraction_amount", "retraction_speed",
+					"retraction_extra_prime_amount", "retraction_min_travel", "retraction_combing"],
 		"Dual Extrusion" : [
 			"prime_tower_enable", "prime_tower_size", "prime_tower_position_x", "prime_tower_position_y"]
 		}
@@ -77,6 +76,7 @@ class CuraCfgDlg(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
 		self.settings = settings
+		nExtruders = settings.nextruders
 		self.callback = cb
 		
 		ico = wx.Icon(os.path.join(cmd_folder, "images", "curacfg.png"), wx.BITMAP_TYPE_PNG)
@@ -100,13 +100,13 @@ class CuraCfgDlg(wx.Frame):
 		MaterialMap.Directory = os.path.join(self.settings.cfgdirectory, "material")
 		PrinterMap.Directory = os.path.join(self.settings.cfgdirectory, "printer")
 
-		self.profileCfg = CategoryCfg(self, self.nb, NotebookPage.profile, self.images, ProfileMap, curasettings)
+		self.profileCfg = CategoryCfg(self, self.nb, NotebookPage.profile, self.images, ProfileMap, curasettings, nExtruders)
 		self.nb.AddPage(self.profileCfg, "Profile", imageId=self.nbilUnmodifiedIdx)
 
-		self.materialCfg = CategoryCfg(self, self.nb, NotebookPage.material, self.images, MaterialMap, curasettings)
+		self.materialCfg = CategoryCfg(self, self.nb, NotebookPage.material, self.images, MaterialMap, curasettings, nExtruders, ignorePerExtruder=True)
 		self.nb.AddPage(self.materialCfg, "Material", imageId=self.nbilUnmodifiedIdx)
 		
-		self.printerCfg = CategoryCfg(self, self.nb, NotebookPage.printer, self.images, PrinterMap, curasettings)
+		self.printerCfg = CategoryCfg(self, self.nb, NotebookPage.printer, self.images, PrinterMap, curasettings, nExtruders)
 		self.nb.AddPage(self.printerCfg, "Printer", imageId=self.nbilUnmodifiedIdx)
 		
 		self.profileCfg.initialSelection(settings.profilechoice)

@@ -71,8 +71,7 @@ class SaveDlg(wx.Dialog):
 		self.EndModal(wx.ID_SAVE)
 
 class CategoryCfg(wx.Window):
-	def __init__(self, gparent, parent, pageid, images, pmap, definitions):
-		#wx.Panel.__init__(self, parent, wx.ID_ANY, size=(600, 400))
+	def __init__(self, gparent, parent, pageid, images, pmap, definitions, nExtruders, ignorePerExtruder=False):
 		wx.Window.__init__(self, parent, wx.ID_ANY, size=(600, 400))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
@@ -102,7 +101,7 @@ class CategoryCfg(wx.Window):
 		self.Bind(wx.EVT_BUTTON, self.onBDelete, self.bDelete)
 		self.bDelete.Enable(False)
 		
-		self.props = PropertiesGrid(self, pmap.CategoryOrder, pmap.PropertyOrder, definitions)
+		self.props = PropertiesGrid(self, pmap.CategoryOrder, pmap.PropertyOrder, definitions, nExtruders, ignorePerExtruder)
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
 		sz.AddSpacer((10, 10))

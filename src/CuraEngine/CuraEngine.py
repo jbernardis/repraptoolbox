@@ -604,13 +604,15 @@ class CuraEngineDlg(wx.Frame):
 		v = str(self.settings.centerobject).lower()
 		args.extend(["-s", "center_object=%s" % v])
 		
+		self.extruderTrain = [[]] * self.settings.nextruders
+		
 		args.extend(self.addArgs(dProfile))
 		args.extend(self.addArgs(dPrinter))
-		ex = 0
-		for m in dMaterial:
+		
+		for ex in range(len(dMaterial)):
 			args.append("-e%d" % ex)
-			ex += 1
-			args.extend(self.addArgs(m))
+			args.extend(self.extruderTrain[ex])
+			args.extend(self.addArgs(dMaterial[ex]))
 
 		args.extend(("-l", self.stlFn))
 		
@@ -619,8 +621,14 @@ class CuraEngineDlg(wx.Frame):
 	def addArgs(self, cfg):
 		result = []
 		for k,v in cfg.iteritems():
-			if self.includeSetting(k, cfg):
-				result.extend(("-s", "%s=%s" % (k,v)))
+			if "." in k:
+				k1, k2 = k.split(".", 1)
+				if self.includeSetting(k1, cfg):
+					train = int(k2[-1])
+					self.extruderTrain[train].extend(("-s", "%s=%s" % (k1, v)))					
+			else:
+				if self.includeSetting(k, cfg):
+					result.extend(("-s", "%s=%s" % (k,v)))
 		
 		return result
 	
