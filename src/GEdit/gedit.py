@@ -21,7 +21,6 @@ from tools import formatElapsed
 from gcsuffix import parseGCSuffix, modifyGCSuffix
 from properties import PropertiesDlg
 from propenums import PropertyEnum
-from History.history import ShiftModel, TempChange, SpeedChange, FilamentChange, OpenEdit, FileSave
 
 gcRegex = re.compile("[-]?\d+[.]?\d*")
 BUTTONDIM = (48, 48)
@@ -583,9 +582,6 @@ class GEditDlg(wx.Frame):
 
 	def applyShift(self):
 		self.gcode = [self.applyAxisShift(self.applyAxisShift(l, 'y', self.shiftY), 'x', self.shiftX) for l in self.gcode]
-		if self.filename is not None:
-			self.history.addEvent(ShiftModel(self.history.addFile(self.filename), "dx=%d dy=%d" % (self.shiftX, self.shiftY)))
-
 		self.shiftX = 0
 		self.shiftY = 0
 		self.gObj = self.buildModel()
@@ -637,10 +633,6 @@ class GEditDlg(wx.Frame):
 	def applyTempChange(self, bed, hes):
 		self.currentTool = 0
 		self.gcode = [self.applySingleTempChange(l, bed, hes) for l in self.gcode]
-		if self.filename is not None:
-			stHes = ["%.1f" % h for h in hes]
-			self.history.addEvent(TempChange(self.history.addFile(self.filename), "bed=%.1f he=%s" % (bed, str(stHes))))
-
 		self.setModified(True)
 		self.gObj = self.buildModel()
 		self.modGcSuffixTemps(self.gObj.getTemps())
@@ -711,9 +703,6 @@ class GEditDlg(wx.Frame):
 
 	def applySpeedChange(self, speeds):
 		self.gcode = [self.applySingleSpeedChange(l, speeds) for l in self.gcode]
-		if self.filename is not None:
-			self.history.addEvent(SpeedChange(self.history.addFile(self.filename), "print=%.3f move=%.3f" % (speeds[0], speeds[1])))
-
 		self.setModified(True)
 		self.gObj = self.buildModel()
 		self.gcFrame.loadModel(self.gObj, self.gcFrame.getCurrentLayer(), self.gcFrame.getZoom())
@@ -750,9 +739,6 @@ class GEditDlg(wx.Frame):
 		dlg.Destroy()
 		if rc != wx.ID_OK:
 			return
-	
-		if self.filename is not None:
-			self.history.addEvent(FilamentChange(self.history.addFile(self.filename), "insertion point: %d" % insertPoint))
 			
 		if insertPoint == 0:
 			self.gcode = ngc + self.gcode
@@ -782,9 +768,6 @@ class GEditDlg(wx.Frame):
 		if rc != wx.ID_OK:
 			return
 
-		if self.filename is not None:
-			self.history.addEvent(OpenEdit(self.history.addFile(self.filename), ""))
-			
 		self.gcode = data[:]
 		self.setModified(True)
 		self.gObj = self.buildModel()
@@ -969,8 +952,6 @@ class GEditDlg(wx.Frame):
 		self.setModified(False)
 			
 		fp.close()
-
-		self.history.addEvent(FileSave(self.history.addFile(self.filename), ""))
 		
 		self.filename = path
 		if self.settings.autoexport:

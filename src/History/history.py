@@ -70,41 +70,6 @@ class SliceComplete (HistoryEvent):
 	def getFns(self):
 		return [ self.gcfn.getFn(), self.stlfn.getFn() ]
 
-class OpenEdit (HistoryEvent):
-	def __init__(self, gcfn, txt):
-		HistoryEvent.__init__(self)
-		self.eventType = HistoryEventEnum.OpenEdit
-		self.gcfn = gcfn
-		self.text = txt
-
-class FilamentChange (HistoryEvent):
-	def __init__(self, gcfn, txt):
-		HistoryEvent.__init__(self)
-		self.eventType = HistoryEventEnum.FilamentChange
-		self.gcfn = gcfn
-		self.text = txt
-
-class ShiftModel (HistoryEvent):
-	def __init__(self, gcfn, txt):
-		HistoryEvent.__init__(self)
-		self.eventType = HistoryEventEnum.ShiftModel
-		self.gcfn = gcfn
-		self.text = txt
-
-class TempChange (HistoryEvent):
-	def __init__(self, gcfn, txt):
-		HistoryEvent.__init__(self)
-		self.eventType = HistoryEventEnum.TempChange
-		self.gcfn = gcfn
-		self.text = txt
-
-class SpeedChange (HistoryEvent):
-	def __init__(self, gcfn, txt):
-		HistoryEvent.__init__(self)
-		self.eventType = HistoryEventEnum.SpeedChange
-		self.gcfn = gcfn
-		self.text = txt
-
 class PrintStarted (HistoryEvent):
 	def __init__(self, gcfn, txt):
 		HistoryEvent.__init__(self)
@@ -116,13 +81,6 @@ class PrintCompleted (HistoryEvent):
 	def __init__(self, gcfn, txt):
 		HistoryEvent.__init__(self)
 		self.eventType = HistoryEventEnum.PrintCompleted
-		self.gcfn = gcfn
-		self.text = txt
-	
-class FileSave (HistoryEvent):
-	def __init__(self, gcfn, txt):
-		HistoryEvent.__init__(self)
-		self.eventType = HistoryEventEnum.FileSave
 		self.gcfn = gcfn
 		self.text = txt
 	

@@ -251,7 +251,7 @@ class HistoryCtrl(wx.ListCtrl):
 			
 		self.filteredEvents = list(reversed(fe))
 
-		self.eventFlags = []
+		self.listAttrs = []
 		for e in self.filteredEvents:
 			et = e.getEventType()
 			fns = e.getFns()
@@ -269,15 +269,15 @@ class HistoryCtrl(wx.ListCtrl):
 				stlTime = None
 				
 			if gcTime == 0:
-				self.eventFlags.append("delgc")
+				self.listAttrs.append(self.attrDeletedGc)
 			elif stlTime == 0:
-				self.eventFlags.append("delstl")
+				self.listAttrs.append(self.attrDeletedStl)
 			elif stlTime is None:
-				self.eventFlags.append("")
+				self.listAttrs.append(None)
 			elif stlTime > gcTime:
-				self.eventFlags.append("stale")
+				self.listAttrs.append(self.attrStale)
 			else:
-				self.eventFlags.append("")
+				self.listAttrs.append(None)
 				
 		self.SetItemCount(len(self.filteredEvents))
 		
@@ -365,15 +365,8 @@ class HistoryCtrl(wx.ListCtrl):
 			return -1
 	
 	def OnGetItemAttr(self, item):
-		if item < 0 or item > len(self.eventFlags):
+		if item < 0 or item > len(self.listAttrs):
 			return None
 		
-		if self.eventFlags[item] == "stale":
-			return self.attrStale
-		elif self.eventFlags[item] == "delgc":
-			return self.attrDeletedGc
-		elif self.eventFlags[item] == "delstl":
-			return self.attrDeletedStl
-		else:
-			return None
+		return self.listAttrs[item]
 

@@ -56,9 +56,10 @@ def loadProfile(fn, log, curasettings):
 
 	result = {}		
 	for k, v in kdict.iteritems():
-		df = curasettings.getDefinition(k)
+		baseK = k.split(".")[0]
+		df = curasettings.getDefinition(baseK)
 		if df is None:
-			print "Unable to find definition for (%s)" % k
+			print "Unable to find definition for (%s)" % baseK
 			continue
 		dt = df.getDType()
 		
@@ -600,6 +601,19 @@ class CuraEngineDlg(wx.Frame):
 		self.enableButtons()
 	
 	def formCommandLine(self, dProfile, dMaterial, dPrinter):	
+		gparams = {}
+		for i in range(len(dMaterial)):
+			for p in ["material_bed_temperature", "material_print_temperature"]:
+				k = "%s.%s" % (p, i)
+				if p in dMaterial[i].keys():
+					gparams[k] = dMaterial[i][p]
+					print "FCL1: %s => %s:" % (k, str(gparams[k]))
+				else:
+					pdef = self.curasettings.getDefinition(p)
+					if pdef is not None:
+						gparams[k] = pdef.getDefault()
+						print "FCL2: %s => %s:" % (k, str(gparams[k]))
+			
 		args = [self.settings.engineexecutable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFn]
 		v = str(self.settings.centerobject).lower()
 		args.extend(["-s", "center_object=%s" % v])

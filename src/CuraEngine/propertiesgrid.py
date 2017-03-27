@@ -82,10 +82,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 					self.properties[k] = pgp
 
 		self.rowCount = lines
-		
-		for prop in self.Properties:
-			print(prop.GetName(), prop.GetLabel())
-		
+	
 		self.setBaseValues()
 		
 	def getPropertyForType(self, stg, pid, dt):
