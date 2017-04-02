@@ -50,6 +50,20 @@ EnableIfGreater = {
 	"infill_pattern" : ("infill_sparse_density", 0)
 	}
 
+# these are the cura settings that can be inserted into G Code fields in the settings files
+gCodeParameters = [
+	"material_bed_temperature",
+	"material_bed_temperature_layer_0",
+	"material_print_temperature",
+	"material_print_temperature_layer_0"
+	]
+
+# these are the cura settings into which the above parameters can be substituted
+parameterizable = [
+	"machine_start_gcode",
+	"machine_end_gcode"
+	]
+
 def loadProfile(fn, log, curasettings):
 	with open(fn) as json_data:
 		kdict = json.load(json_data)
@@ -601,18 +615,7 @@ class CuraEngineDlg(wx.Frame):
 		self.enableButtons()
 	
 	def formCommandLine(self, dProfile, dMaterial, dPrinter):	
-		gparams = {}
-		for i in range(len(dMaterial)):
-			for p in ["material_bed_temperature", "material_print_temperature"]:
-				k = "%s.%s" % (p, i)
-				if p in dMaterial[i].keys():
-					gparams[k] = dMaterial[i][p]
-					print "FCL1: %s => %s:" % (k, str(gparams[k]))
-				else:
-					pdef = self.curasettings.getDefinition(p)
-					if pdef is not None:
-						gparams[k] = pdef.getDefault()
-						print "FCL2: %s => %s:" % (k, str(gparams[k]))
+		gparams = self.getGCodeParams(dMaterial)
 			
 		args = [self.settings.engineexecutable, "slice", "-j", self.settings.jsonfile, "-o", self.gcFn]
 		v = str(self.settings.centerobject).lower()
@@ -621,7 +624,7 @@ class CuraEngineDlg(wx.Frame):
 		self.extruderTrain = [[]] * self.settings.nextruders
 		
 		args.extend(self.addArgs(dProfile))
-		args.extend(self.addArgs(dPrinter))
+		args.extend(self.addArgs(dPrinter, gparams))
 		
 		for ex in range(len(dMaterial)):
 			args.append("-e%d" % ex)
@@ -631,10 +634,24 @@ class CuraEngineDlg(wx.Frame):
 		args.extend(("-l", self.stlFn))
 		
 		return args
+
+	def getGCodeParams(self, dMaterial):
+		gparams = {}
+		for i in range(len(dMaterial)):
+			for p in gCodeParameters:
+				k = "%s.%s" % (p, i)
+				if p in dMaterial[i].keys():
+					gparams[k] = dMaterial[i][p]
+				else:
+					pdef = self.curasettings.getDefinition(p)
+					if pdef is not None:
+						gparams[k] = pdef.getDefault()	
+		return gparams
 	
-	def addArgs(self, cfg):
+	def addArgs(self, cfg, gparams = None):
 		result = []
 		for k,v in cfg.iteritems():
+			v = self.keywordSubstitution(v, k, gparams)
 			if "." in k:
 				k1, k2 = k.split(".", 1)
 				if self.includeSetting(k1, cfg):
@@ -645,6 +662,19 @@ class CuraEngineDlg(wx.Frame):
 					result.extend(("-s", "%s=%s" % (k,v)))
 		
 		return result
+
+	def keywordSubstitution(self, v, k, gparams):
+		if gparams is None:
+			return v
+		if not k in parameterizable:
+			return v
+
+		for gk in gparams.keys():
+			kw = "{%s}" % gk
+			if kw in v:
+				v = v.replace(kw, str(gparams[gk]))
+
+		return v
 	
 	def includeSetting(self, sid, cfg):
 		stg = self.curasettings.getDefinition(sid)

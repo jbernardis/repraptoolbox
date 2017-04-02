@@ -75,7 +75,7 @@ class MacroDialog(wx.Frame):
 	def runMacro(self, evt):
 		kid = evt.GetId() - BASE_ID
 		if kid < 0 or kid >= len(self.macroMap):
-			print "Invalid ID in runmacro: ", kid
+			self.log("Invalid ID in runmacro: %d" % kid)
 			return
 	
 		mn = self.macroMap[kid]	

@@ -400,7 +400,7 @@ class Slic3rDlg(wx.Frame):
 		try:
 			subprocess.Popen(args,stderr=subprocess.STDOUT,stdout=subprocess.PIPE)
 		except:
-			print "Exception occurred trying to spawn slicer"
+			self.log("Exception occurred trying to spawn slic3r")
 			return
 		
 	def onRefresh(self, evt):

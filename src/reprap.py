@@ -1016,6 +1016,3 @@ class RepRap:
 			self.priQ.put((cmd, ""))
 		else:
 			self.mainQ.put((cmd, ""))
-			
-	def log(self, msg):
-		print msg

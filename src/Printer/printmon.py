@@ -624,12 +624,12 @@ class PrintMonitorDlg(wx.Frame):
 		elif evt.event == RepRapEventEnum.PRINT_SENDGCODE:
 			self.log(evt.msg)
 		else:
-			print "unknown reprap event: ", evt.event
+			self.log("unknown reprap event: %s" % str(evt.event))
 				
 	def buildModel(self):
 		cnc = CNC(self.settings.acceleration)
 		if RECORD_TIMES:
-			print "recording g code times in /tmp/gcodeTimes"
+			self.log("recording g code times in /tmp/gcodeTimes")
 			fp = open("/tmp/gcodeTimes", "w")
 		
 		ln = -1
@@ -687,7 +687,7 @@ class PrintMonitorDlg(wx.Frame):
 		try:
 			return float(gcRegex.findall(self.paramStr.split(which)[1])[0])
 		except:
-			print "exception: ", self.paramStr
+			self.log("unable to parse float from (%s)" % self.paramStr)
 			
 	def enableButtonsByState(self):
 		if self.state == PrintState.idle:
