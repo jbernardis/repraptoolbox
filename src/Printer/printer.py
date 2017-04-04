@@ -19,11 +19,14 @@ from macros import MacroDialog
 from gcodeentry import GCodeEntry
 
 BUTTONDIM = (48, 48)
+MARGIN = 70
 
 class EngageZDlg(wx.Dialog):
-	def __init__(self, parent, images):
-		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Z Axis Is Engaged", size=(200, 200))
+	def __init__(self, parent, reprap, images):
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Z Axis Is Engaged", size=(MARGIN*2+BUTTONDIM[0], MARGIN*2+BUTTONDIM[1]))
 		self.SetBackgroundColour("white")
+		
+		self.reprap = reprap
 		
 		self.zdir = True
 		self.moveZAxis()
@@ -39,13 +42,11 @@ class EngageZDlg(wx.Dialog):
 		b.SetToolTipString("Disengage Z axis and Exit")
 		b.Bind(wx.EVT_BUTTON, self.onExit, b)
 		
-		hsz.AddSpacer((20, 20))
+		hsz.AddSpacer((MARGIN, 20))
 		hsz.Add(b)
-		hsz.AddSpacer((20, 20))
 		
-		vsz.AddSpacer((20, 20))
+		vsz.AddSpacer((20, MARGIN))
 		vsz.Add(hsz)
-		vsz.AddSpacer((20, 20))
 		
 		self.SetSizer(vsz)
 		
@@ -53,12 +54,12 @@ class EngageZDlg(wx.Dialog):
 		self.moveZAxis()
 		
 	def moveZAxis(self):
-		self.reprap.send_now("G91")
+		self.reprap.sendNow("G91")
 		if self.zdir:
-			self.reprap.send_now("G1 Z0.1 F300")
+			self.reprap.sendNow("G1 Z0.1 F300")
 		else:
-			self.reprap.send_now("G1 Z-0.1 F300")
-		self.reprap.send_now("G90")
+			self.reprap.sendNow("G1 Z-0.1 F300")
+		self.reprap.sendNow("G90")
 		self.zdir = not self.zdir
 		
 	def onExit(self, evt):
@@ -296,7 +297,7 @@ class PrinterDlg(wx.Frame):
 		self.pmonDlg = None
 		
 	def onEngageZ(self, evt):
-		dlg = EngageZDlg(self, self.images)
+		dlg = EngageZDlg(self, self.reprap, self.images)
 		dlg.ShowModal()
 		dlg.Destroy()
 	
