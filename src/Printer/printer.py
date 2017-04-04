@@ -20,6 +20,54 @@ from gcodeentry import GCodeEntry
 
 BUTTONDIM = (48, 48)
 
+class EngageZDlg(wx.Dialog):
+	def __init__(self, parent, images):
+		wx.Dialog.__init__(self, parent, wx.ID_ANY, "Z Axis Is Engaged", size=(200, 200))
+		self.SetBackgroundColour("white")
+		
+		self.zdir = True
+		self.moveZAxis()
+		
+		self.moveTimer = wx.Timer(self)
+		self.Bind(wx.EVT_TIMER, self.onTimer, self.moveTimer)
+		self.moveTimer.Start(10000)
+		
+		vsz = wx.BoxSizer(wx.VERTICAL)
+		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		
+		b = wx.BitmapButton(self, wx.ID_ANY, images.pngDisengagez, size=BUTTONDIM)
+		b.SetToolTipString("Disengage Z axis and Exit")
+		b.Bind(wx.EVT_BUTTON, self.onExit, b)
+		
+		hsz.AddSpacer((20, 20))
+		hsz.Add(b)
+		hsz.AddSpacer((20, 20))
+		
+		vsz.AddSpacer((20, 20))
+		vsz.Add(hsz)
+		vsz.AddSpacer((20, 20))
+		
+		self.SetSizer(vsz)
+		
+	def onTimer(self, evt):
+		self.moveZAxis()
+		
+	def moveZAxis(self):
+		self.reprap.send_now("G91")
+		if self.zdir:
+			self.reprap.send_now("G1 Z0.1 F300")
+		else:
+			self.reprap.send_now("G1 Z-0.1 F300")
+		self.reprap.send_now("G90")
+		self.zdir = not self.zdir
+		
+	def onExit(self, evt):
+		self.moveTimer.Stop()
+		if not self.zdir:
+			self.moveZAxis() # leave it the way we found it
+			
+		self.EndModal(wx.ID_OK)
+		
 class PrinterDlg(wx.Frame):
 	def __init__(self, parent, printerName, reprap):
 		wx.Frame.__init__(self, None, wx.ID_ANY, "%s manual control" % printerName, size=(100, 100))
@@ -53,8 +101,6 @@ class PrinterDlg(wx.Frame):
 		self.importMessage = "Import G Code file from G Code Queue"
 		self.importFile = None
 			
-		self.zEngaged = False
-		
 		self.moveAxis = ManualCtl(self, reprap, printerName)				
 		szWindow = wx.BoxSizer(wx.VERTICAL)
 		szWindow.Add(self.moveAxis)
@@ -250,13 +296,10 @@ class PrinterDlg(wx.Frame):
 		self.pmonDlg = None
 		
 	def onEngageZ(self, evt):
-		print "engage z"
-		self.zEngaged = not self.zEngaged
-		if self.zEngaged:
-			self.bEngageZ.SetBitmap(self.images.pngDisengagez)
-		else:
-			self.bEngageZ.SetBitmap(self.images.pngEngagez)
-		
+		dlg = EngageZDlg(self, self.images)
+		dlg.ShowModal()
+		dlg.Destroy()
+	
 	def onRunMacro(self, evt):
 		if self.macroDlg is None:
 			self.macroDlg = MacroDialog(self, self.parent, self.reprap, self.printerName)
