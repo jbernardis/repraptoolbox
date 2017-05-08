@@ -268,16 +268,24 @@ class HistoryCtrl(wx.ListCtrl):
 			else:
 				stlTime = None
 				
+			print "History Event: ", e.dump()
+			print "gc time: ", gcTime, " stl time: ", stlTime
+				
 			if gcTime == 0:
 				self.listAttrs.append(self.attrDeletedGc)
+				print "deleted GC"
 			elif stlTime == 0:
 				self.listAttrs.append(self.attrDeletedStl)
+				print "deleted stl"
 			elif stlTime is None:
 				self.listAttrs.append(None)
+				print "no decoration 1"
 			elif stlTime > gcTime:
 				self.listAttrs.append(self.attrStale)
+				print "gc file is stale"
 			else:
 				self.listAttrs.append(None)
+				print "no decoration 2"
 				
 		self.SetItemCount(len(self.filteredEvents))
 		

@@ -945,8 +945,9 @@ class RepRap:
 		self.timer.Start(1000)
 
 	def stopTimer(self):
-		self.timer.Stop()
-		self.timer = None
+		if not self.timer is None:
+			self.timer.Stop()
+			self.timer = None
 
 	def OnTimer(self, evt):
 		self.cycle += 1
@@ -965,6 +966,8 @@ class RepRap:
 
 	def suspendTempProbe(self, flag=True):
 		self.suspendM105 = flag
+		if flag:
+			self.m105pending = False
 		
 	def printStopped(self):
 		self.printing = False

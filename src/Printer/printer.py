@@ -44,11 +44,14 @@ class EngageZDlg(wx.Dialog):
 		
 		hsz.AddSpacer((MARGIN, 20))
 		hsz.Add(b)
+		hsz.AddSpacer((MARGIN, 20))
 		
 		vsz.AddSpacer((20, MARGIN))
 		vsz.Add(hsz)
+		vsz.AddSpacer((20, MARGIN))
 		
 		self.SetSizer(vsz)
+		self.Fit()
 		
 	def onTimer(self, evt):
 		self.moveZAxis()
@@ -89,10 +92,14 @@ class PrinterDlg(wx.Frame):
 		self.images = Images(os.path.join(cmdFolder, "images"))
 		self.parentImages = self.parent.images
 		
-		self.graphDlg = None
 		self.pmonDlg = None
 		self.macroDlg = None
 		self.fwDlg = None
+		
+		self.graphDlg = TempDlg(self, self.parent, self.settings.nextruders, self.printerName)
+		self.graphDlg.Hide()
+		if not self.settings.tempposition is None:
+			self.graphDlg.SetPosition(self.settings.tempposition)
 		
 		self.bedTemps = {"actual": "??", "target": "??"}
 		self.heTemps = {}
@@ -272,16 +279,10 @@ class PrinterDlg(wx.Frame):
 		return True
 		
 	def onGraph(self, evt):
-		if self.graphDlg is None:
-			self.graphDlg = TempDlg(self, self.parent, self.settings.nextruders, self.printerName)
-			if not self.settings.tempposition is None:
-				self.graphDlg.SetPosition(self.settings.tempposition)
-		else:
-			self.graphDlg.Show()
+		if not self.graphDlg is None:
+			if not self.graphDlg.IsShown():
+				self.graphDlg.Show()
 			self.graphDlg.Raise()
-		
-	def closeGraph(self):
-		self.graphDlg = None
 		
 	def onPrintMon(self, evt):
 		if self.pmonDlg is None:

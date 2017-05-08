@@ -30,7 +30,7 @@ class TempDlg(wx.Frame):
 		self.parent = parent
 		title = "%s temperatures" % prtName
 		wx.Frame.__init__(self, wparent, wx.ID_ANY, title)
-		self.Show()
+		#self.Show()
 		ico = wx.Icon(os.path.join(cmdFolder, "images", "graph.png"), wx.BITMAP_TYPE_PNG)
 		self.SetIcon(ico)
 		self.Bind(wx.EVT_CLOSE, self.onClose)
@@ -158,11 +158,10 @@ class TempDlg(wx.Frame):
 		h.getValueHandle().SetLabel("%s / %s" % (vAct, vSet))
 		
 	def onClose(self, evt):
-		self.terminate()
+		self.Hide()
 
 	def terminate(self):
 		self.graph.stop()
-		self.parent.closeGraph()
 		self.Destroy()
 		
 class GraphData:
