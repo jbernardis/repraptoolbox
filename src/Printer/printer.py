@@ -96,6 +96,8 @@ class PrinterDlg(wx.Frame):
 		self.macroDlg = None
 		self.fwDlg = None
 		
+		self.zLocked = False
+		
 		self.graphDlg = TempDlg(self, self.parent, self.settings.nextruders, self.printerName)
 		self.graphDlg.Hide()
 		if not self.settings.tempposition is None:
@@ -272,6 +274,7 @@ class PrinterDlg(wx.Frame):
 		if self.graphDlg:
 			self.graphDlg.terminate()
 			
+		self.parent.registerPrinterStatusReporter(self.printerName, None)
 		self.reprap.registerTempHandler(None)
 		self.settings.save()
 		self.parent.PrinterClosed(self.printerName)
@@ -299,8 +302,10 @@ class PrinterDlg(wx.Frame):
 		
 	def onEngageZ(self, evt):
 		dlg = EngageZDlg(self, self.reprap, self.images)
+		self.zLocked = True
 		dlg.ShowModal()
 		dlg.Destroy()
+		self.zLocked = False
 	
 	def onRunMacro(self, evt):
 		if self.macroDlg is None:
@@ -360,6 +365,9 @@ class PrinterDlg(wx.Frame):
 			self.bPendant.Enable(False)
 		
 	def doPendantCommand(self, cmd):
+		if self.zLocked:
+			self.log("Ignoring pendant command (%s) while Z axis is engaged" % cmd)
+			
 		if cmd.startswith("@"):
 			self.metaCommand(cmd)
 		else:

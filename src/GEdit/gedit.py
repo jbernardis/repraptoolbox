@@ -214,9 +214,9 @@ class GEditDlg(wx.Frame):
 		btnszr.AddSpacer((30, 10))
 		
 		optszr = wx.BoxSizer(wx.VERTICAL)
-		optszr.AddSpacer((3,5))
+		optszr.AddSpacer((1,1))
 		optszr.Add(self.cbShowMoves)
-		optszr.AddSpacer((2,5))
+		optszr.AddSpacer((1,1))
 		optszr.Add(self.cbShowPrevious)
 		btnszr.Add(optszr)
 		
@@ -233,9 +233,9 @@ class GEditDlg(wx.Frame):
 		btnszr.AddSpacer((5, 5))
 		
 		optszr = wx.BoxSizer(wx.VERTICAL)
-		optszr.AddSpacer((3,5))
+		optszr.AddSpacer((1,1))
 		optszr.Add(self.cbExport)
-		optszr.AddSpacer((2,5))
+		optszr.AddSpacer((1,1))
 		optszr.Add(self.cbEnqueue)
 		btnszr.Add(optszr)
 		

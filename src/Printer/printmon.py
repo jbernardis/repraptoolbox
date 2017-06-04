@@ -268,7 +268,6 @@ class PrintMonitorDlg(wx.Frame):
 	def terminate(self):
 		self.reprap.registerPositionHandler(None)
 		self.reprap.registerEventHandler(None)
-		self.wparent.registerPrinterStatusReporter(self.printerName, None)
 		self.parent.closePrintMon()
 		self.propDlg.Destroy()
 		self.Destroy()

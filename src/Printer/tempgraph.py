@@ -276,6 +276,9 @@ class TempGraph(wx.Window):
 		self.drawGraph()
 		
 	def drawGraph(self):
+		if not self.parent.IsShown():
+			return
+		
 		dc = wx.BufferedDC(wx.ClientDC(self), self.buffer)
 		dc.SetBackground(wx.Brush(wx.Colour(255, 255, 230)))
 		dc.Clear()
