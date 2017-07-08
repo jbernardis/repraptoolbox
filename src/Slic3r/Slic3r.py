@@ -14,9 +14,11 @@ import subprocess
 import thread
 import time
 import tempfile
+import pprint
 
 from settings import Settings
 from images import Images
+from override import Slic3rOverRideDlg, loadOverrides
 from gcsuffix import buildGCSuffix
 from History.history import SliceComplete
 
@@ -29,7 +31,6 @@ FILAMENT_BASE = 1000
 BUTTONDIM = (48, 48)
 
 filamentMergeKeys = ['extrusion_multiplier', 'filament_diameter', 'first_layer_temperature', 'temperature']
-
 
 def loadProfiles(fnames, mergeKeys, log):
 	kdict = {}
@@ -115,7 +116,6 @@ class SlicerThread:
 
 		self.running = False
 
-
 class Slic3rDlg(wx.Frame):
 	def __init__(self, parent):
 		wx.Frame.__init__(self, None, wx.ID_ANY, 'Slic3r', size=(100, 100))
@@ -133,6 +133,7 @@ class Slic3rDlg(wx.Frame):
 		
 		self.slicing = False
 		self.sliceComplete = False
+		self.ovrDlg = None
 		
 		self.Bind(EVT_SLIC3R_UPDATE, self.slic3rUpdate)
 		self.Show()
@@ -286,7 +287,14 @@ class Slic3rDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onBSlice, self.bSlice)
 		szButton.Add(self.bSlice)
 		
-		szButton.AddSpacer((100, 10))
+		szButton.AddSpacer((50, 10))
+		
+		self.bOverRide = wx.BitmapButton(self, wx.ID_ANY, self.images.pngOverride, size=BUTTONDIM)
+		self.bOverRide.SetToolTipString("Modify slic3r over-rides")
+		self.Bind(wx.EVT_BUTTON, self.doOverRide, self.bOverRide)
+		szButton.Add(self.bOverRide)
+		
+		szButton.AddSpacer((20, 20))
 		
 		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlic3r, size=BUTTONDIM)
 		self.bConfig.SetToolTipString("Load slic3r to modify configurations")
@@ -626,6 +634,8 @@ class Slic3rDlg(wx.Frame):
 			self.tcGc.SetValue("")
 		
 	def onClose(self, evt):
+		if self.ovrDlg is not None:
+			self.ovrDlg.terminate()
 		self.parent.Slic3rClosed()
 		self.terminate()
 		
@@ -659,3 +669,19 @@ class Slic3rDlg(wx.Frame):
 		dProfile.update(loadProfiles(filamentFns, filamentMergeKeys, self.log))
 		
 		return dProfile
+	
+	def doOverRide(self, evt):
+		self.b.Enable(False)
+		self.ovDlg = Slic3rOverRideDlg(self, self.closeOverRide)
+		self.ovDlg.Show()
+		
+	def closeOverRide(self, changed):
+		self.b.Enable(True)
+		if changed:
+			ov = loadOverrides()
+			pprint.pprint(ov)
+			
+		self.ovDlg.Destroy()
+		self.ovrDlg = None
+		
+
