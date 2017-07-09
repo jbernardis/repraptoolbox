@@ -91,9 +91,10 @@ def saveOverrides(ov, inidir):
 	cfp.close()
 	
 class Slic3rOverRideDlg(wx.Frame):
-	def __init__(self, parent, cbClose):
+	def __init__(self, parent, iniDir, cbClose):
 		wx.Frame.__init__(self, None, wx.ID_ANY, 'Slic3r Over-Rides', size=(100, 100))
 		self.parent = parent
+		self.iniDir = iniDir
 		self.cbClose = cbClose
 
 		self.Bind(wx.EVT_CLOSE, self.doClose)
@@ -105,7 +106,7 @@ class Slic3rOverRideDlg(wx.Frame):
 		self.tcs = {}
 		self.dis = {}
 		
-		ov = loadOverrides()
+		ov = loadOverrides(self.iniDir)
 		self.modified = False
 		
 		preModified = False
@@ -207,8 +208,8 @@ class Slic3rOverRideDlg(wx.Frame):
 				di = self.dis[tag]
 				ov[tag] = di.getValue()
 
-		saveOverrides(ov)
-		self.cClose(True)
+		saveOverrides(ov, self.iniDir)
+		self.cbClose(True)
 
 	def doClose(self, evt):
 		if self.modified:
