@@ -226,7 +226,6 @@ class Slic3rDlg(wx.Frame):
 		hsz.AddSpacer((5, 5))
 		hsz.Add(self.bImportQ)
 		szStl.Add(hsz)
-		szStl.AddSpacer((5, 5))
 
 		szUseStl = wx.BoxSizer(wx.HORIZONTAL)
 		szUseStl.AddSpacer((20, 10))
@@ -251,11 +250,7 @@ class Slic3rDlg(wx.Frame):
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
 		szGcH.AddSpacer((50, 10))
 		szGcH.Add(self.cbAutoExport)
-		szGcH.AddSpacer((10, 10))
-		szGc.Add(szGcH)
-		
-		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((50, 10))
+		szGcH.AddSpacer((30, 10))
 		szGcH.Add(self.cbAutoEnqueue)
 		szGcH.AddSpacer((10, 10))
 		szGc.Add(szGcH)
@@ -284,14 +279,16 @@ class Slic3rDlg(wx.Frame):
 		self.bOverRide = wx.BitmapButton(self, wx.ID_ANY, self.images.pngOverride, size=BUTTONDIM)
 		self.bOverRide.SetToolTipString("Modify slic3r over-rides")
 		self.Bind(wx.EVT_BUTTON, self.doOverRide, self.bOverRide)
-		szOverRide.Add(self.bOverRide)
+		szOverRide.Add(self.bOverRide, 0, wx.ALIGN_CENTER_VERTICAL, 1)
+		szOverRide.AddSpacer((10, 10))
 
 		self.cbOverRide = wx.CheckBox(self, wx.ID_ANY, "Apply Over-Rides")
 		self.cbOverRide.SetToolTipString("Apply over ride values to the slice operation")
 		self.cbOverRide.SetValue(False)
-		szOverRide.Add(self.cbOverRide)
+		szOverRide.Add(self.cbOverRide, 0, wx.ALIGN_CENTER_VERTICAL, 1)
+		szOverRide.AddSpacer((10, 10))
 		
-		self.tcOverRide = wx.TextCtrl(self, wx.ID_ANY, size=(200, 200), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
+		self.tcOverRide = wx.TextCtrl(self, wx.ID_ANY, size=(300, 140), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
 		szOverRide.Add(self.tcOverRide)
 		self.showOverRideValues()
 		
@@ -325,36 +322,38 @@ class Slic3rDlg(wx.Frame):
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "STL File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer((5, 5))
 		bsizer.Add(szStl)
-		bsizer.AddSpacer((10, 20))
-		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizer.AddSpacer((5, 5))
+		bsizer.AddSpacer((5, 5))
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code Directory")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer((5, 5))
 		bsizer.Add(szUseStl)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer((5, 5))
 		bsizer.Add(szGcDir)
-		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizer.AddSpacer((5, 5))
+		bsizer.AddSpacer((5, 5))
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bsizer.AddSpacer((10, 10))
 		bsizer.Add(szGc)
 		bsizer.AddSpacer((10, 10))
-		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizer.AddSpacer((5, 5))
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
 		
-		sizer.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((10, 10))
-		sizer.Add(szOverRide, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((10, 10))
-		sizer.Add(self.tcLog, flag=wx.EXPAND | wx.ALL, border=10)
-		sizer.AddSpacer((10, 10))
+		box = wx.StaticBox(self, wx.ID_ANY, "Slic3r Configuration")
+		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
+		bsizer.AddSpacer((5, 5))
+		bsizer.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		bsizer.AddSpacer((5, 5))
+		bsizer.Add(szOverRide, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
+		bsizer.AddSpacer((5, 5))
+		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
+
+		sizer.Add(self.tcLog, flag=wx.EXPAND | wx.ALL, border=5)
+		sizer.AddSpacer((5, 5))
 		sizer.Add(szButton, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		sizer.AddSpacer((5, 5))
 		
@@ -702,7 +701,7 @@ class Slic3rDlg(wx.Frame):
 	def showOverRideValues(self):
 		self.tcOverRide.Clear()
 		for k in self.overRideValues.keys():
-			self.tcOverRide.AppendText("%s = %s\n" % (k, self.tcOverRideValues[k]))
+			self.tcOverRide.AppendText("%s = %s\n" % (k, self.overRideValues[k]))
 			
 	def applyOverRides(self, cfgMap):
 		print "Apply override values to config map"
@@ -711,7 +710,7 @@ class Slic3rDlg(wx.Frame):
 		print "========== CONFIG MAP =========="
 		pprint.pprint(cfgMap)
 		print "================================"
-		for k in self.overRides.keys():
+		for k in self.overRideValues.keys():
 			if k not in cfgMap.keys():
 				print "override key (%s) is not in config map" % k
 		return cfgMap
