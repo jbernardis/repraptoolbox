@@ -713,7 +713,25 @@ class Slic3rDlg(wx.Frame):
 		for k in self.overRideValues.keys():
 			if k not in cfgMap.keys():
 				print "override key (%s) is not in config map" % k
+			elif k in filamentMergeKeys:
+				cfgMap[k] = self.reconcileMergeKeys(cfgMap[k], self.overRideValues[k])
+			else:
+				cfgMap[k] = self.overRideValues[k]
+				
+		print "==========AFTERWARDS ==========="
+		pprint.pprint(cfgMap)
+		print "================================"
 		return cfgMap
+	
+	def reconcileMergeKeys(self, cfgList, ovList):
+		cfl = cfgList.split(",")
+		ovl = ovList.split(",")
+		
+		for i in range(len(ovl)):
+			if i < len(cfl):
+				cfl[i] = ovl[i]
+				
+		return ",".join(cfl)
 
 		
 
