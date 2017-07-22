@@ -82,6 +82,8 @@ class CategoryCfg(wx.Window):
 		self.gparent = gparent
 		self.parent = parent
 		
+		self.log = gparent.log
+		
 		bkgd = self.parent.GetBackgroundColour()
 		
 		self.buildFileLists()
@@ -129,8 +131,12 @@ class CategoryCfg(wx.Window):
 		self.props.Refresh()
 		
 	def buildFileLists(self):
-		cf = os.listdir(self.cfgDir)
-		self.cfgFileList = [os.path.splitext(os.path.basename(fn))[0] for fn in cf if fn.lower().endswith(".json")]
+		try:
+			cf = os.listdir(self.cfgDir)
+			self.cfgFileList = [os.path.splitext(os.path.basename(fn))[0] for fn in cf if fn.lower().endswith(".json")]
+		except:
+			#TODO - this should be a message box
+			self.cfgFileList = []
 		self.cfgNameList = ["<default>"] + self.cfgFileList
 		
 	def hasBeenModified(self):
@@ -226,8 +232,3 @@ class CategoryCfg(wx.Window):
 			
 	def onClose(self, evt):
 		self.Destroy()
-		
-	def log(self, msg):
-		dlg = wx.MessageDialog(self, msg, "Program error", wx.OK | wx.ICON_ERROR)
-		dlg.ShowModal()
-		dlg.Destroy()

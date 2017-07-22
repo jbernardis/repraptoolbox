@@ -32,6 +32,8 @@ BUTTONDIM = (48, 48)
 
 filamentMergeKeys = ['extrusion_multiplier', 'filament_diameter', 'first_layer_temperature', 'temperature']
 
+multiOverrides = {"printspeed": ["infill_speed", "solid_infill_speed", "perimeter_speed"]}
+
 def loadProfiles(fnames, mergeKeys, log):
 	kdict = {}
 
@@ -711,10 +713,16 @@ class Slic3rDlg(wx.Frame):
 		pprint.pprint(cfgMap)
 		print "================================"
 		for k in self.overRideValues.keys():
-			if k not in cfgMap.keys():
+			if k not in cfgMap.keys() and k not in multiOverrides.keys():
 				print "override key (%s) is not in config map" % k
 			elif k in filamentMergeKeys:
 				cfgMap[k] = self.reconcileMergeKeys(cfgMap[k], self.overRideValues[k])
+			elif k in multiOverrides.keys():
+				for mk in multiOverrides[k]:
+					if mk in filamentMergeKeys:
+						cfgMap[mk] = self.reconcileMergeKeys(cfgMap[mk], self.overRideValues[k])
+					else:
+						cfgMap[mk] = self.overRideValues[k]
 			else:
 				cfgMap[k] = self.overRideValues[k]
 				

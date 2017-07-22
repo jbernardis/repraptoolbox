@@ -130,10 +130,13 @@ class CuraDefinitionCategory():
 class CuraDefinitions():
 	def __init__(self, fn):
 		self.categories = {}
-		with open(fn) as json_data:
-			jsdata = json.load(json_data)
+		try:
+			with open(fn) as json_data:
+				jsdata = json.load(json_data)
 		
-		jsSettings = jsdata["settings"]
+			jsSettings = jsdata["settings"]
+		except:
+			jsSettings = {}
 		
 		for s in jsSettings.keys():
 			self.parseChildren(s, jsSettings[s])

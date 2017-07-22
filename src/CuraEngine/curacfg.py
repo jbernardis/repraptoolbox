@@ -71,10 +71,12 @@ class NotebookPage:
 	printer = 2
 
 class CuraCfgDlg(wx.Frame):
-	def __init__(self, settings, curasettings, cb=None):
+	def __init__(self, parent, settings, curasettings, cb=None):
 		wx.Frame.__init__(self, None, title="Cura Engine Configuration")
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
+		self.parent = parent
+		self.log = self.parent.log
 		self.settings = settings
 		nExtruders = settings.nextruders
 		self.callback = cb

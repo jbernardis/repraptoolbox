@@ -212,7 +212,11 @@ class CuraEngineDlg(wx.Frame):
 		if self.settings.profilechoice in self.choicesProfile:
 			cxProfile = self.choicesProfile.index(self.settings.profilechoice)
 		else:
-			self.settings.profilechoice = self.choicesProfile[0]
+			try:
+				self.settings.profilechoice = self.choicesProfile[0]
+			except:
+				# TODO - this should be a message box
+				self.settings.profilechoice = ""
 			cxProfile = 0
 		self.chProfile.SetSelection(cxProfile)
 		
@@ -222,7 +226,10 @@ class CuraEngineDlg(wx.Frame):
 		if self.settings.printerchoice in self.choicesPrinter:
 			cxPrinter = self.choicesPrinter.index(self.settings.printerchoice)
 		else:
-			self.settings.printerchoice = self.choicesPrinter[0]
+			try:
+				self.settings.printerchoice = self.choicesPrinter[0]
+			except:
+				self.settings.printerchoice = ""
 			cxPrinter = 0
 		self.chPrinter.SetSelection(cxPrinter)
 		
@@ -239,7 +246,10 @@ class CuraEngineDlg(wx.Frame):
 			if self.settings.materialchoice[ex] in self.choicesMaterial:
 				cxMaterial[ex] = self.choicesMaterial.index(self.settings.materialchoice[ex])
 			else:
-				self.settings.materialchoice[ex] = self.choicesMaterial[0]
+				try:
+					self.settings.materialchoice[ex] = self.choicesMaterial[0]
+				except:
+					self.settings.materialchoice[ex] = ""
 				cxMaterial[ex] = 0
 			self.chMaterial[ex].SetSelection(cxMaterial[ex])
 			self.chMaterial[ex].Enable(ex < self.nExtruders)
@@ -500,7 +510,7 @@ class CuraEngineDlg(wx.Frame):
 			self.log("Invalid value for Y Offset %s" % self.tcOffsetY.GetValue())
 		
 	def onConfig(self, evt):
-		self.cfgDlg = CuraCfgDlg(self.settings, self.curasettings, self.cfgClosed)
+		self.cfgDlg = CuraCfgDlg(self, self.settings, self.curasettings, self.cfgClosed)
 		self.bConfig.Enable(False)
 		
 	def cfgClosed(self):

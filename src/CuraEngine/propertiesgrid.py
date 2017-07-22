@@ -39,14 +39,14 @@ class PropertiesGrid(wxpg.PropertyGrid):
 		self.properties = {}
 		self.SetExtraStyle(wxpg.PG_EX_HELP_AS_TOOLTIPS)
 
-		lines = 0		
+		lines = 0	
 		for cat in catOrder:
 			self.Append(wxpg.PropertyCategory(cat))
 			lines += 1
 			for k in propertyOrder[cat]:
 				stg = definitions.getDefinition(k)
 				if stg is None:
-					self.log("unable to find definition (%s)" % k)
+					self.log("unable to find definition: (%s:%s)" % (cat, stg))
 					continue
 				
 				pid = str(stg.getLabel())
@@ -80,6 +80,7 @@ class PropertiesGrid(wxpg.PropertyGrid):
 					
 					lines += 1
 					self.properties[k] = pgp
+
 
 		self.rowCount = lines
 	
