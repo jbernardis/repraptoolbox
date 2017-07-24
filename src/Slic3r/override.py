@@ -53,7 +53,7 @@ ovData["raft_layers"] = OverRideField("Raft Layers", OvTypeInt(), None, "Number 
 
 ovOrder = [ "filament_diameter", "extrusion_multiplier", "layer_height", "extrusion_width", "fill_density", "fill_pattern",
 		"temperature", "first_layer_temperature", "bed_temperature", "first_layer_bed_temperature",
-		"printspeed", "print1speed", "travel_speed", "skirts", "skirt_height", "brim_width", "support_material", "raft_layers" ]
+		"printspeed", "first_layer_speed", "travel_speed", "skirts", "skirt_height", "brim_width", "support_material", "raft_layers" ]
 
 OVFN = "overrides.ini"
 OVSECTION = "slic3r"

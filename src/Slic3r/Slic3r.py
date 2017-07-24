@@ -14,7 +14,6 @@ import subprocess
 import thread
 import time
 import tempfile
-import pprint
 
 from settings import Settings
 from images import Images
@@ -706,29 +705,28 @@ class Slic3rDlg(wx.Frame):
 			self.tcOverRide.AppendText("%s = %s\n" % (k, self.overRideValues[k]))
 			
 	def applyOverRides(self, cfgMap):
-		print "Apply override values to config map"
-		print "======= OVER RIDE VALUES ======="
-		pprint.pprint(self.overRideValues)
-		print "========== CONFIG MAP =========="
-		pprint.pprint(cfgMap)
-		print "================================"
+		self.log("Applying Slic3r override values:")
 		for k in self.overRideValues.keys():
 			if k not in cfgMap.keys() and k not in multiOverrides.keys():
-				print "override key (%s) is not in config map" % k
+				self.log("==> override key (%s) is not in config map" % k)
 			elif k in filamentMergeKeys:
-				cfgMap[k] = self.reconcileMergeKeys(cfgMap[k], self.overRideValues[k])
+				v = self.reconcileMergeKeys(cfgMap[k], self.overRideValues[k])
+				cfgMap[k] = v
+				self.log("  %s -> %s" % (k, v))
 			elif k in multiOverrides.keys():
+				self.log("  %s ->" % k)
 				for mk in multiOverrides[k]:
 					if mk in filamentMergeKeys:
-						cfgMap[mk] = self.reconcileMergeKeys(cfgMap[mk], self.overRideValues[k])
+						v = self.reconcileMergeKeys(cfgMap[mk], self.overRideValues[k])
 					else:
-						cfgMap[mk] = self.overRideValues[k]
+						v = self.overRideValues[k]
+					cfgMap[mk] = v
+					self.log("    %s -> %s" % (mk, v))
 			else:
-				cfgMap[k] = self.overRideValues[k]
+				v = self.overRideValues[k]
+				cfgMap[k] = v
+				self.log("  %s -> %s" % (k, v))
 				
-		print "==========AFTERWARDS ==========="
-		pprint.pprint(cfgMap)
-		print "================================"
 		return cfgMap
 	
 	def reconcileMergeKeys(self, cfgList, ovList):
