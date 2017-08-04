@@ -110,10 +110,10 @@ class HistoryDlg(wx.Frame):
 		self.parent.closeHistory()
 		
 	def onReprint(self, evt):
-		self.parent.exportGcFile(self.gcFn)
+		self.parent.exportGcFile(self.gcFn, True, self.settings.enqueuegc)
 		
 	def onReslice(self, evt):
-		self.parent.exportStlFile(self.stlFn)
+		self.parent.exportStlFile(self.stlFn, True, self.settings.enqueuestl)
 		
 	def onRefresh(self, evt):
 		self.history.refreshAll()

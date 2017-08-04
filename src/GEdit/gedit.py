@@ -371,7 +371,7 @@ class GEditDlg(wx.Frame):
 			if rc != wx.ID_YES:
 				return
 		
-		self.parent.exportGcFile(self.filename, self.settings.autoenqueue)
+		self.parent.exportGcFile(self.filename, True, self.settings.autoenqueue)
 		
 	def onCbExport(self, evt):
 		self.settings.autoexport = evt.IsChecked()
@@ -954,8 +954,7 @@ class GEditDlg(wx.Frame):
 		fp.close()
 		
 		self.filename = path
-		if self.settings.autoexport:
-			self.parent.exportGcFile(path, self.settings.autoenqueue)
+		self.parent.exportGcFile(path, self.settings.autoexport, self.settings.autoenqueue)
 		self.updateTitle()
 		
 		dlg = wx.MessageDialog(self, "G Code file\n" + path + "\nwritten.",

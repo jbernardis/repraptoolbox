@@ -380,7 +380,7 @@ class StlViewDlg(wx.Frame):
 		self.parent.viewStlClosed()
 		
 	def onExport(self, evt):
-		self.parent.exportStlFile(self.fileName, self.settings.autoenqueue)
+		self.parent.exportStlFile(self.fileName, True, self.settings.autoenqueue)
 		
 	def onEnqueue(self, evt):
 		self.settings.autoenqueue = evt.IsChecked()

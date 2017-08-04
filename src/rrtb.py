@@ -732,14 +732,15 @@ class MyFrame(wx.Frame):
 	def onStlClear(self, evt):
 		self.exportStlFile(None)
 		
-	def exportStlFile(self, fn, addToQueue=False):
+	def exportStlFile(self, fn, exportFile=True, addToQueue=False):
 		self.exportedStlFile = fn
 		if fn is None:
 			self.bStlToQueue.Enable(False)
 			self.tcStlFile.SetValue("")
 		else:
-			self.bStlToQueue.Enable(True)
-			self.tcStlFile.SetValue(fn)
+			if exportFile:
+				self.bStlToQueue.Enable(True)
+				self.tcStlFile.SetValue(fn)
 			if addToQueue:
 				self.sliceQueue.enQueuePath(fn)
 				self.setSliceQLen()
@@ -756,14 +757,15 @@ class MyFrame(wx.Frame):
 	def onGcClear(self, evt):
 		self.exportGcFile(None)
 		
-	def exportGcFile(self, fn, addToQueue=False):
+	def exportGcFile(self, fn, exportFile=True, addToQueue=False):
 		self.exportedGcFile = fn
 		if fn is None:
 			self.bGcToQueue.Enable(False)
 			self.tcGcFile.SetValue("")
 		else:
-			self.bGcToQueue.Enable(True)
-			self.tcGcFile.SetValue(fn)
+			if exportFile:
+				self.bGcToQueue.Enable(True)
+				self.tcGcFile.SetValue(fn)
 			if addToQueue:
 				self.gcodeQueue.enQueuePath(fn)
 				self.setGCodeQLen()

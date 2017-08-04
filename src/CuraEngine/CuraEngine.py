@@ -810,7 +810,7 @@ class CuraEngineDlg(wx.Frame):
 		self.enableButtons()
 	
 	def onBExport(self, evt):
-		self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
+		self.parent.exportGcFile(self.gcFn, True, self.settings.autoenqueue)
 		
 	def onAutoExport(self, evt):
 		self.settings.autoexport = self.cbAutoExport.GetValue()
@@ -883,8 +883,7 @@ class CuraEngineDlg(wx.Frame):
 					self.history.addFile(self.gcFn),
 					self.history.addFile(self.stlFn),
 					self.sufCfg))
-				if self.settings.autoexport:
-					self.parent.exportGcFile(self.gcFn, self.settings.autoenqueue)
+				self.parent.exportGcFile(self.gcFn, self.settings.autoexport, self.settings.autoenqueue)
 				
 			self.updateFileDisplay()
 			self.enableButtons()

@@ -5,7 +5,7 @@ printchoice = normal with support
 printerchoice = OB2
 filamentchoice = PLA,PLA,PLA,PLA
 autoexport = True
-executable = C:\Users\Jeff\Program Files\Slic3r\slic3r.exe
+executable = C:\Users\Jeff\Program Files\Slic3r-1.3.0\slic3r.exe
 cfgdirectory = C:\Users\Jeff\AppData\Roaming\Slic3r
 usestldir = True
 

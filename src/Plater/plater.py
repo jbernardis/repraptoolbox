@@ -561,7 +561,7 @@ class PlaterDlg(wx.Frame):
 		self.bExport.Enable(not self.settings.autoexport and self.savedfile is not None)
 
 	def doExport(self, evt):
-		self.parent.exportStlFile(self.savedfile, self.settings.autoenqueue)
+		self.parent.exportStlFile(self.savedfile, True, self.settings.autoenqueue)
 		
 	def doSaveAs(self, evt):
 		wildcard = "STL (*.stl)|*.stl;*.STL"
@@ -596,8 +596,7 @@ class PlaterDlg(wx.Frame):
 			"Save",
 			wx.OK | wx.ICON_INFORMATION)
 		
-		if self.settings.autoexport:
-			self.parent.exportStlFile(self.savedfile)
+		self.parent.exportStlFile(self.savedfile, self.settings.autoexport, self.settings.autoenqueue)
 
 		dlg.ShowModal()
 		dlg.Destroy()
