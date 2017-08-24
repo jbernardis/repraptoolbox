@@ -748,6 +748,11 @@ class GEditDlg(wx.Frame):
 		self.setModified(True)
 		self.enableButtons()
 		self.gObj = self.buildModel()
+				
+		lmax = self.gObj.layerCount()-1
+		self.slLayers.SetRange(0, lmax)
+		self.slLayers.SetPageSize(int(lmax/10))
+
 		self.gcFrame.loadModel(self.gObj, self.currentLayer, None)
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(self.currentLayer))
@@ -776,6 +781,11 @@ class GEditDlg(wx.Frame):
 		self.currentLayer = 0
 		self.setLayerText()
 		self.slLayers.SetValue(0)
+		
+		lmax = self.gObj.layerCount()-1
+		self.slLayers.SetRange(0, lmax)
+		self.slLayers.SetPageSize(int(lmax/10))
+
 		self.lcGCode.setGCode(self.gcode)
 		self.lcGCode.setLayerBounds(self.gObj.getGCodeLines(0))
 		self.lcGCode.refreshList()
