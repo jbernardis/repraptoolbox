@@ -112,6 +112,10 @@ class PrintMonitorDlg(wx.Frame):
 		self.cbShowPrevious.SetValue(self.settings.showprevious)
 		self.Bind(wx.EVT_CHECKBOX, self.onShowPrevious, self.cbShowPrevious)
 
+		self.cbToolPathOnly = wx.CheckBox(self, wx.ID_ANY, "Show tool paths only")
+		self.cbToolPathOnly.SetValue(self.settings.toolpathonly)
+		self.Bind(wx.EVT_CHECKBOX, self.onToolPathOnly, self.cbToolPathOnly)
+
 		self.cbSyncPrint = wx.CheckBox(self, wx.ID_ANY, "Sync with print")
 		self.cbSyncPrint.SetValue(True)
 		self.Bind(wx.EVT_CHECKBOX, self.onSyncPrint, self.cbSyncPrint)
@@ -179,6 +183,8 @@ class PrintMonitorDlg(wx.Frame):
 		szOpts.Add(self.cbShowMoves)
 		szOpts.AddSpacer((10, 10))
 		szOpts.Add(self.cbShowPrevious)
+		szOpts.AddSpacer((10, 10))
+		szOpts.Add(self.cbToolPathOnly)
 		szOpts.AddSpacer((10, 10))
 		szOpts.Add(self.cbSyncPrint)
 		szOpts.AddSpacer((10, 10))
@@ -281,6 +287,11 @@ class PrintMonitorDlg(wx.Frame):
 		v = self.cbShowPrevious.GetValue()
 		self.settings.showprevious = v
 		self.gcf.setShowPrevious(v)
+		
+	def onToolPathOnly(self, evt):
+		v = self.cbToolPathOnly.GetValue()
+		self.settings.toolpathonly = v
+		self.gcf.setToolPathsOnly(v)
 	
 	def onSyncPrint(self, evt):
 		v = self.cbSyncPrint.GetValue()
@@ -626,7 +637,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.log("unknown reprap event: %s" % str(evt.event))
 				
 	def buildModel(self):
-		cnc = CNC(self.settings.acceleration)
+		cnc = CNC(self.settings.acceleration, self.settings.layerheight)
 		if RECORD_TIMES:
 			self.log("recording g code times in /tmp/gcodeTimes")
 			fp = open("/tmp/gcodeTimes", "w")

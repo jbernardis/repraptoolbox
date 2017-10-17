@@ -2,7 +2,7 @@ import math
 from gobject import gobject, layer, segment, ST_MOVE, ST_PRINT, ST_RETRACTION, ST_REV_RETRACTION;
 
 class CNC:
-	def __init__(self, acceleration):
+	def __init__(self, acceleration, ht=0.2):
 		self.curX = 0
 		self.curY = 0
 		self.curZ = 0
@@ -14,14 +14,14 @@ class CNC:
 		self.curTool = 0
 		self.currentSegment = segment(0, self.curTool)
 		self.currentSegmentType = 0
-		self.recordPoint((0, 0), 0, ST_MOVE, 0, 0, 0)
+		self.recordPoint((0, 0), 0, ST_MOVE, 0, 0, 0, 0)
 		
 		self.minERate = [999.9, 999.0, 999.0, 999.0]
 		self.maxERate = [0.0, 0.0, 0.0, 0.0]
 		self.maxTool = 0
 		self.totalE = [0.0, 0.0, 0.0, 0.0]
 		self.layerE = [0.0, 0.0, 0.0, 0.0]
-		self.layerHt = 0.0
+		self.layerHt = ht
 		self.ew = 0.56
 		
 		self.layerTimes = []
@@ -110,8 +110,14 @@ class CNC:
 				st = ST_REV_RETRACTION
 			else:
 				st = ST_RETRACTION
+				
+		if dist != 0 and eUsed != 0 and st == ST_PRINT:
+			w = eUsed/(dist*self.layerHt)
+			print "calculated width = %f" % w
+		else:
+			w = 0.5
 			
-		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed)
+		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed, w)
 
 		if dx * self.lastDx + dy * self.lastDy <= 0:
 			self.lastSpeed = 0
@@ -141,7 +147,7 @@ class CNC:
 		self.totalTime += calcTime
 		return calcTime
 	
-	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed):
+	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed, lineWidth):
 		if ht != self.currentHeight:
 			self.currentLayer.addSegment(self.currentSegment)
 			self.gObject.addLayer(self.currentLayer)
@@ -151,16 +157,16 @@ class CNC:
 			self.currentHeight = ht
 			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine, eUsed)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth)
 			
 		elif st != self.currentSegmentType:
 			self.currentLayer.addSegment(self.currentSegment)
 			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine, eUsed)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth)
 			
 		else:
-			self.currentSegment.addPoint(p, sourceLine, eUsed)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth)
 			
 	def getGObject(self):
 		self.currentLayer.addSegment(self.currentSegment);
@@ -217,7 +223,7 @@ class CNC:
 			self.curY = 0
 			self.curZ = 0
 			
-		self.recordPoint((self.curX, self.curY), self.curZ, ST_MOVE, sourceLine, self.curE, 0)
+		self.recordPoint((self.curX, self.curY), self.curZ, ST_MOVE, sourceLine, self.curE, 0, 0)
 		return 0
 		
 	def setAbsolute(self, parms, sourceLine):

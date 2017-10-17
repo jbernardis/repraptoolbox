@@ -32,7 +32,8 @@ class Settings:
 		self.lastdirectory = "C:\\"
 		self.platemps = [60, 185]
 		self.abstemps = [110, 225]
-		self.acceleration = 1500
+		self.acceleration = 150
+		self.layerheight = 0.2
 		
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -90,6 +91,13 @@ class Settings:
 						print("Non-integer value in ini file for acceleration")
 						self.acceleration = 1500
 						
+				elif opt == 'layerheight':
+					try:
+						self.layerheight = float(value)
+					except:
+						print("Invalid float value in ini file for layerheight")
+						self.layerheight = 0.2
+						
 				elif opt == 'lastdirectory':
 					self.lastdirectory = value
 						
@@ -131,6 +139,7 @@ class Settings:
 		self.cfg.set(self.section, "platemps", str(self.platemps))
 		self.cfg.set(self.section, "abstemps", str(self.abstemps))
 		self.cfg.set(self.section, "acceleration", str(self.acceleration))
+		self.cfg.set(self.section, "layerheight", str(self.layerheight))
 
 		try:		
 			cfp = open(self.inifile, 'wb')

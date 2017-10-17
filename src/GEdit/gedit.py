@@ -873,7 +873,7 @@ class GEditDlg(wx.Frame):
 	def buildModel(self):
 		rgcode = [s.rstrip() for s in self.gcode]
 		
-		cnc = CNC(self.settings.acceleration)
+		cnc = CNC(self.settings.acceleration, self.settings.layerheight)
 		
 		ln = -1
 		for gl in rgcode:

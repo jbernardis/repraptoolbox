@@ -1,3 +1,5 @@
+import math
+
 ST_MOVE = 0
 ST_RETRACTION = -1
 ST_REV_RETRACTION = -2
@@ -7,15 +9,17 @@ class segment:
 	def __init__(self, stype, tool):
 		self.points = []
 		self.lineRef = []
+		self.widths = []
 		self.stype = stype
 		self.tool = tool
+		self.lastPoint = None
 		self.eUsed = 0
 		self.xmin = 99999
 		self.xmax = -99999
 		self.ymin = 99999
 		self.ymax = -99999
 		
-	def addPoint(self, p, lineNbr, eUsed):
+	def addPoint(self, p, lineNbr, eUsed, width):
 		self.eUsed += eUsed
 		if p[0] < self.xmin: self.xmin = p[0]
 		if p[0] > self.xmax: self.xmax = p[0]
@@ -23,6 +27,14 @@ class segment:
 		if p[1] > self.ymax: self.ymax = p[1]
 		self.points.append(p)
 		self.lineRef.append(lineNbr)
+		self.widths.append(width)
+		if self.lastPoint is not None:
+			dist = math.hypot((p[0]-self.lastPoint[0], p[1]-self.lastPoint[1]))
+		else:
+			dist = 0
+			
+		self.lastPoint = p
+		self.distance.append(dist)
 		
 	def getPointsBetween(self, bracket):
 		result = []
@@ -58,6 +70,15 @@ class segment:
 	def segmentType(self):
 		return self.stype
 	
+	def getTool(self):
+		return self.tool
+	
+	def getWidths(self):
+		return self.widths
+	
+	def getLineRefs(self):
+		return self.lineRef
+	
 	def getFilament(self):
 		return self.tool, self.eUsed
 	
@@ -76,6 +97,7 @@ class segment:
 			return None
 		
 		return self.points[ix]
+		# return (self.points[ix][0], self.points[ix][1], self.lineref[ix], self.widths[ix])
 	
 	def __iter__(self):
 		self.__lindex__ = 0
@@ -86,6 +108,7 @@ class segment:
 			i = self.__lindex__
 			self.__lindex__ += 1
 			return self.points[i]
+			# return (self.points[ix][0], self.points[ix][1], self.lineref[ix], self.widths[ix])
 
 		raise StopIteration
 	

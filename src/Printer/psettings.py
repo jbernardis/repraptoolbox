@@ -46,6 +46,8 @@ class PrtSettings:
 		self.tempposition = None
 		self.propposition = None
 		self.monposition = None
+		self.layerheight = 0.2
+		self.toolpathonly = False
 		
 		self.cfg = ConfigParser.ConfigParser()
 		self.cfg.optionxform = str
@@ -151,6 +153,13 @@ class PrtSettings:
 						print "Non-integer value in ini file for acceleration"
 						self.acceleration = 1500
 
+				elif opt == 'layerheight':
+					try:
+						self.layerheight = float(value)
+					except:
+						print "Invalif float value in ini file for layerheight"
+						self.layerheight = 0.2
+
 				elif opt == 'edistance':
 					try:
 						self.edistance = int(value)
@@ -163,6 +172,9 @@ class PrtSettings:
 						self.speedquery = None
 					else:
 						self.speedquery = value
+						
+				elif opt == 'toolpathonly':
+					self.toolpathonly = parseBoolean(value, False)
 						
 				elif opt == 'haszprobe':
 					self.hasZProbe = parseBoolean(value, False)
@@ -240,6 +252,7 @@ class PrtSettings:
 		self.cfg.set(self.section, "zspeed", str(self.zspeed))
 		self.cfg.set(self.section, "espeed", str(self.espeed))
 		self.cfg.set(self.section, "acceleration", str(self.acceleration))
+		self.cfg.set(self.section, "layerheight", str(self.layerheight))
 		self.cfg.set(self.section, "edistance", str(self.edistance))
 		self.cfg.set(self.section, "moveabsolute", str(self.moveabsolute))
 		self.cfg.set(self.section, "extrudeabsolute", str(self.extrudeabsolute))
@@ -251,6 +264,7 @@ class PrtSettings:
 		self.cfg.set(self.section, "heinfo", str(self.heinfo))
 		self.cfg.set(self.section, "scale", str(self.scale))
 		self.cfg.set(self.section, "buildarea", str(self.buildarea))
+		self.cfg.set(self.section, "toolpathonly", str(self.toolpathonly))
 		self.cfg.set(self.section, "showmoves", str(self.showmoves))
 		self.cfg.set(self.section, "showprevious", str(self.showprevious))
 		self.cfg.set(self.section, "ctrlposition", str(self.ctrlposition))
