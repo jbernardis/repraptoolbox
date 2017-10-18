@@ -10,6 +10,7 @@ class segment:
 		self.points = []
 		self.lineRef = []
 		self.widths = []
+		self.speeds = []
 		self.stype = stype
 		self.tool = tool
 		self.eUsed = 0
@@ -18,7 +19,7 @@ class segment:
 		self.ymin = 99999
 		self.ymax = -99999
 		
-	def addPoint(self, p, lineNbr, eUsed, width):
+	def addPoint(self, p, lineNbr, eUsed, width, speed):
 		self.eUsed += eUsed
 		if p[0] < self.xmin: self.xmin = p[0]
 		if p[0] > self.xmax: self.xmax = p[0]
@@ -27,6 +28,7 @@ class segment:
 		self.points.append(p)
 		self.lineRef.append(lineNbr)
 		self.widths.append(width)
+		self.speeds.append(speed)
 		
 	def getPointsBetween(self, bracket):
 		result = []
@@ -71,6 +73,9 @@ class segment:
 	def getLineRefs(self):
 		return self.lineRef
 	
+	def getSpeeds(self):
+		return self.speeds
+	
 	def getFilament(self):
 		return self.tool, self.eUsed
 	
@@ -89,7 +94,6 @@ class segment:
 			return None
 		
 		return self.points[ix]
-		# return (self.points[ix][0], self.points[ix][1], self.lineref[ix], self.widths[ix])
 	
 	def __iter__(self):
 		self.__lindex__ = 0
@@ -100,7 +104,6 @@ class segment:
 			i = self.__lindex__
 			self.__lindex__ += 1
 			return self.points[i]
-			# return (self.points[ix][0], self.points[ix][1], self.lineref[ix], self.widths[ix])
 
 		raise StopIteration
 	

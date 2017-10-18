@@ -1,5 +1,5 @@
 import wx, math
-from gobject import ST_MOVE, ST_PRINT, ST_RETRACTION, ST_REV_RETRACTION
+from gobject import ST_MOVE, ST_RETRACTION, ST_REV_RETRACTION
 
 MAXZOOM = 10
 ZOOMDELTA = 0.1
@@ -37,11 +37,16 @@ class GcFrame (wx.Window):
 		self.hilitePen2 = wx.Pen(wx.Colour(255, 255, 255), 1)
 		self.movePen = wx.Pen(wx.Colour(0, 0, 0), 1)
 		self.backgroundPen = wx.Pen(wx.Colour(128, 128, 128), 1)
-		self.normalPen = wx.Pen(wx.Colour(0, 0, 255), 1)
+		#self.normalPen = wx.Pen(wx.Colour(0, 0, 255), 1)
 		self.bracketPen = wx.Pen(wx.Colour(255, 128, 0), 2)
+		self.retractionColor = wx.Colour(255, 255, 255)
+		self.revretractionColor = wx.Colour(255, 0, 0)
 
 		self.showmoves = settings.showmoves
 		self.showprevious = settings.showprevious
+		self.showretractions = True
+		self.showrevretractions = True
+		self.hilitetool = None
 		
 		sz = [(x+1) * self.scale for x in self.buildarea]
 		
@@ -71,7 +76,7 @@ class GcFrame (wx.Window):
 		self.redrawCurrentLayer()
 		
 	def onPaint(self, evt):
-		dc = wx.BufferedPaintDC(self, self.buffer)
+		dc = wx.BufferedPaintDC(self, self.buffer)  # @UnusedVariable
 		
 	def onLeftDown(self, evt):
 		self.startPos = evt.GetPositionTuple()
@@ -270,34 +275,85 @@ class GcFrame (wx.Window):
 		
 		layer = self.model[lx]
 
-		pLast = None
+
+
+
+
+
+		lines = []
+		pens = []
+		lastPt = None
 		hpts = None
 		for sg in layer:
-			stype = sg.segmentType()
-			pts = [ self.transform(p[0], p[1]) for p in sg]
-			if pLast is not None:
-				pts = [pLast] + pts
-			else:
-				if len(pts) == 1:
-					pts = [self.transform(0,0)] + pts
-					
-			pen = self.segmentPenType(stype, background)
-			if pen is not None:
-				dc.SetPen(pen)
-				dc.DrawLines(pts)
 			if not background and sg.hasLineNbr(self.hiliteLine):
 				p = sg.getHilitedPoint(self.hiliteLine)
 				if p is not None:
 					if len(p) == 1:
 						p0 = self.transform(p[0][0], p[0][1])
-						if pLast is None:
+						if lastPt is None:
 							hpts = [p0, p0]
 						else:
-							hpts = [pLast, p0]
+							hpts = [lastPt, p0]
 					else:
 						hpts = [self.transform(pt[0], pt[1]) for pt in p]
+			
+			stype = sg.segmentType()
+			speeds = sg.getSpeeds()
+			tool = sg.getTool()
+			pts = [ self.transform(p[0], p[1]) for p in sg]
+
+			if lastPt is not None:
+				pts = [lastPt] + pts
 					
-			pLast = pts[-1]
+			lastPt = pts[-1]
+
+			if stype == ST_MOVE and not self.showmoves:
+				continue
+
+			if stype == ST_RETRACTION and not self.showretractions:
+				continue
+
+			if stype == ST_REV_RETRACTION and not self.showrevretractions:
+				continue
+
+			if len(pts) == 0:
+				continue
+
+			if len(pts) == 1:
+				pts = [[pts[0][0], pts[0][1]], [pts[0][0], pts[0][1]]]
+				
+			pens.extend([self.getPen(speeds[i], stype, background, tool) for i in range(len(speeds))])
+			lines.extend([[pts[i][0], pts[i][1], pts[i+1][0], pts[i+1][1]] for i in range(len(pts)-1)])
+			pens = pens[:len(lines)]
+			
+		dc.DrawLineList(lines, pens)
+
+
+
+
+
+
+
+
+
+
+
+
+# 		pLast = None
+# 		hpts = None
+# 		for sg in layer:
+# 			stype = sg.segmentType()
+# 			pts = [ self.transform(p[0], p[1]) for p in sg]
+# 			if pLast is not None:
+# 				pts = [pLast] + pts
+# 			else:
+# 				if len(pts) == 1:
+# 					pts = [self.transform(0,0)] + pts
+# 					
+# 			pen = self.segmentPenType(stype, background)
+# 			if pen is not None:
+# 				dc.SetPen(pen)
+# 				dc.DrawLines(pts)
 			
 		if self.bracket[0] is not None and self.bracket[1] is not None:
 			npt = layer.getPointsBetween(self.bracket)
@@ -312,17 +368,62 @@ class GcFrame (wx.Window):
 			dc.DrawLine(hpts[0][0], hpts[0][1], hpts[1][0], hpts[1][1])
 
 
-	def segmentPenType(self, st, background=False):
-		if st == ST_MOVE:
-			if self.showmoves:
-				return self.movePen
-			else:
-				return None
+	def getPen(self, speed, segmentType, background, tool):
+		if segmentType == ST_MOVE:
+			return self.movePen
 
 		if background:
-			return self.backgroundPen
+				return self.backgroundPen
 				
-		return self.normalPen
+		if self.hilitetool is not None:
+			if self.hilitetool == tool:
+				if segmentType == ST_RETRACTION:
+					c = self.retractionColor
+					w = 4
+				elif segmentType == ST_REV_RETRACTION:
+					c = self.revRetractionColor
+					w = 4
+				else:
+					c = self.colorBySpeed(speed)
+					w = 2
+			else:
+				c = wx.Colour(0, 0, 0)
+				if segmentType == ST_RETRACTION:
+					w = 4
+				elif segmentType == ST_REV_RETRACTION:
+					w = 4
+				else:
+					w = 2
+		else:
+			if segmentType == ST_RETRACTION:
+				c = self.retractionColor
+				w = 4
+			elif segmentType == ST_REV_RETRACTION:
+				c = self.revRetractionColor
+				w = 4
+			else:
+				c = self.colorBySpeed(speed)
+				w = 2
+			
+		return wx.Pen(c, w)	
+	
+	def colorBySpeed(self, speed):
+		print "speed: ", speed
+		return wx.Colour(0, 0, 255)
+		
+
+
+# 	def segmentPenType(self, st, background=False):
+# 		if st == ST_MOVE:
+# 			if self.showmoves:
+# 				return self.movePen
+# 			else:
+# 				return None
+# 
+# 		if background:
+# 			return self.backgroundPen
+# 				
+# 		return self.normalPen
 
 	def transform(self, ptx, pty):
 		x = (ptx - self.offsetx + self.shiftX)*self.zoom*self.scale

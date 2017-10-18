@@ -14,7 +14,7 @@ class CNC:
 		self.curTool = 0
 		self.currentSegment = segment(0, self.curTool)
 		self.currentSegmentType = 0
-		self.recordPoint((0, 0), 0, ST_MOVE, 0, 0, 0, 0)
+		self.recordPoint((0, 0), 0, ST_MOVE, 0, 0, 0, 0, 0)
 		
 		self.minERate = [999.9, 999.0, 999.0, 999.0]
 		self.maxERate = [0.0, 0.0, 0.0, 0.0]
@@ -116,7 +116,7 @@ class CNC:
 		else:
 			w = 0.5
 			
-		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed, w)
+		self.recordPoint((self.curX, self.curY), self.curZ, st, sourceLine, e, eUsed, w, self.speed)
 
 		if dx * self.lastDx + dy * self.lastDy <= 0:
 			self.lastSpeed = 0
@@ -146,7 +146,7 @@ class CNC:
 		self.totalTime += calcTime
 		return calcTime
 	
-	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed, lineWidth):
+	def recordPoint(self, p, ht, st, sourceLine, eBefore, eUsed, lineWidth, speed):
 		if ht != self.currentHeight:
 			self.currentLayer.addSegment(self.currentSegment)
 			self.gObject.addLayer(self.currentLayer)
@@ -156,16 +156,16 @@ class CNC:
 			self.currentHeight = ht
 			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth, speed)
 			
 		elif st != self.currentSegmentType:
 			self.currentLayer.addSegment(self.currentSegment)
 			self.currentSegment = segment(st, self.curTool)
 			self.currentSegmentType = st
-			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth, speed)
 			
 		else:
-			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth)
+			self.currentSegment.addPoint(p, sourceLine, eUsed, lineWidth, speed)
 			
 	def getGObject(self):
 		self.currentLayer.addSegment(self.currentSegment);
@@ -222,7 +222,7 @@ class CNC:
 			self.curY = 0
 			self.curZ = 0
 			
-		self.recordPoint((self.curX, self.curY), self.curZ, ST_MOVE, sourceLine, self.curE, 0, 0)
+		self.recordPoint((self.curX, self.curY), self.curZ, ST_MOVE, sourceLine, self.curE, 0, 0, 0)
 		return 0
 		
 	def setAbsolute(self, parms, sourceLine):

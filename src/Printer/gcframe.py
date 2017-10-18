@@ -3,6 +3,7 @@ from gobject import ST_MOVE, ST_PRINT, ST_RETRACTION, ST_REV_RETRACTION
 
 MAXZOOM = 10
 ZOOMDELTA = 0.1
+THICK_ADJUSTMENT = 2.0
 
 
 def setColor(a,b):
@@ -27,8 +28,6 @@ def colorByPos(distance, tool):
 				return unprintedColor[tool]
 		else:
 				return printedColor(tool, -distance)
-
-
 			
 def triangulate(p1, p2):
 	dx = p2[0] - p1[0]
@@ -61,6 +60,7 @@ class GcFrame (wx.Window):
 		self.toolPathOnly = settings.toolpathonly
 		
 		self.movePen = wx.Pen(wx.Colour(0, 0, 0), 1)
+		self.movePenPrinted = wx.Pen(wx.Colour(0, 0, 0), 2)
 		self.backgroundPen = wx.Pen(wx.Colour(128, 128, 128), 1)
 
 		self.showmoves = settings.showmoves
@@ -316,30 +316,6 @@ class GcFrame (wx.Window):
 		
 		layer = self.model[lx]
 
-		#pLast = None
-		
-		
-		# this logic needs to be re-written
-		# pts arrays need to also carry width, linenumber so that I can determine Pen Type.  This requires a 
-		# different interface to dc.drawlines.
-		# DrawPointList(self, points, pens=None) where pens is a list of pens the same size as points
-		# also gcframe in gedit
-		#
-		# loop through the width and line reference arays in unison
-		#  if background:
-		#    use (background pen, width=1)
-		#  elif current segment is a MOVE segment:
-		#    use (white, width = 1)
-		#  elif line > printposition:
-		#    calculate pen using not-printed color and width
-		#  else:
-		#    calculate pen using color based on (printposition-line) for color, and width
-		
-		# w = lw * self.zoom * self.scale
-		# if self.toolPathsOnly:
-		# 	w = 1
-		
-
 		lines = []
 		pens = []
 		lastPt = None
@@ -373,12 +349,14 @@ class GcFrame (wx.Window):
 			pens.extend([self.getPen(widths[i], lineRefs[i], stype, background, tool) for i in range(len(widths))])
 			lines.extend([[pts[i][0], pts[i][1], pts[i+1][0], pts[i+1][1]] for i in range(len(pts)-1)])
 			pens = pens[:len(lines)]
-
 			
 		dc.DrawLineList(lines, pens)
 
 	def getPen(self, width, lineref, segmentType, background, tool):
 		if segmentType == ST_MOVE:
+			if self.printPosition >= lineref:
+				return self.movePenPrinted
+			else:
 				return self.movePen
 
 		if background:
@@ -387,77 +365,9 @@ class GcFrame (wx.Window):
 		if self.toolPathOnly:
 				w = 1
 		else:
-				w = width * self.zoom * self.scale * 2
+				w = width * self.zoom * self.scale * THICK_ADJUSTMENT
 				
-		return wx.Pen(colorByPos(lineref-self.printPosition, tool), w)
-
-		
-		
-# 		for sg in layer:
-# 			stype = sg.segmentType()
-# 			pts = [ self.transform(p[0], p[1]) for p in sg]
-# 			if pLast is not None:
-# 				pts = [pLast] + pts
-# 			else:
-# 				if len(pts) == 1:
-# 					pts = [self.transform(0,0)] + pts
-# 					
-# 			if sg.hasLineNbr(self.printPosition):
-# 				splitPos = None
-# 				for lx in range(len(sg.lineRef)):
-# 					if sg.lineRef[lx] > self.printPosition:
-# 						splitPos = lx
-# 						break
-# 				if splitPos is not None:
-# 					ptsa = pts[:splitPos]
-# 					ptsb = pts[splitPos:]
-# 					if len(ptsb) != 0:
-# 						ptsa.append(ptsb[0])
-# 				else:
-# 					ptsa = pts
-# 					ptsb = []
-# 
-# 				if len(ptsa) > 0:					
-# 					pen = self.segmentPenType(stype, True, background)
-# 					if pen is not None:
-# 						dc.SetPen(pen)
-# 						dc.DrawLines(ptsa)
-# 
-# 				if len(ptsb) > 0:					
-# 					pen = self.segmentPenType(stype, False, background)
-# 					if pen is not None:
-# 						dc.SetPen(pen)
-# 						dc.DrawLines(ptsb)
-# 					
-# 				pLast = pts[-1]
-# 			else:
-# 				fl = sg.getFirstLine()
-# 				if fl is None:
-# 					alreadyPrinted = True
-# 				else:
-# 					alreadyPrinted = fl <= self.printPosition
-# 				pen = self.segmentPenType(stype, alreadyPrinted, background)
-# 				if pen is not None:
-# 					dc.SetPen(pen)
-# 					dc.DrawLines(pts)
-# 					
-# 				pLast = pts[-1]
-# 
-# 
-# 	def segmentPenType(self, st, alreadyPrinted=False, background=False):
-# 		if st == ST_MOVE:
-# 			if self.showmoves:
-# 				return self.movePen
-# 			else:
-# 				return None
-# 
-# 		if background:
-# 			return self.backgroundPen
-# 		
-# 		if alreadyPrinted:
-# 			return self.printedPen
-# 				
-# 		return self.normalPen
+		return wx.Pen(colorByPos(lineref-self.printPosition, tool), w)	
 
 	def transform(self, ptx, pty):
 		x = (ptx - self.offsetx + self.shiftX)*self.zoom*self.scale
