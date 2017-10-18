@@ -113,7 +113,6 @@ class CNC:
 				
 		if dist != 0 and eUsed != 0 and st == ST_PRINT:
 			w = eUsed/(dist*self.layerHt)
-			print "calculated width = %f" % w
 		else:
 			w = 0.5
 			

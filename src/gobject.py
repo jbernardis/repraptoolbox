@@ -12,7 +12,6 @@ class segment:
 		self.widths = []
 		self.stype = stype
 		self.tool = tool
-		self.lastPoint = None
 		self.eUsed = 0
 		self.xmin = 99999
 		self.xmax = -99999
@@ -28,13 +27,6 @@ class segment:
 		self.points.append(p)
 		self.lineRef.append(lineNbr)
 		self.widths.append(width)
-		if self.lastPoint is not None:
-			dist = math.hypot((p[0]-self.lastPoint[0], p[1]-self.lastPoint[1]))
-		else:
-			dist = 0
-			
-		self.lastPoint = p
-		self.distance.append(dist)
 		
 	def getPointsBetween(self, bracket):
 		result = []

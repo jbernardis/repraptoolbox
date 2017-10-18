@@ -22,14 +22,11 @@ def printedColor(tool, distance):
 
 unprintedColor = ["blue", "green", "cyan"]
 
-def pen(color, width):
-		return "[%s,%d]" % (color, width)
-
 def colorByPos(distance, tool):
-		if distance < 0: # not yet printed
+		if distance >= 0: # not yet printed
 				return unprintedColor[tool]
 		else:
-				return printedColor(tool, distance)
+				return printedColor(tool, -distance)
 
 
 			
@@ -345,22 +342,40 @@ class GcFrame (wx.Window):
 
 		lines = []
 		pens = []
+		lastPt = None
 		for sg in layer:
-			widths = sg.getWidths()
-			lineRefs = sg.getLineRefs()
 			stype = sg.segmentType()
+			widths = sg.getWidths()
+
+			lineRefs = sg.getLineRefs()
 			tool = sg.getTool()
 			pts = [ self.transform(p[0], p[1]) for p in sg]
+
+			if lastPt is not None:
+				pts = [lastPt] + pts
+			lastPt = pts[-1]
+
+			if stype == ST_MOVE and not self.showmoves:
+				continue
+
+			if stype == ST_RETRACTION:
+				continue
+
+			if stype == ST_REV_RETRACTION:
+				continue
+
 			if len(pts) == 0:
 				continue
-			
+
 			if len(pts) == 1:
 				pts = [[pts[0][0], pts[0][1]], [pts[0][0], pts[0][1]]]
 				
-			pens.extend([self.getPen(widths[i], lineRefs[i], stype, background, tool) for i in range(1,len(widths))])
+			pens.extend([self.getPen(widths[i], lineRefs[i], stype, background, tool) for i in range(len(widths))])
 			lines.extend([[pts[i][0], pts[i][1], pts[i+1][0], pts[i+1][1]] for i in range(len(pts)-1)])
+			pens = pens[:len(lines)]
+
 			
-		dc.drawLineList(lines, pens)
+		dc.DrawLineList(lines, pens)
 
 	def getPen(self, width, lineref, segmentType, background, tool):
 		if segmentType == ST_MOVE:
@@ -372,8 +387,9 @@ class GcFrame (wx.Window):
 		if self.toolPathOnly:
 				w = 1
 		else:
-				w = width * self.zoom * self.scale
-		return wx.Pen(wx.Colour(colorByPos(lineref-self.printposition, tool)), w)
+				w = width * self.zoom * self.scale * 2
+				
+		return wx.Pen(colorByPos(lineref-self.printPosition, tool), w)
 
 		
 		
