@@ -26,6 +26,8 @@ class Settings:
 		self.nextruders = 1
 		self.showprevious = True
 		self.showmoves = True
+		self.showretractions = True
+		self.showrevretractions = True
 		self.uselinenbrs = False
 		self.autoexport = True
 		self.autoenqueue = False
@@ -110,6 +112,12 @@ class Settings:
 				elif opt == 'showmoves':
 					self.showmoves = parseBoolean(value, True)
 						
+				elif opt == 'showretractions':
+					self.showretractions = parseBoolean(value, True)
+						
+				elif opt == 'showrevretractions':
+					self.showrevretractions = parseBoolean(value, True)
+						
 				elif opt == 'autoexport':
 					self.autoexport = parseBoolean(value, True)
 						
@@ -132,6 +140,8 @@ class Settings:
 		self.cfg.set(self.section, "scale", str(self.scale))
 		self.cfg.set(self.section, "showprevious", str(self.showprevious))
 		self.cfg.set(self.section, "showmoves", str(self.showmoves))
+		self.cfg.set(self.section, "showretractions", str(self.showretractions))
+		self.cfg.set(self.section, "showrevretractions", str(self.showrevretractions))
 		self.cfg.set(self.section, "autoexport", str(self.autoexport))
 		self.cfg.set(self.section, "autoenqueue", str(self.autoenqueue))
 		self.cfg.set(self.section, "uselinenbrs", str(self.uselinenbrs))

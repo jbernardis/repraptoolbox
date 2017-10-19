@@ -3,6 +3,9 @@ from gobject import ST_MOVE, ST_RETRACTION, ST_REV_RETRACTION
 
 MAXZOOM = 10
 ZOOMDELTA = 0.1
+
+RETRACTION_WIDTH = 4
+PRINT_WIDTH = 1
 			
 def triangulate(p1, p2):
 	dx = p2[0] - p1[0]
@@ -10,7 +13,6 @@ def triangulate(p1, p2):
 	d = math.sqrt(dx*dx + dy*dy)
 	return d
 
-#orange = wx.Colour(237, 139, 33)
 dk_Gray = wx.Colour(224, 224, 224)
 lt_Gray = wx.Colour(128, 128, 128)
 black = wx.Colour(0, 0, 0)
@@ -33,19 +35,19 @@ class GcFrame (wx.Window):
 		self.bracket = [None, None]
 		
 		self.hiliteLine = 0;
-		self.hilitePen1 = wx.Pen(wx.Colour(0, 255, 0), 6)
+		self.hilitePen1 = wx.Pen(wx.Colour(255, 255, 0), 6)
 		self.hilitePen2 = wx.Pen(wx.Colour(255, 255, 255), 1)
 		self.movePen = wx.Pen(wx.Colour(0, 0, 0), 1)
 		self.backgroundPen = wx.Pen(wx.Colour(128, 128, 128), 1)
-		#self.normalPen = wx.Pen(wx.Colour(0, 0, 255), 1)
 		self.bracketPen = wx.Pen(wx.Colour(255, 128, 0), 2)
 		self.retractionColor = wx.Colour(255, 255, 255)
-		self.revretractionColor = wx.Colour(255, 0, 0)
+		self.revRetractionColor = wx.Colour(255, 0, 0)
+		self.printPens = [wx.Colour(0, 0, 255), wx.Colour(0, 255, 0), wx.Colour(255, 128, 0), wx.Colour(255, 0, 0)]
 
 		self.showmoves = settings.showmoves
 		self.showprevious = settings.showprevious
-		self.showretractions = True
-		self.showrevretractions = True
+		self.showretractions = settings.showretractions
+		self.showrevretractions = settings.showrevretractions
 		self.hilitetool = None
 		
 		sz = [(x+1) * self.scale for x in self.buildarea]
@@ -73,6 +75,18 @@ class GcFrame (wx.Window):
 		
 	def setShowPrevious(self, flag=True):
 		self.showprevious = flag
+		self.redrawCurrentLayer()
+		
+	def setShowRetractions(self, flag=True):
+		self.showretractions = flag
+		self.redrawCurrentLayer()
+		
+	def setShowRevRetractions(self, flag=True):
+		self.showrevretractions = flag
+		self.redrawCurrentLayer()
+		
+	def setHiLightTool(self, tool):
+		self.hilitetool = tool
 		self.redrawCurrentLayer()
 		
 	def onPaint(self, evt):
@@ -275,11 +289,6 @@ class GcFrame (wx.Window):
 		
 		layer = self.model[lx]
 
-
-
-
-
-
 		lines = []
 		pens = []
 		lastPt = None
@@ -328,33 +337,6 @@ class GcFrame (wx.Window):
 			
 		dc.DrawLineList(lines, pens)
 
-
-
-
-
-
-
-
-
-
-
-
-# 		pLast = None
-# 		hpts = None
-# 		for sg in layer:
-# 			stype = sg.segmentType()
-# 			pts = [ self.transform(p[0], p[1]) for p in sg]
-# 			if pLast is not None:
-# 				pts = [pLast] + pts
-# 			else:
-# 				if len(pts) == 1:
-# 					pts = [self.transform(0,0)] + pts
-# 					
-# 			pen = self.segmentPenType(stype, background)
-# 			if pen is not None:
-# 				dc.SetPen(pen)
-# 				dc.DrawLines(pts)
-			
 		if self.bracket[0] is not None and self.bracket[1] is not None:
 			npt = layer.getPointsBetween(self.bracket)
 			if npt is not None and len(npt) > 1:
@@ -367,7 +349,6 @@ class GcFrame (wx.Window):
 			dc.SetPen(self.hilitePen2)
 			dc.DrawLine(hpts[0][0], hpts[0][1], hpts[1][0], hpts[1][1])
 
-
 	def getPen(self, speed, segmentType, background, tool):
 		if segmentType == ST_MOVE:
 			return self.movePen
@@ -379,52 +360,46 @@ class GcFrame (wx.Window):
 			if self.hilitetool == tool:
 				if segmentType == ST_RETRACTION:
 					c = self.retractionColor
-					w = 4
+					w = RETRACTION_WIDTH
 				elif segmentType == ST_REV_RETRACTION:
 					c = self.revRetractionColor
-					w = 4
+					w = RETRACTION_WIDTH
 				else:
 					c = self.colorBySpeed(speed)
-					w = 2
+					w = PRINT_WIDTH
 			else:
 				c = wx.Colour(0, 0, 0)
 				if segmentType == ST_RETRACTION:
-					w = 4
+					w = RETRACTION_WIDTH
 				elif segmentType == ST_REV_RETRACTION:
-					w = 4
+					w = RETRACTION_WIDTH
 				else:
-					w = 2
+					w = PRINT_WIDTH
 		else:
 			if segmentType == ST_RETRACTION:
 				c = self.retractionColor
-				w = 4
+				w = RETRACTION_WIDTH
 			elif segmentType == ST_REV_RETRACTION:
 				c = self.revRetractionColor
-				w = 4
+				w = RETRACTION_WIDTH
 			else:
 				c = self.colorBySpeed(speed)
-				w = 2
+				w = PRINT_WIDTH
 			
 		return wx.Pen(c, w)	
 	
 	def colorBySpeed(self, speed):
-		print "speed: ", speed
-		return wx.Colour(0, 0, 255)
+		if speed < 20:
+			return self.printPens[0]
 		
-
-
-# 	def segmentPenType(self, st, background=False):
-# 		if st == ST_MOVE:
-# 			if self.showmoves:
-# 				return self.movePen
-# 			else:
-# 				return None
-# 
-# 		if background:
-# 			return self.backgroundPen
-# 				
-# 		return self.normalPen
-
+		if speed < 40:
+			return self.printPens[1]
+		
+		if speed < 60:
+			return self.printPens[2]
+		
+		return self.printPens[3]
+		
 	def transform(self, ptx, pty):
 		x = (ptx - self.offsetx + self.shiftX)*self.zoom*self.scale
 		y = (self.buildarea[1]-pty - self.offsety - self.shiftY)*self.zoom*self.scale

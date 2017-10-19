@@ -95,6 +95,7 @@ class PrintMonitorDlg(wx.Frame):
 			self.sdcard = None
 
 		self.gcf = GcFrame(self, self.gObj, self.settings)
+		self.stLayerText = wx.StaticText(self, wx.ID_ANY, "Layer Height:   0.00")
 		
 		ht = self.gcf.GetSize().Get()[1] - BUTTONDIM[1]*2 - 20
 		
@@ -166,6 +167,7 @@ class PrintMonitorDlg(wx.Frame):
 		szGcf = wx.BoxSizer(wx.HORIZONTAL)
 		szGcf.AddSpacer((10, 10))
 		szGcf.Add(self.gcf)
+		szGcf.Add(self.stLayerText, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		szGcf.AddSpacer((10, 10))
 
 		szNav = wx.BoxSizer(wx.VERTICAL)
@@ -238,6 +240,13 @@ class PrintMonitorDlg(wx.Frame):
 		self.Raise()
 		self.propDlg.Show()
 		self.propDlg.Raise()
+		
+	def setLayerText(self, ht):
+		if ht is None:
+			htv = 0.0
+		else:
+			htv = ht
+		self.stLayerText.SetLabel("Layer Height: %0.3f" % htv)
 		
 	def getStatusReport(self):
 		r = self.propDlg.getStatusReport()
@@ -550,6 +559,7 @@ class PrintMonitorDlg(wx.Frame):
 		self.currentLayer = lx
 		self.slLayers.SetValue(lx)
 		ht = self.gObj.getLayerHeight(lx)
+		self.setLayerText(ht)
 		if ht is None:
 			self.propDlg.setProperty(PropertyEnum.layerNum, "%d / %d" % (lx, self.gObj.layerCount()))
 		else:

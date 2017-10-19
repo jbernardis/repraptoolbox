@@ -177,6 +177,21 @@ class GEditDlg(wx.Frame):
 		self.cbShowPrevious.SetValue(self.settings.showprevious)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbShowPrevious, self.cbShowPrevious)
 
+		self.cbShowRetractions = wx.CheckBox(self, wx.ID_ANY, "Show Retractions")
+		self.cbShowRetractions.SetToolTipString("Show/Hide retractions")
+		self.cbShowRetractions.SetValue(self.settings.showretractions)
+		self.Bind(wx.EVT_CHECKBOX, self.onCbShowRetractions, self.cbShowRetractions)
+
+		self.cbShowRevRetractions = wx.CheckBox(self, wx.ID_ANY, "Show Reverse Retractions")
+		self.cbShowRevRetractions.SetToolTipString("Show/Hide reverse retractions")
+		self.cbShowRevRetractions.SetValue(self.settings.showrevretractions)
+		self.Bind(wx.EVT_CHECKBOX, self.onCbShowRevRetractions, self.cbShowRevRetractions)
+		
+		self.cmbTool = wx.ComboBox(self, wx.ID_ANY, "None", choices = ["None", "0", "1", "2", "3"],
+			style = wx.CB_DROPDOWN + wx.CB_READONLY)
+		self.cmbTool.SetToolTipString("Choose which tool, if any, is highlighted in the display")
+		self.Bind(wx.EVT_COMBOBOX, self.onCmbTool, self.cmbTool)
+
 		self.cbLineNbrs = wx.CheckBox(self, wx.ID_ANY, "Line Numbers")
 		self.cbLineNbrs.SetToolTipString("Use G Code line numbers")
 		self.cbLineNbrs.SetValue(self.settings.uselinenbrs)
@@ -218,6 +233,16 @@ class GEditDlg(wx.Frame):
 		optszr.Add(self.cbShowMoves)
 		optszr.AddSpacer((1,1))
 		optszr.Add(self.cbShowPrevious)
+		optszr.AddSpacer((1,1))
+		optszr.Add(self.cbShowRetractions)
+		optszr.AddSpacer((1,1))
+		optszr.Add(self.cbShowRevRetractions)
+		optszr.AddSpacer((1,1))
+		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz.Add(wx.StaticText(self, wx.ID_ANY, "Tool to Hi-light: "))
+		hsz.AddSpacer((5,5))
+		hsz.Add(self.cmbTool)
+		optszr.Add(hsz)
 		btnszr.Add(optszr)
 		
 		btnszr.AddSpacer((20, 10))
@@ -798,6 +823,26 @@ class GEditDlg(wx.Frame):
 	def onCbShowPrevious(self, evt):
 		self.settings.showprevious = self.cbShowPrevious.GetValue()
 		self.gcFrame.setShowPrevious(self.settings.showprevious)
+	
+	def onCbShowRetractions(self, evt):
+		self.settings.showretractions = self.cbShowRetractions.GetValue()
+		self.gcFrame.setShowRetractions(self.settings.showretractions)
+	
+	def onCbShowRevRetractions(self, evt):
+		self.settings.showrevretractions = self.cbShowRevRetractions.GetValue()
+		self.gcFrame.setShowRevRetractions(self.settings.showrevretractions)
+		
+	def onCmbTool(self, evt):
+		sel = self.cmbTool.GetStringSelection()
+		if sel == "" or sel == "None":
+			sel = None
+		else:
+			try:
+				sel = int(sel)
+			except:
+				sel = None
+				
+		self.gcFrame.setHilightTool(sel)
 		
 	def onCbLineNbrs(self, evt):
 		self.settings.uselinenbrs = self.cbLineNbrs.GetValue()
