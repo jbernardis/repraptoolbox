@@ -4,7 +4,7 @@ from gobject import ST_MOVE, ST_RETRACTION, ST_REV_RETRACTION
 MAXZOOM = 10
 ZOOMDELTA = 0.1
 
-RETRACTION_WIDTH = 4
+RETRACTION_WIDTH = 8
 PRINT_WIDTH = 1
 			
 def triangulate(p1, p2):
@@ -40,9 +40,9 @@ class GcFrame (wx.Window):
 		self.movePen = wx.Pen(wx.Colour(0, 0, 0), 1)
 		self.backgroundPen = wx.Pen(wx.Colour(128, 128, 128), 1)
 		self.bracketPen = wx.Pen(wx.Colour(255, 128, 0), 2)
-		self.retractionColor = wx.Colour(255, 255, 255)
-		self.revRetractionColor = wx.Colour(255, 0, 0)
-		self.printPens = [wx.Colour(0, 0, 255), wx.Colour(0, 255, 0), wx.Colour(255, 128, 0), wx.Colour(255, 0, 0)]
+		self.retractionColor = wx.Colour(45, 222, 222)
+		self.revRetractionColor = wx.Colour(196, 28, 173)
+		self.printPens = [wx.Colour(37, 61, 180), wx.Colour(42, 164, 105), wx.Colour(229, 129, 34), wx.Colour(224, 55, 38)]
 
 		self.showmoves = settings.showmoves
 		self.showprevious = settings.showprevious
@@ -85,7 +85,7 @@ class GcFrame (wx.Window):
 		self.showrevretractions = flag
 		self.redrawCurrentLayer()
 		
-	def setHiLightTool(self, tool):
+	def setHilightTool(self, tool):
 		self.hilitetool = tool
 		self.redrawCurrentLayer()
 		
