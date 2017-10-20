@@ -35,7 +35,8 @@ reE = re.compile("(.*[eE])([0-9\.]+)(.*)")
 
 class LegendDlg(wx.Frame):
 	def __init__(self, parent):
-		wx.Frame.__init__(self, parent, wx.ID_ANY, size=(500, 500))
+		wx.Frame.__init__(self, parent, wx.ID_ANY, "Legend", size=(500, 500))
+		self.parent = parent
 		self.SetBackgroundColour(wx.Colour(255, 255, 255))
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		
@@ -189,7 +190,7 @@ class GEditDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onInfo, self.bInfo)
 		self.bInfo.Enable(False)
 		
-		self.bLegend = wx.BitmapButton(self, wx.ID_ANY, self.images.pngInfo, size=BUTTONDIM)
+		self.bLegend = wx.BitmapButton(self, wx.ID_ANY, self.images.pngLegend, size=BUTTONDIM)
 		self.bLegend.SetToolTipString("Display a color legend")
 		self.Bind(wx.EVT_BUTTON, self.onLegend, self.bLegend)
 		self.bLegend.Enable(True)
@@ -297,7 +298,7 @@ class GEditDlg(wx.Frame):
 		btnszr.Add(self.bInfo)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bLegend)
-		btnszr.AddSpacer((20, 10))
+		btnszr.AddSpacer((50, 10))
 		btnszr.Add(self.bSaveLayers)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bOpen)
