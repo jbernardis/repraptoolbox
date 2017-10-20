@@ -17,6 +17,10 @@ dk_Gray = wx.Colour(224, 224, 224)
 lt_Gray = wx.Colour(128, 128, 128)
 black = wx.Colour(0, 0, 0)
 
+RETRACTIONCOLOR = wx.Colour(45, 222, 222)
+REVRETRACTIONCOLOR = wx.Colour(196, 28, 173)
+PRINTCOLOR = [wx.Colour(37, 61, 180), wx.Colour(42, 164, 105), wx.Colour(229, 129, 34), wx.Colour(224, 55, 38)]
+
 class GcFrame (wx.Window):
 	def __init__(self, parent, model, settings):
 		self.parent = parent
@@ -40,9 +44,6 @@ class GcFrame (wx.Window):
 		self.movePen = wx.Pen(wx.Colour(0, 0, 0), 1)
 		self.backgroundPen = wx.Pen(wx.Colour(128, 128, 128), 1)
 		self.bracketPen = wx.Pen(wx.Colour(255, 128, 0), 2)
-		self.retractionColor = wx.Colour(45, 222, 222)
-		self.revRetractionColor = wx.Colour(196, 28, 173)
-		self.printPens = [wx.Colour(37, 61, 180), wx.Colour(42, 164, 105), wx.Colour(229, 129, 34), wx.Colour(224, 55, 38)]
 
 		self.showmoves = settings.showmoves
 		self.showprevious = settings.showprevious
@@ -359,10 +360,10 @@ class GcFrame (wx.Window):
 		if self.hilitetool is not None:
 			if self.hilitetool == tool:
 				if segmentType == ST_RETRACTION:
-					c = self.retractionColor
+					c = RETRACTIONCOLOR
 					w = RETRACTION_WIDTH
 				elif segmentType == ST_REV_RETRACTION:
-					c = self.revRetractionColor
+					c = REVRETRACTIONCOLOR
 					w = RETRACTION_WIDTH
 				else:
 					c = self.colorBySpeed(speed)
@@ -377,10 +378,10 @@ class GcFrame (wx.Window):
 					w = PRINT_WIDTH
 		else:
 			if segmentType == ST_RETRACTION:
-				c = self.retractionColor
+				c = RETRACTIONCOLOR
 				w = RETRACTION_WIDTH
 			elif segmentType == ST_REV_RETRACTION:
-				c = self.revRetractionColor
+				c = REVRETRACTIONCOLOR
 				w = RETRACTION_WIDTH
 			else:
 				c = self.colorBySpeed(speed)
@@ -390,15 +391,15 @@ class GcFrame (wx.Window):
 	
 	def colorBySpeed(self, speed):
 		if speed < 20:
-			return self.printPens[0]
+			return PRINTCOLOR[0]
 		
 		if speed < 40:
-			return self.printPens[1]
+			return PRINTCOLOR[1]
 		
 		if speed < 60:
-			return self.printPens[2]
+			return PRINTCOLOR[2]
 		
-		return self.printPens[3]
+		return PRINTCOLOR[3]
 		
 	def transform(self, ptx, pty):
 		x = (ptx - self.offsetx + self.shiftX)*self.zoom*self.scale

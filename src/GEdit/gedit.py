@@ -8,7 +8,8 @@ cmdFolder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( insp
 
 from settings import Settings
 from cnc import CNC
-from gcframe import GcFrame
+from gcframe import GcFrame, RETRACTIONCOLOR, REVRETRACTIONCOLOR, PRINTCOLOR
+
 from gclistctrl import GcodeListCtrl
 from shiftmodel import ShiftModelDlg
 from modtemps import ModifyTempsDlg
@@ -32,6 +33,68 @@ reS = re.compile("(.*[sS])([0-9\.]+)(.*)")
 reF = re.compile("(.*[fF])([0-9\.]+)(.*)")
 reE = re.compile("(.*[eE])([0-9\.]+)(.*)")
 
+class LegendDlg(wx.Frame):
+	def __init__(self, parent):
+		wx.Frame.__init__(self, parent, wx.ID_ANY, size=(500, 500))
+		self.SetBackgroundColour(wx.Colour(255, 255, 255))
+		self.Bind(wx.EVT_CLOSE, self.onClose)
+		
+		lFont = wx.Font(16, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+				
+		sz = wx.BoxSizer(wx.VERTICAL)
+		sz.AddSpacer((20, 20))
+		
+		st = wx.StaticText(self, wx.ID_ANY, "Print Speed < 20 mm/s")
+		st.SetForegroundColour(PRINTCOLOR[0])
+		st.SetFont(lFont)
+		sz.Add(st)
+		sz.AddSpacer((10, 10))
+		
+		st = wx.StaticText(self, wx.ID_ANY, "Print Speed < 40 mm/s")
+		st.SetForegroundColour(PRINTCOLOR[1])
+		st.SetFont(lFont)
+		sz.Add(st)
+		sz.AddSpacer((10, 10))
+		
+		st = wx.StaticText(self, wx.ID_ANY, "Print Speed < 60 mm/s")
+		st.SetForegroundColour(PRINTCOLOR[2])
+		st.SetFont(lFont)
+		sz.Add(st)
+		sz.AddSpacer((10, 10))
+		
+		st = wx.StaticText(self, wx.ID_ANY, "Print Speed >= 60 mm/s")
+		st.SetForegroundColour(PRINTCOLOR[3])
+		st.SetFont(lFont)
+		sz.Add(st)
+		sz.AddSpacer((20, 20))
+		
+		st = wx.StaticText(self, wx.ID_ANY, "Retractions")
+		st.SetForegroundColour(RETRACTIONCOLOR)
+		st.SetFont(lFont)
+		sz.Add(st)
+		sz.AddSpacer((10, 10))
+		
+		st = wx.StaticText(self, wx.ID_ANY, "Reverse Retractions")
+		st.SetForegroundColour(REVRETRACTIONCOLOR)
+		st.SetFont(lFont)
+		sz.Add(st)
+		
+		sz.AddSpacer((20, 20))
+		
+		hsz = wx.BoxSizer(wx.HORIZONTAL)
+		hsz.AddSpacer((20, 20))
+		hsz.Add(sz)
+		hsz.AddSpacer((20, 20))
+		
+		self.SetSizer(hsz)
+		
+		self.Layout()
+		self.Fit()
+		self.Show()
+
+	def onClose(self, evt):
+		self.parent.legendClosed()
+		self.Destroy()
 
 class GEditDlg(wx.Frame):
 	def __init__(self, parent):
@@ -45,6 +108,7 @@ class GEditDlg(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.settings = Settings(cmdFolder)
 		self.propDlg = None
+		self.legend = None
 		
 		self.log = self.parent.log
 		
@@ -124,6 +188,11 @@ class GEditDlg(wx.Frame):
 		self.bInfo.SetToolTipString("Information")
 		self.Bind(wx.EVT_BUTTON, self.onInfo, self.bInfo)
 		self.bInfo.Enable(False)
+		
+		self.bLegend = wx.BitmapButton(self, wx.ID_ANY, self.images.pngInfo, size=BUTTONDIM)
+		self.bLegend.SetToolTipString("Display a color legend")
+		self.Bind(wx.EVT_BUTTON, self.onLegend, self.bLegend)
+		self.bLegend.Enable(True)
 		
 		self.bSaveLayers = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSavelayers, size=BUTTONDIM)
 		self.bSaveLayers.SetToolTipString("Save specific layers to a file")
@@ -226,11 +295,11 @@ class GEditDlg(wx.Frame):
 		btnszr.Add(self.bEdit)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bInfo)
-		btnszr.AddSpacer((30, 10))
-		
+		btnszr.AddSpacer((10, 10))
+		btnszr.Add(self.bLegend)
 		btnszr.AddSpacer((20, 10))
 		btnszr.Add(self.bSaveLayers)
-		btnszr.AddSpacer((20, 10))
+		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bOpen)
 		btnszr.AddSpacer((10, 10))
 		btnszr.Add(self.bImport)
@@ -331,6 +400,17 @@ class GEditDlg(wx.Frame):
 		
 		if self.gObj is not None:
 			self.enableButtons()
+			
+	def onLegend(self, evt):
+		if self.legend is None:
+			self.legend = LegendDlg(self)
+			self.legend.Show()
+		else:
+			self.legend.Show()
+			self.legend.Raise()
+			
+	def legendClosed(self):
+		self.legend = None
 			
 	def setImportFile(self, fn):
 		self.importFileName = fn
