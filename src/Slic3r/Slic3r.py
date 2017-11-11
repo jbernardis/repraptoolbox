@@ -145,7 +145,7 @@ class Slic3rDlg(wx.Frame):
 		self.tcStl = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
-		self.bOpen.SetToolTipString("Select an STL file for slicing")
+		self.bOpen.SetToolTip("Select an STL file for slicing")
 		self.Bind(wx.EVT_BUTTON, self.onBOpen, self.bOpen)
 		
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
@@ -155,29 +155,29 @@ class Slic3rDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onBImportFromQueue, self.bImportQ)
 		
 		self.cbGcDir = wx.CheckBox(self, wx.ID_ANY, "Use STL directory for G Code file")
-		self.cbGcDir.SetToolTipString("Use the directory from the STL file for the resulting G Code file")
+		self.cbGcDir.SetToolTip("Use the directory from the STL file for the resulting G Code file")
 		self.cbGcDir.SetValue(self.settings.usestldir)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbGcDir, self.cbGcDir)
 
 		self.tcGcDir = wx.TextCtrl(self, wx.ID_ANY, "", size=(330, -1), style=wx.TE_READONLY)
 		self.bGcDir = wx.Button(self, wx.ID_ANY, "...", size=(30, 22))
 		self.bGcDir.Enable(not self.settings.usestldir)
-		self.bGcDir.SetToolTipString("Choose G Code directory")
+		self.bGcDir.SetToolTip("Choose G Code directory")
 		self.Bind(wx.EVT_BUTTON, self.onBGcDir, self.bGcDir)
 		
 		self.tcGc = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
-		self.bExport.SetToolTipString("Export G Code file to toolbox")
+		self.bExport.SetToolTip("Export G Code file to toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onBExport, self.bExport)
 		
 		self.cbAutoExport = wx.CheckBox(self, wx.ID_ANY, "Auto-export")
-		self.cbAutoExport.SetToolTipString("Automatically export the G code file when finished")
+		self.cbAutoExport.SetToolTip("Automatically export the G code file when finished")
 		self.Bind(wx.EVT_CHECKBOX, self.onAutoExport, self.cbAutoExport)
 		self.cbAutoExport.SetValue(self.settings.autoexport)
 		
 		self.cbAutoEnqueue = wx.CheckBox(self, wx.ID_ANY, "Auto-enqueue")
-		self.cbAutoEnqueue.SetToolTipString("Automatically enqueue the G code file when exporting")
+		self.cbAutoEnqueue.SetToolTip("Automatically enqueue the G code file when exporting")
 		self.Bind(wx.EVT_CHECKBOX, self.onAutoEnqueue, self.cbAutoEnqueue)
 		self.cbAutoEnqueue.SetValue(self.settings.autoenqueue)
 		
@@ -212,48 +212,48 @@ class Slic3rDlg(wx.Frame):
 		self.updateFileDisplay()
 
 		szStl = wx.BoxSizer(wx.VERTICAL)
-		szStl.AddSpacer((5, 5))
+		szStl.AddSpacer(5)
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		hsz.AddSpacer((10, 10))
+		hsz.AddSpacer(10)
 		hsz.Add(self.tcStl)
-		hsz.AddSpacer((10, 10))
+		hsz.AddSpacer(10)
 		szStl.Add(hsz)
-		szStl.AddSpacer((10, 10))
+		szStl.AddSpacer(10)
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		hsz.AddSpacer((10, 10))
+		hsz.AddSpacer(10)
 		hsz.Add(self.bOpen)
-		hsz.AddSpacer((5, 5))
+		hsz.AddSpacer(5)
 		hsz.Add(self.bImport)
-		hsz.AddSpacer((5, 5))
+		hsz.AddSpacer(5)
 		hsz.Add(self.bImportQ)
 		szStl.Add(hsz)
 
 		szUseStl = wx.BoxSizer(wx.HORIZONTAL)
-		szUseStl.AddSpacer((20, 10))
+		szUseStl.AddSpacer(20)
 		szUseStl.Add(self.cbGcDir)
 		
 		szGcDir = wx.BoxSizer(wx.HORIZONTAL)
-		szGcDir.AddSpacer((10, 10))
+		szGcDir.AddSpacer(10)
 		szGcDir.Add(self.tcGcDir)
-		szGcDir.AddSpacer((10, 10))
+		szGcDir.AddSpacer(10)
 		szGcDir.Add(self.bGcDir)
-		szGcDir.AddSpacer((10, 10))
+		szGcDir.AddSpacer(10)
 
 		szGc = wx.BoxSizer(wx.VERTICAL)
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGcH.Add(self.tcGc, 1, wx.TOP, 8)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGcH.Add(self.bExport)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGc.Add(szGcH)
 		
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((50, 10))
+		szGcH.AddSpacer(50)
 		szGcH.Add(self.cbAutoExport)
-		szGcH.AddSpacer((30, 10))
+		szGcH.AddSpacer(30)
 		szGcH.Add(self.cbAutoEnqueue)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGc.Add(szGcH)
 
 		szCfgL = wx.BoxSizer(wx.VERTICAL)
@@ -262,7 +262,7 @@ class Slic3rDlg(wx.Frame):
 		szCfgL.Add(wx.StaticText(self, wx.ID_ANY, "Print:"))
 		szCfgL.Add(self.chPrint)
 		
-		szCfgL.AddSpacer((20, 20))
+		szCfgL.AddSpacer(20)
 		szCfgL.Add(wx.StaticText(self, wx.ID_ANY, "Printer:"))
 		szCfgL.Add(self.chPrinter)
 
@@ -272,22 +272,22 @@ class Slic3rDlg(wx.Frame):
 			
 		szCfg = wx.BoxSizer(wx.HORIZONTAL)
 		szCfg.Add(szCfgL)
-		szCfg.AddSpacer((50, 20))
+		szCfg.AddSpacer(50)
 		szCfg.Add(szCfgR)
 		
 		szOverRide = wx.BoxSizer(wx.HORIZONTAL)
 		
 		self.bOverRide = wx.BitmapButton(self, wx.ID_ANY, self.images.pngOverride, size=BUTTONDIM)
-		self.bOverRide.SetToolTipString("Modify slic3r over-rides")
+		self.bOverRide.SetToolTip("Modify slic3r over-rides")
 		self.Bind(wx.EVT_BUTTON, self.doOverRide, self.bOverRide)
 		szOverRide.Add(self.bOverRide, 0, wx.ALIGN_CENTER_VERTICAL, 1)
-		szOverRide.AddSpacer((10, 10))
+		szOverRide.AddSpacer(10)
 
 		self.cbOverRide = wx.CheckBox(self, wx.ID_ANY, "Apply Over-Rides")
-		self.cbOverRide.SetToolTipString("Apply over ride values to the slice operation")
+		self.cbOverRide.SetToolTip("Apply over ride values to the slice operation")
 		self.cbOverRide.SetValue(False)
 		szOverRide.Add(self.cbOverRide, 0, wx.ALIGN_CENTER_VERTICAL, 1)
-		szOverRide.AddSpacer((10, 10))
+		szOverRide.AddSpacer(10)
 		
 		self.tcOverRide = wx.TextCtrl(self, wx.ID_ANY, size=(300, 140), style=wx.TE_MULTILINE|wx.TE_RICH2|wx.TE_READONLY)
 		szOverRide.Add(self.tcOverRide)
@@ -298,65 +298,65 @@ class Slic3rDlg(wx.Frame):
 		szButton = wx.BoxSizer(wx.HORIZONTAL)
 		
 		self.bSlice = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlice, size=BUTTONDIM)
-		self.bSlice.SetToolTipString("Slice the file using Slic3r")
+		self.bSlice.SetToolTip("Slice the file using Slic3r")
 		self.Bind(wx.EVT_BUTTON, self.onBSlice, self.bSlice)
 		szButton.Add(self.bSlice)
 		
-		szButton.AddSpacer((100, 10))
+		szButton.AddSpacer(100)
 		
 		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlic3r, size=BUTTONDIM)
-		self.bConfig.SetToolTipString("Load slic3r to modify configurations")
+		self.bConfig.SetToolTip("Load slic3r to modify configurations")
 		self.Bind(wx.EVT_BUTTON, self.onConfig, self.bConfig)
 		szButton.Add(self.bConfig)
 		
-		szButton.AddSpacer((20, 20))
+		szButton.AddSpacer(20)
 		
 		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRefresh, size=BUTTONDIM)
-		self.bRefresh.SetToolTipString("Refresh dialog box from slic3r configuration files")
+		self.bRefresh.SetToolTip("Refresh dialog box from slic3r configuration files")
 		self.Bind(wx.EVT_BUTTON, self.onRefresh, self.bRefresh)
 		szButton.Add(self.bRefresh)
 		
 		self.enableButtons()
 		
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.AddSpacer((5, 5))
+		sizer.AddSpacer(5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "STL File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		bsizer.Add(szStl)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code Directory")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		bsizer.Add(szUseStl)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		bsizer.Add(szGcDir)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		bsizer.Add(szGc)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "Slic3r Configuration")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		bsizer.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		bsizer.Add(szOverRide, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		bsizer.AddSpacer((5, 5))
+		bsizer.AddSpacer(5)
 		sizer.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 5)
 
 		sizer.Add(self.tcLog, flag=wx.EXPAND | wx.ALL, border=5)
-		sizer.AddSpacer((5, 5))
+		sizer.AddSpacer(5)
 		sizer.Add(szButton, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((5, 5))
+		sizer.AddSpacer(5)
 		
 		self.SetSizer(sizer)
 		self.Fit()
@@ -365,18 +365,18 @@ class Slic3rDlg(wx.Frame):
 			
 	def setImportButton(self, msg):
 		if msg is None:
-			self.bImportQ.SetToolTipString("")
+			self.bImportQ.SetToolTip("")
 			self.bImportQ.Enable(False)
 		else:
-			self.bImportQ.SetToolTipString(msg)
+			self.bImportQ.SetToolTip(msg)
 			self.bImportQ.Enable(True)
 			
 	def setImportFile(self, fn):
 		if fn is None:
-			self.bImport.SetToolTipString("")
+			self.bImport.SetToolTip("")
 			self.bImport.Enable(False)
 		else:
-			self.bImport.SetToolTipString("Import model file (%s)" % fn)
+			self.bImport.SetToolTip("Import model file (%s)" % fn)
 			self.bImport.Enable(True)
 		
 	def getExtruderCount(self, cfgfn):
@@ -586,7 +586,7 @@ class Slic3rDlg(wx.Frame):
 			defaultDir=self.settings.laststldirectory, 
 			defaultFile="",
 			wildcard=wildcard,
-			style=wx.OPEN)
+			style=wx.FD_OPEN)
 
 		rc = dlg.ShowModal()
 		if rc == wx.ID_OK:

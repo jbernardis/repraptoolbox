@@ -88,10 +88,10 @@ class GcodeListCtrl(wx.ListCtrl):
 		
 	def doListSelect(self, evt):
 		x = self.selectedItem
-		self.selectedItem = evt.m_itemIndex
+		self.selectedItem = evt.GetIndex()
 		if x is not None:
 			self.RefreshItem(x)
-		self.parent.reportSelectedLine(self.startLine+evt.m_itemIndex)
+		self.parent.reportSelectedLine(self.startLine+evt.GetIndex())
 		
 	def getSelectedLine(self):
 		if self.selectedItem is None:

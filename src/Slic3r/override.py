@@ -100,7 +100,7 @@ class Slic3rOverRideDlg(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.doClose)
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
-		sz.AddSpacer((10, 10))
+		sz.AddSpacer(10)
 		
 		self.cbs = {}
 		self.tcs = {}
@@ -125,7 +125,7 @@ class Slic3rOverRideDlg(wx.Frame):
 		
 		for tag in ovOrder:
 			hsz = wx.BoxSizer(wx.HORIZONTAL)
-			hsz.AddSpacer((10, 10))
+			hsz.AddSpacer(10)
 			
 			fld = ovData[tag]
 			
@@ -142,7 +142,7 @@ class Slic3rOverRideDlg(wx.Frame):
 			hsz.Add(tc)
 			ht = fld.getHelpText()
 			if ht is not None:
-				tc.SetToolTipString(ht)
+				tc.SetToolTip(ht)
 
 			self.tcs[tag] = tc
 			if cb.IsChecked():
@@ -157,24 +157,24 @@ class Slic3rOverRideDlg(wx.Frame):
 			units = fld.getUnits()				
 			if not units is None:
 				st = wx.StaticText(self, wx.ID_ANY, units)
-				hsz.AddSpacer((10, 10))
+				hsz.AddSpacer(10)
 				hsz.Add(st, 1, wx.TOP, int(HT/5.0))
-				hsz.AddSpacer((5, 5))
+				hsz.AddSpacer(5)
 				
-			hsz.AddSpacer((10, 10))
+			hsz.AddSpacer(10)
 			
 			sz.Add(hsz)
-			sz.AddSpacer((2, 2))
+			sz.AddSpacer(2)
 			
-		sz.AddSpacer((20, 20))
+		sz.AddSpacer(20)
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
 		
 		hsz.Add(self.bSave)
-		hsz.AddSpacer((20, 20))
+		hsz.AddSpacer(20)
 		hsz.Add(self.bExit)
 		
 		sz.Add(hsz, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sz.AddSpacer((20, 20))
+		sz.AddSpacer(20)
 		
 		self.SetSizer(sz)
 		self.Layout()

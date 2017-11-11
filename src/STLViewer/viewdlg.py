@@ -308,46 +308,46 @@ class StlViewDlg(wx.Frame):
 		self.gl = StlCanvas(self)
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		glsizer = wx.BoxSizer(wx.HORIZONTAL)
-		glsizer.AddSpacer((10, 10))
+		glsizer.AddSpacer(10)
 		glsizer.Add(self.gl)
-		glsizer.AddSpacer((10, 10))
+		glsizer.AddSpacer(10)
 		sizer.Add(glsizer)
 		
 		bsizer = wx.BoxSizer(wx.HORIZONTAL)
 
 		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
-		self.bOpen.SetToolTipString("Open an STL file for viewing")
+		self.bOpen.SetToolTip("Open an STL file for viewing")
 		self.Bind(wx.EVT_BUTTON, self.onOpen, self.bOpen)
 		bsizer.Add(self.bOpen)
 		
-		bsizer.AddSpacer((20, 20))
+		bsizer.AddSpacer(20)
 		
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
-		self.bImport.SetToolTipString("Import the current STL file from the toolbox for viewing")
+		self.bImport.SetToolTip("Import the current STL file from the toolbox for viewing")
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
 		self.bImport.Enable(False)
 		bsizer.Add(self.bImport)
 		
-		bsizer.AddSpacer((20, 20))
+		bsizer.AddSpacer(20)
 		
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
-		self.bExport.SetToolTipString("Export the current STL file to the toolbox for downstream")
+		self.bExport.SetToolTip("Export the current STL file to the toolbox for downstream")
 		self.Bind(wx.EVT_BUTTON, self.onExport, self.bExport)
 		self.bExport.Enable(False)
 		bsizer.Add(self.bExport)
 		
-		bsizer.AddSpacer((20, 20))
+		bsizer.AddSpacer(20)
 		
 		self.cbEnqueue = wx.CheckBox(self, wx.ID_ANY, "Enqueue STL file")
-		self.cbEnqueue.SetToolTipString("Enqueue the current STL file to the end of the slice queue")
+		self.cbEnqueue.SetToolTip("Enqueue the current STL file to the end of the slice queue")
 		self.Bind(wx.EVT_CHECKBOX, self.onEnqueue, self.cbEnqueue)
 		self.cbEnqueue.SetValue(self.settings.autoenqueue)
 		self.cbEnqueue.Enable(True)
 		bsizer.Add(self.cbEnqueue, 1, wx.TOP, 12)
 		
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		sizer.Add(bsizer, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		
 		self.setTitle()
 		self.SetSizer(sizer)
@@ -355,10 +355,10 @@ class StlViewDlg(wx.Frame):
 			
 	def setImportFile(self, fn):
 		if fn is None:
-			self.bImport.SetToolTipString("")
+			self.bImport.SetToolTip("")
 			self.bImport.Enable(False)
 		else:
-			self.bImport.SetToolTipString("Import model file (%s)" % fn)
+			self.bImport.SetToolTip("Import model file (%s)" % fn)
 			self.bImport.Enable(True)
 		
 	def setTitle(self):
@@ -404,7 +404,7 @@ class StlViewDlg(wx.Frame):
 			defaultDir=self.settings.lastdirectory, 
 			defaultFile="",
 			wildcard=wildcard,
-			style=wx.OPEN)
+			style=wx.FD_OPEN)
 
 		rc = dlg.ShowModal()
 		if rc == wx.ID_OK:

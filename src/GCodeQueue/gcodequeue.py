@@ -166,74 +166,74 @@ class GCodeQueueDlg(wx.Frame):
 		self.settings = Settings(cmdFolder)
 
 		dsizer = wx.BoxSizer(wx.VERTICAL)
-		dsizer.AddSpacer((10, 10))
+		dsizer.AddSpacer(10)
 		
 		lbsizer = wx.BoxSizer(wx.HORIZONTAL)
-		lbsizer.AddSpacer((10, 10))
+		lbsizer.AddSpacer(10)
 		self.lbQueue = GCodeQueueListCtrl(self, self.gq, self.images, self.settings.showgcodebasename)
 		lbsizer.Add(self.lbQueue);
-		lbsizer.AddSpacer((10, 10))
+		lbsizer.AddSpacer(10)
 		
 		lbbtns = wx.BoxSizer(wx.VERTICAL)
-		lbbtns.AddSpacer((10, 10))
+		lbbtns.AddSpacer(10)
 		self.bAdd = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAdd, size=BUTTONDIM)
-		self.bAdd.SetToolTipString("Add new files to the gcode queue")
+		self.bAdd.SetToolTip("Add new files to the gcode queue")
 		self.Bind(wx.EVT_BUTTON, self.doAdd, self.bAdd)
 		lbbtns.Add(self.bAdd)
 		
 		self.bDel = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDel, size=BUTTONDIM)
-		self.bDel.SetToolTipString("Remove selected file(s) from the queue")
+		self.bDel.SetToolTip("Remove selected file(s) from the queue")
 		lbbtns.Add(self.bDel)
 		self.Bind(wx.EVT_BUTTON, self.doDel, self.bDel)
 		self.bDel.Enable(False)
 		
-		lbbtns.AddSpacer((20, 20))
+		lbbtns.AddSpacer(20)
 		
 		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp, size=BUTTONDIM)
-		self.bUp.SetToolTipString("Move selected item up in queue")
+		self.bUp.SetToolTip("Move selected item up in queue")
 		lbbtns.Add(self.bUp)
 		self.Bind(wx.EVT_BUTTON, self.doUp, self.bUp)
 		self.bUp.Enable(False)
 		
 		self.bDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDown, size=BUTTONDIM)
-		self.bDown.SetToolTipString("Move selected item down in queue")
+		self.bDown.SetToolTip("Move selected item down in queue")
 		lbbtns.Add(self.bDown)
 		self.Bind(wx.EVT_BUTTON, self.doDown, self.bDown)
 		self.bDown.Enable(False)
 		
-		lbbtns.AddSpacer((20, 20))
+		lbbtns.AddSpacer(20)
 		
 		self.bView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngView, size=BUTTONDIM)
-		self.bView.SetToolTipString("View G Code file")
+		self.bView.SetToolTip("View G Code file")
 		lbbtns.Add(self.bView)
 		self.Bind(wx.EVT_BUTTON, self.gcodeView, self.bView)
 		self.bView.Enable(False)
 		
 		lbsizer.Add(lbbtns)
-		lbsizer.AddSpacer((10, 10))
+		lbsizer.AddSpacer(10)
 		
 		dsizer.Add(lbsizer)
-		dsizer.AddSpacer((10,10))
+		dsizer.AddSpacer(10)
 		
 		btnsizer = wx.BoxSizer(wx.HORIZONTAL)
 		
 		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngOk, size=BUTTONDIM)
-		self.bSave.SetToolTipString("Save changes to queue")
+		self.bSave.SetToolTip("Save changes to queue")
 		btnsizer.Add(self.bSave)
 		self.Bind(wx.EVT_BUTTON, self.doSave, self.bSave)
 		self.bSave.Enable(False)
 		
-		btnsizer.AddSpacer((20, 20))
+		btnsizer.AddSpacer(20)
 
 		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCancel, size=BUTTONDIM)
-		self.bCancel.SetToolTipString("Exit without saving")
+		self.bCancel.SetToolTip("Exit without saving")
 		btnsizer.Add(self.bCancel)
 		self.Bind(wx.EVT_BUTTON, self.doCancel, self.bCancel)
 		
-		btnsizer.AddSpacer((20, 20))
+		btnsizer.AddSpacer(20)
 		
 		self.cbBasename = wx.CheckBox(self, wx.ID_ANY, "Show basename only")
-		self.cbBasename.SetToolTipString("Show only the basename of files")
+		self.cbBasename.SetToolTip("Show only the basename of files")
 		self.Bind(wx.EVT_CHECKBOX, self.checkBasename, self.cbBasename)
 		self.cbBasename.SetValue(self.settings.showgcodebasename)
 		btnsizer.Add(self.cbBasename, 1, wx.TOP, 15)
@@ -253,7 +253,7 @@ class GCodeQueueDlg(wx.Frame):
 						defaultDir=self.settings.lastgcodedirectory, 
 						defaultFile="",
 						wildcard=wildcard,
-						style=wx.OPEN | wx.MULTIPLE | wx.CHANGE_DIR)
+						style=wx.FD_OPEN | wx.FD_MULTIPLE | wx.FD_CHANGE_DIR)
 
 		if dlg.ShowModal() == wx.ID_OK:
 			paths = dlg.GetPaths()
@@ -410,7 +410,7 @@ class GCodeQueueListCtrl(wx.ListCtrl):
 		
 	def doListSelect(self, evt):
 		x = self.selectedItem
-		self.selectedItem = evt.m_itemIndex
+		self.selectedItem = evt.GetIndex()
 		if x is not None:
 			self.RefreshItem(x)
 		if self.selectedItem is not None:

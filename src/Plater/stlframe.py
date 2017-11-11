@@ -274,7 +274,7 @@ class StlFrame (wx.Window):
 		return matchHull
 		
 	def onLeftDown(self, evt):
-		pos = evt.GetPositionTuple()
+		pos = evt.GetPosition()
 		x, y = screenToWorld(pos[0], pos[1])
 		self.startPos = [x, y]
 		h = self.findClosest(x, y)
@@ -291,7 +291,7 @@ class StlFrame (wx.Window):
 		if self.selectedHull is None:
 			return
 		
-		pos = evt.GetPositionTuple()
+		pos = evt.GetPosition()
 		x, y = screenToWorld(pos[0], pos[1])
 		h = self.selectedHull
 		h.translate(x-h.centerx, y-h.centery)
@@ -304,7 +304,7 @@ class StlFrame (wx.Window):
 			
 	def onMotion(self, evt):
 		if evt.Dragging() and evt.LeftIsDown() and self.startPos != None:
-			pos = evt.GetPositionTuple()
+			pos = evt.GetPosition()
 			x, y = screenToWorld(pos[0], pos[1])
 			dx = x - self.startPos[0]
 			dy = y - self.startPos[1]
@@ -475,7 +475,7 @@ class StlFrame (wx.Window):
 		
 	def initBuffer(self):
 		w, h = self.GetClientSize();
-		self.buffer = wx.EmptyBitmap(w, h)
+		self.buffer = wx.Bitmap(w, h)
 		self.refresh()
 		
 	def refresh(self):

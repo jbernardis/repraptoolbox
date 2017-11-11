@@ -218,7 +218,7 @@ class EditGCodeDlg(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.doCancel, btn)
 		self.Bind(wx.EVT_CLOSE, self.doCancel)
 		
-		btnsizer.AddSpacer((DLGWIDTH-360, 10))
+		btnsizer.AddSpacer(DLGWIDTH-360)
 		self.font12bold = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 		self.stPosition = wx.StaticText(self, wx.ID_ANY, "(0, 0)")
 		self.stPosition.SetFont(self.font12bold)

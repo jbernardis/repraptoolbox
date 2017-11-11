@@ -94,7 +94,7 @@ class GcFrame (wx.Window):
 		dc = wx.BufferedPaintDC(self, self.buffer)  # @UnusedVariable
 		
 	def onLeftDown(self, evt):
-		self.startPos = evt.GetPositionTuple()
+		self.startPos = evt.GetPosition()
 		self.startOffset = (self.offsetx, self.offsety)
 		self.CaptureMouse()
 		self.SetFocus()
@@ -105,7 +105,7 @@ class GcFrame (wx.Window):
 			
 	def onMotion(self, evt):
 		if evt.Dragging() and evt.LeftIsDown():
-			x, y = evt.GetPositionTuple()
+			x, y = evt.GetPosition()
 			dx = x - self.startPos[0]
 			dy = y - self.startPos[1]
 			self.offsetx = self.startOffset[0] - dx/(2*self.zoom)
@@ -165,7 +165,7 @@ class GcFrame (wx.Window):
 
 	def initBuffer(self):
 		w, h = self.GetClientSize();
-		self.buffer = wx.EmptyBitmap(w, h)
+		self.buffer = wx.Bitmap(w, h)
 		self.redrawCurrentLayer()
 		
 	def setLayer(self, lyr):

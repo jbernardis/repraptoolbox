@@ -27,7 +27,7 @@ class Heaters(wx.Window):
 		
 		self.bedInfo = HeaterInfo("Bed", None, self.settings.bedinfo)
 		self.hBed = Heater(self, self.bedInfo, self.reprap)
-		szHeaters.AddSpacer((5, 5))
+		szHeaters.AddSpacer(5)
 		szHeaters.Add(self.hBed)
 
 		self.hHEs = []
@@ -42,12 +42,12 @@ class Heaters(wx.Window):
 
 			hi = HeaterInfo(title, tool, self.settings.heinfo)	
 			h = Heater(self, hi, self.reprap)
-			szHeaters.AddSpacer((5, 5))
+			szHeaters.AddSpacer(5)
 			szHeaters.Add(h)
 			self.hHEs.append(h)
 			self.hHEInfo.append(hi)
 		
-		szHeaters.AddSpacer((5, 5))
+		szHeaters.AddSpacer(5)
 		self.SetSizer(szHeaters)
 		self.Layout()
 		self.Fit()
@@ -101,16 +101,16 @@ class Heater(wx.Window):
 		
 		t = wx.StaticText(self, wx.ID_ANY, "%s:" % hi.name, size=(50, -1), style=wx.ALIGN_RIGHT)
 		t.SetFont(self.font12bold)
-		szHeater.AddSpacer((10, 10))
+		szHeater.AddSpacer(10)
 		szHeater.Add(t, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 		
-		szHeater.AddSpacer((10, 10))
+		szHeater.AddSpacer(10)
 		
 		self.sbIndicator = wx.StaticBitmap(self, wx.ID_ANY, self.images.pngLedoff)
 		szHeater.Add(self.sbIndicator, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 		
 		self.bPower = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHeatoff, size=BUTTONDIM, style = wx.NO_BORDER)
-		self.bPower.SetToolTipString("Turn heater on/off")
+		self.bPower.SetToolTip("Turn heater on/off")
 		self.Bind(wx.EVT_BUTTON, self.onBPower, self.bPower)
 		szHeater.Add(self.bPower)
 		
@@ -129,35 +129,35 @@ class Heater(wx.Window):
 		self.slThermostat = wx.Slider(self, wx.ID_ANY, value=self.lowpreset, size=(180, -1),
 				minValue=self.mintemp, maxValue=self.maxtemp,
 				style=wx.SL_HORIZONTAL | wx.SL_VALUE_LABEL)
-		self.slThermostat.SetToolTipString("Choose temperature setting for heater")
+		self.slThermostat.SetToolTip("Choose temperature setting for heater")
 		szHeater.Add(self.slThermostat, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 		self.Bind(wx.EVT_SCROLL, self.doThermostat, self.slThermostat)
 		
-		szHeater.AddSpacer((10, 10))
+		szHeater.AddSpacer(10)
 		
 		self.bLowPreset = wx.Button(self, wx.ID_ANY, "%d" % self.lowpreset, size=(40, 22))
-		self.bLowPreset.SetToolTipString("Set heater to low preset value")
+		self.bLowPreset.SetToolTip("Set heater to low preset value")
 		self.Bind(wx.EVT_BUTTON, self.doLowPreset, self.bLowPreset)
 		self.bHighPreset = wx.Button(self, wx.ID_ANY, "%d" % self.highpreset, size=(40, 22))
-		self.bHighPreset.SetToolTipString("Set heater to high preset value")
+		self.bHighPreset.SetToolTip("Set heater to high preset value")
 		self.Bind(wx.EVT_BUTTON, self.doHighPreset, self.bHighPreset)
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
-		sz.AddSpacer((3,3))
+		sz.AddSpacer(3)
 		sz.Add(self.bHighPreset)
 		sz.Add(self.bLowPreset)
 		
 		szHeater.Add(sz)
 		
-		szHeater.AddSpacer((10, 10))
+		szHeater.AddSpacer(10)
 		
 		self.bExtract = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
-		self.bExtract.SetToolTipString("Extract temperature setting from G Code")
+		self.bExtract.SetToolTip("Extract temperature setting from G Code")
 		self.Bind(wx.EVT_BUTTON, self.onBExtract, self.bExtract)
 		szHeater.Add(self.bExtract)
 		self.bExtract.Enable(False)
 		
-		szHeater.AddSpacer((10, 10))
+		szHeater.AddSpacer(10)
 		
 		self.SetSizer(szHeater)
 		self.Layout()

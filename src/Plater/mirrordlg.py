@@ -12,29 +12,29 @@ class MirrorDlg(wx.Dialog):
 		
 		bX = wx.BitmapButton(self, wx.ID_ANY, images.pngXaxis, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbX, bX)
-		bX.SetToolTipString("Mirror on YZ plane")
+		bX.SetToolTip("Mirror on YZ plane")
 		sizer.Add(bX)
 		
 		bY = wx.BitmapButton(self, wx.ID_ANY, images.pngYaxis, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbY, bY)
-		bY.SetToolTipString("Mirror on XZ plane")
+		bY.SetToolTip("Mirror on XZ plane")
 		sizer.Add(bY)
 		
 		bZ = wx.BitmapButton(self, wx.ID_ANY, images.pngZaxis, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbZ, bZ)
-		bZ.SetToolTipString("Mirror on XY plane")
+		bZ.SetToolTip("Mirror on XY plane")
 		sizer.Add(bZ)
 		
 		bView = wx.BitmapButton(self, wx.ID_ANY, images.pngView, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbView, bView)
-		bView.SetToolTipString("3D view of the object")
-		sizer.AddSpacer((20, 20))
+		bView.SetToolTip("3D view of the object")
+		sizer.AddSpacer(20)
 		sizer.Add(bView)
 		
 		bExit = wx.BitmapButton(self, wx.ID_ANY, images.pngExit, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbExit, bExit)
-		bExit.SetToolTipString("Dismiss dialog")
-		sizer.AddSpacer((20, 20))
+		bExit.SetToolTip("Dismiss dialog")
+		sizer.AddSpacer(20)
 		sizer.Add(bExit)
 		
 		self.SetSizer(sizer)

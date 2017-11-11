@@ -3,7 +3,7 @@ import wx.lib.newevent
 import ConfigParser
 
 (FirmwareEvent, EVT_FIRMWARE) = wx.lib.newevent.NewEvent()
-wildcard="Firmware Files (*.fw)|*.fw;*.FW|All Files (*.*)|*.*"
+wildcard="Firmware Files (*.eep)|*.eep;*.FW|All Files (*.*)|*.*"
 
 
 grpinfoBase = {'m92' : ['Steps per Unit - M92', 4, ['x', 'y', 'z', 'e'], ['X Steps', 'Y Steps', 'Z Steps', 'E Steps']],
@@ -329,7 +329,7 @@ class FirmwareDlg(wx.Dialog):
 				
 				tv = wx.TextCtrl(self, wx.ID_ANY, "", style=wx.TE_CENTER, size=(140, 25))
 				tv.SetFont(font)
-				tv.SetToolTipString(grpinfo[g][3][i])
+				tv.SetToolTip(grpinfo[g][3][i])
 				self.sizer.Add(tv, pos=(row+i, 3), flag=wx.EXPAND)
 				
 				b = wx.Button(self, btnBase+row+i, "-->")
@@ -359,7 +359,7 @@ class FirmwareDlg(wx.Dialog):
 
 		btnSizer = wx.BoxSizer(wx.VERTICAL)
 
-		btnSizer.AddSpacer((10, 40))
+		btnSizer.AddSpacer(40)
 
 		self.buttons = []		
 		btn = wx.Button(self, wx.ID_ANY, "Load Profile", size=BSIZE)
@@ -372,7 +372,7 @@ class FirmwareDlg(wx.Dialog):
 		btnSizer.Add(btn, 0, wx.ALL, 10)
 		self.buttons.append(btn)
 		
-		btnSizer.AddSpacer((10, 100))
+		btnSizer.AddSpacer(100)
 		
 		btn = wx.Button(self, wx.ID_ANY, "All -> FLASH", size=BSIZE)
 		self.Bind(wx.EVT_BUTTON, self.onCopyAllToFlash, btn)
@@ -394,7 +394,7 @@ class FirmwareDlg(wx.Dialog):
 		btnSizer.Add(btn, 0, wx.ALL, 10)
 		self.buttons.append(btn)
 		
-		btnSizer.AddSpacer((10, 100))
+		btnSizer.AddSpacer(100)
 		
 		btn = wx.Button(self, wx.ID_ANY, "Close", size=BSIZE)
 		self.Bind(wx.EVT_BUTTON, self.onClose, btn)
@@ -402,7 +402,7 @@ class FirmwareDlg(wx.Dialog):
 		self.buttons.append(btn)
 		
 		self.sizer.Add(btnSizer, pos=(0,0), span=(row,1))
-		self.sizer.AddSpacer((10, 10), pos=(row, 8))
+		self.sizer.AddSpacer(10, pos=(row, 8))
 
 		self.Bind(wx.EVT_CLOSE, self.onClose)
 		self.Bind(EVT_FIRMWARE, self.copyEEPromToFlashResume)
@@ -535,7 +535,7 @@ class FirmwareDlg(wx.Dialog):
 		
 		ext = os.path.splitext(os.path.basename(path))[1]
 		if ext == "":
-			path += ".fw"
+			path += ".eep"
 			
 		msg = putFirmwareProfile(path, self.working)[1]
 		self.log(msg)

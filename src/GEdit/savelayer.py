@@ -12,7 +12,7 @@ class SaveLayerDlg(wx.Dialog):
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		
 		box = wx.BoxSizer(wx.HORIZONTAL)
-		box.AddSpacer([10, 10])
+		box.AddSpacer(10)
 		
 		self.lbStart = wx.ListBox(self, wx.ID_ANY, choices=self.layerText, style=wx.LB_SINGLE)
 		self.lbStart.SetSelection(0)
@@ -21,7 +21,7 @@ class SaveLayerDlg(wx.Dialog):
 		sbox = wx.StaticBoxSizer(b, wx.VERTICAL)
 		sbox.Add(self.lbStart)
 		box.Add(sbox)
-		box.AddSpacer((10, 10))
+		box.AddSpacer(10)
 		
 		self.lbEnd = wx.ListBox(self, wx.ID_ANY, choices=self.layerText, style=wx.LB_SINGLE)
 		self.lbEnd.SetSelection(len(self.layerText)-1)
@@ -30,29 +30,29 @@ class SaveLayerDlg(wx.Dialog):
 		sbox = wx.StaticBoxSizer(b, wx.VERTICAL)
 		sbox.Add(self.lbEnd)
 		box.Add(sbox)
-		box.AddSpacer((10, 10))
+		box.AddSpacer(10)
 		
 		vbox = wx.BoxSizer(wx.VERTICAL)
-		vbox.AddSpacer((20, 20))
+		vbox.AddSpacer(20)
 		
 		self.cbPreE = wx.CheckBox(self, wx.ID_ANY, "E Axis Reset")
 		self.cbPreE.SetValue(True)
 		vbox.Add(self.cbPreE)
-		vbox.AddSpacer((20,20))
+		vbox.AddSpacer(20)
 		
 		self.cbZModify = wx.CheckBox(self, wx.ID_ANY, "Change height by")
 		self.cbZModify.SetValue(True)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbZModify, self.cbZModify)
 		self.cbZModify.SetValue(False)
 		vbox.Add(self.cbZModify)
-		vbox.AddSpacer((10,10))
+		vbox.AddSpacer(10)
 
 		self.tcZDelta = NumCtrl(self, integerWidth=4, fractionWidth = 2)
 		self.tcZDelta.Enable(False)
 		vbox.Add(self.tcZDelta, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		
 		box.Add(vbox) #, 0, wx.GROW|wx.ALIGN_TOP)
-		box.AddSpacer([10, 10])
+		box.AddSpacer(10)
 
 		sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
@@ -66,7 +66,7 @@ class SaveLayerDlg(wx.Dialog):
 		self.Bind(wx.EVT_BUTTON, self.onOK, self.bOk)
 		btnsizer.Add(self.bOk)
 		
-		btnsizer.AddSpacer((20,20))
+		btnsizer.AddSpacer(20)
 
 		btn = wx.Button(self, wx.ID_ANY, "Cancel")
 		btn.SetHelpText("Exit without saving")

@@ -23,7 +23,7 @@ class FilamentChangeDlg(wx.Dialog):
 
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		box = wx.BoxSizer(wx.HORIZONTAL)
-		box.AddSpacer([10, 10])
+		box.AddSpacer(10)
 	
 		b = wx.StaticBox(self, wx.ID_ANY, "Parameters")
 		sbox = wx.StaticBoxSizer(b, wx.VERTICAL)
@@ -78,7 +78,7 @@ class FilamentChangeDlg(wx.Dialog):
 		
 		self.text = wx.TextCtrl(self, -1, "", size=(300, 100), style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_RICH2)
 		box.Add(self.text, 0, wx.GROW|wx.ALIGN_LEFT, 5)
-		box.AddSpacer([10, 10])
+		box.AddSpacer(10)
 
 		sizer.Add(box, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
 
@@ -88,7 +88,7 @@ class FilamentChangeDlg(wx.Dialog):
 		btn.SetHelpText("Insert the new code")
 		self.Bind(wx.EVT_BUTTON, self.onBOk, btn)
 		btnsizer.Add(btn)
-		btnsizer.AddSpacer((20, 20))
+		btnsizer.AddSpacer(20)
 
 		btn = wx.Button(self, wx.ID_ANY, "Cancel")
 		btn.SetHelpText("Exit without changing code")

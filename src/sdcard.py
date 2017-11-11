@@ -350,7 +350,7 @@ class SDChooseFileDlg(wx.Dialog):
 
 			t = wx.StaticText(self, wx.ID_ANY, text, size=sz)
 			t.SetFont(f)
-			sizer.AddSpacer((20, 20))
+			sizer.AddSpacer(20)
 			sizer.Add(t, 0, wx.LEFT | wx.ALIGN_LEFT, 5)
 			self.tbNewFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(80, -1))
 			sizer.Add(self.tbNewFile, 0, wx.ALL|wx.EXPAND|wx.ALIGN_CENTER_HORIZONTAL, 5)

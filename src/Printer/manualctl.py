@@ -42,31 +42,31 @@ class ManualCtl(wx.Window):
 		wx.Window.__init__(self, parent, wx.ID_ANY, size=(-1, -1), style=wx.SIMPLE_BORDER)		
 
 		self.axesXY = ImageMap(self, self.images.pngControl_xy)
-		self.axesXY.SetToolTipString("Move X/Y axes")
+		self.axesXY.SetToolTip("Move X/Y axes")
 		self.axesXY.setHotSpots(self.onImageClick, imageMapXY)
 		self.axisZ = ImageMap(self, self.images.pngControl_z)
-		self.axisZ.SetToolTipString("Move Z axis")
+		self.axisZ.SetToolTip("Move Z axis")
 		self.axisZ.setHotSpots(self.onImageClick, imageMapZ)
 		self.axisE = ImageMap(self, self.images.pngControl_e)
-		self.axisE.SetToolTipString("Extrude/Retract")
+		self.axisE.SetToolTip("Extrude/Retract")
 		self.axisE.setHotSpots(self.onImageClick, imageMapE)
 		self.stopMotors = ImageMap(self, self.images.pngStopmotors)
-		self.stopMotors.SetToolTipString("Stop all motors")
+		self.stopMotors.SetToolTip("Stop all motors")
 		self.stopMotors.setHotSpots(self.onImageClick, imageMapStopM)
 		
 		szWindow = wx.BoxSizer(wx.VERTICAL)
 		
 		szManualCtl = wx.BoxSizer(wx.HORIZONTAL)
-		szManualCtl.AddSpacer((20, 20))
+		szManualCtl.AddSpacer(20)
 		szManualCtl.Add(self.axesXY)
-		szManualCtl.AddSpacer((10, 10))
+		szManualCtl.AddSpacer(10)
 		szManualCtl.Add(self.axisZ)
-		szManualCtl.AddSpacer((10, 10))
+		szManualCtl.AddSpacer(10)
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
 		
 		if self.settings.nextruders > 1:
-			sz.AddSpacer((10, 10))
+			sz.AddSpacer(10)
 			self.chTool = wx.Choice(self, wx.ID_ANY, choices=["Tool %d" % i for i in range(self.settings.nextruders)])
 			self.Bind(wx.EVT_CHOICE, self.onToolChoice, self.chTool)
 			sz.Add(self.chTool)
@@ -75,23 +75,23 @@ class ManualCtl(wx.Window):
 		sz.Add(self.axisE)
 		
 		self.cbCold = wx.CheckBox(self, wx.ID_ANY, "Cold")
-		self.cbCold.SetToolTipString("Allow cold extrusion")
+		self.cbCold.SetToolTip("Allow cold extrusion")
 		sz.Add(self.cbCold, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		self.cbCold.SetValue(False)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbCold, self.cbCold)
 		
 		if self.settings.nextruders == 1:
-			sz.AddSpacer((33, 33))
+			sz.AddSpacer(33)
 			
 		sz.Add(self.stopMotors)
 		szManualCtl.Add(sz)
-		szManualCtl.AddSizer((10, 10))
+		szManualCtl.AddSpacer(10)
 
 		self.font12bold = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
 		self.font12 = wx.Font(12, wx.FONTFAMILY_SWISS, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
 		
 		self.tXYSpeed = wx.TextCtrl(self, wx.ID_ANY, str(self.settings.xyspeed), size=(80, -1), style=wx.TE_RIGHT)
-		self.tXYSpeed.SetToolTipString("Set speed of X/Y movements")
+		self.tXYSpeed.SetToolTip("Set speed of X/Y movements")
 		self.tXYSpeed.SetFont(self.font12)
 		htc = self.tXYSpeed.GetSize()[1]
 		
@@ -100,97 +100,97 @@ class ManualCtl(wx.Window):
 		t.SetFont(self.font12bold)
 		htt = t.GetSize()[1]
 
-		sizerT.AddSpacer((20, 20+htt+4))
+		sizerT.AddSpacer(20+htt+4)
 		sizerT.Add(t, 1, wx.ALIGN_RIGHT, 0)
-		sizerT.AddSpacer((10, htc+10-htt+4))
+		sizerT.AddSpacer(htc+10-htt+4)
 		#t = wx.StaticText(self, wx.ID_ANY, "Z Speed:", style=wx.ALIGN_RIGHT, size=(110, -1))
 		t = wx.StaticText(self, wx.ID_ANY, "Z Speed:")
 		t.SetFont(self.font12bold)
 		sizerT.Add(t, 0, wx.ALIGN_RIGHT, 0)
-		sizerT.AddSpacer((10, htc+10-htt+4))
+		sizerT.AddSpacer(htc+10-htt+4)
 		t = wx.StaticText(self, wx.ID_ANY, "E Speed:")
 		t.SetFont(self.font12bold)
 		sizerT.Add(t, 1, wx.ALIGN_RIGHT, 1)
 		
-		sizerT.AddSpacer((10, htc+20+4))
+		sizerT.AddSpacer(htc+20+4)
 		t = wx.StaticText(self, wx.ID_ANY, "E Length:")
 		t.SetFont(self.font12bold)
 		sizerT.Add(t, 1, wx.ALIGN_RIGHT, 1)
 		
 		szManualCtl.Add(sizerT)
-		szManualCtl.AddSizer((10, 10))
+		szManualCtl.AddSpacer(10)
 		
 		sizerTC = wx.BoxSizer(wx.VERTICAL)
 		t = wx.StaticText(self, wx.ID_ANY, "mm/min", style=wx.ALIGN_LEFT, size=(80, -1))
 		t.SetFont(self.font12bold)
-		sizerTC.AddSpacer((20, 20))
+		sizerTC.AddSpacer(20)
 		sizerTC.Add(t)
 
 		sizerTC.Add(self.tXYSpeed)
-		sizerTC.AddSpacer((10, 10))
+		sizerTC.AddSpacer(10)
 		self.tXYSpeed.Bind(wx.EVT_KILL_FOCUS, self.evtXYSpeedKillFocus)
 		
 		self.tZSpeed = wx.TextCtrl(self, wx.ID_ANY, str(self.settings.zspeed), size=(80, -1), style=wx.TE_RIGHT)
-		self.tZSpeed.SetToolTipString("Set speed of Z movements")
+		self.tZSpeed.SetToolTip("Set speed of Z movements")
 		self.tZSpeed.SetFont(self.font12)
 		sizerTC.Add(self.tZSpeed)
-		sizerTC.AddSpacer((10, 10))
+		sizerTC.AddSpacer(10)
 		self.tZSpeed.Bind(wx.EVT_KILL_FOCUS, self.evtZSpeedKillFocus)
 		
 		self.tESpeed = wx.TextCtrl(self, wx.ID_ANY, str(self.settings.espeed), size=(80, -1), style=wx.TE_RIGHT)
-		self.tESpeed.SetToolTipString("Set speed of Extrusion/Retraction")
+		self.tESpeed.SetToolTip("Set speed of Extrusion/Retraction")
 		self.tESpeed.SetFont(self.font12)
 		sizerTC.Add(self.tESpeed)
 		
 		t = wx.StaticText(self, wx.ID_ANY, "mm", style=wx.ALIGN_LEFT, size=(80, -1))
 		t.SetFont(self.font12bold)
-		sizerTC.AddSpacer((20, 20))
+		sizerTC.AddSpacer(20)
 		sizerTC.Add(t)
 		
 		self.tEDist = wx.TextCtrl(self, wx.ID_ANY, str(self.settings.edistance), size=(80, -1), style=wx.TE_RIGHT)
-		self.tEDist.SetToolTipString("Length of Extrusion/Retraction")
+		self.tEDist.SetToolTip("Length of Extrusion/Retraction")
 		self.tEDist.SetFont(self.font12)
 		sizerTC.Add(self.tEDist)
 		
 		szManualCtl.Add(sizerTC)
-		szManualCtl.AddSpacer((10, 10))
+		szManualCtl.AddSpacer(10)
 		
 		szWindow.Add(szManualCtl)
 		
 		szSpeed = wx.BoxSizer(wx.HORIZONTAL)
 		
 		self.bFanSpeed = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFan, size=BUTTONDIM, style=wx.NO_BORDER)
-		self.bFanSpeed.SetToolTipString("Control Fan Speed")
+		self.bFanSpeed.SetToolTip("Control Fan Speed")
 		self.Bind(wx.EVT_BUTTON, self.doBFanSpeed, self.bFanSpeed)
 		
 		self.slFanSpeed = wx.Slider(self, wx.ID_ANY, value=0, size=(180, -1),
 				minValue=0, maxValue=255,
 				style=wx.SL_HORIZONTAL | wx.SL_VALUE_LABEL)
-		self.slFanSpeed.SetToolTipString("Choose fan speed")
+		self.slFanSpeed.SetToolTip("Choose fan speed")
 		
 		self.bPrintSpeed = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPrintspeed, size=BUTTONDIM, style=wx.NO_BORDER)
-		self.bPrintSpeed.SetToolTipString("Apply Print Speed Multiplier")
+		self.bPrintSpeed.SetToolTip("Apply Print Speed Multiplier")
 		self.Bind(wx.EVT_BUTTON, self.doBPrintSpeed, self.bPrintSpeed)
 		
 		self.slPrintSpeed = wx.Slider(self, wx.ID_ANY, value=100, size=(180, -1),
 				minValue=50, maxValue=200,
 				style=wx.SL_HORIZONTAL | wx.SL_VALUE_LABEL)
-		self.slPrintSpeed.SetToolTipString("Choose print speed multiplier")
+		self.slPrintSpeed.SetToolTip("Choose print speed multiplier")
 
 		szSpeed.Add(self.bFanSpeed)
 		szSpeed.Add(self.slFanSpeed, 0, wx.ALIGN_CENTER_VERTICAL, 1)
-		szSpeed.AddSpacer((20, 20))
+		szSpeed.AddSpacer(20)
 		szSpeed.Add(self.bPrintSpeed)
 		szSpeed.Add(self.slPrintSpeed, 0, wx.ALIGN_CENTER_VERTICAL, 1)
 		
 		if self.settings.speedquery is not None:
 			self.bQuery = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSpeedquery, size=BUTTONDIM, style=wx.NO_BORDER)
-			self.bQuery.SetToolTipString("Query the printer for Print and Fan Speeds")
+			self.bQuery.SetToolTip("Query the printer for Print and Fan Speeds")
 			self.Bind(wx.EVT_BUTTON, self.doBQuery, self.bQuery)
-			szSpeed.AddSpacer((20, 20))
+			szSpeed.AddSpacer(20)
 			szSpeed.Add(self.bQuery)
 
-		szWindow.AddSpacer((10, 10))
+		szWindow.AddSpacer(10)
 		szWindow.Add(szSpeed, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		
 		self.SetSizer(szWindow)

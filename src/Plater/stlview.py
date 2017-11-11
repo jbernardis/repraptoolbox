@@ -76,10 +76,12 @@ class StlCanvas(glcanvas.GLCanvas):
 
 	def OnSize(self, event):
 		size = self.size = self.GetClientSize()
-		if self.GetContext():
-			if self.IsShown() and self.GetParent().IsShown():
+		if (self.GetParent().IsShown()):
+			if (self.context is not None):
 				self.SetCurrent(self.context)
-				glViewport(0, 0, size.width, size.height)
+			else:
+				self.SetCurrent()
+			glViewport(0, 0, size.width, size.height)
 		event.Skip()
 
 	def OnPaint(self, event):
@@ -325,27 +327,27 @@ class StlViewer(wx.Dialog):
 		
 		self.gl = StlCanvas(self, buildarea=self.settings.buildarea)
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		csizer = wx.BoxSizer(wx.HORIZONTAL)
-		csizer.AddSpacer((10, 10))
+		csizer.AddSpacer(10)
 		csizer.Add(self.gl)
-		csizer.AddSpacer((10, 10))
+		csizer.AddSpacer(10)
 		sizer.Add(csizer)
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		
 		bsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bsizer.AddSpacer((20, 10))
+		bsizer.AddSpacer(20)
 		
 		self.bOK = wx.BitmapButton(self, wx.ID_ANY, images.pngOk, size=BUTTONDIM)
 		if self.mode == VIEW_MODE_LOAD:
-			self.bOK.SetToolTipString("Load the STL file")
+			self.bOK.SetToolTip("Load the STL file")
 		else:
-			self.bOK.SetToolTipString("Dismiss dialog box")
+			self.bOK.SetToolTip("Dismiss dialog box")
 		self.Bind(wx.EVT_BUTTON, self.onLoad, self.bOK)
 		bsizer.Add(self.bOK)
 		
-		#bsizer.AddSpacer((600-BUTTONDIM[0]*2-20, 10))
-		bsizer.AddSpacer((220, 10))
+		#bsizer.AddSpacer(600-BUTTONDIM[0]*2-20)
+		bsizer.AddSpacer(220)
 		
 		self.cbSpin = wx.CheckBox(self, wx.ID_ANY, "Spin")
 		f = self.settings.spinstlview
@@ -354,17 +356,17 @@ class StlViewer(wx.Dialog):
 		self.Bind(wx.EVT_CHECKBOX, self.onCbSpin, self.cbSpin)
 		bsizer.Add(self.cbSpin)
 		
-		bsizer.AddSpacer((220, 10))
+		bsizer.AddSpacer(220)
 		
 		if self.mode == VIEW_MODE_LOAD:
 			self.bCancel = wx.BitmapButton(self, wx.ID_ANY, images.pngCancel, size=BUTTONDIM)
-			self.bCancel.SetToolTipString("Do not load the STL file")
+			self.bCancel.SetToolTip("Do not load the STL file")
 			self.Bind(wx.EVT_BUTTON, self.onDontLoad, self.bCancel)
 			bsizer.Add(self.bCancel)
 		
 		sizer.Add(bsizer)
 
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		
 		self.SetSizer(sizer)
 		self.Layout()

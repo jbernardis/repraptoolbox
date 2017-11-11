@@ -101,35 +101,35 @@ class MyFrame(wx.Frame):
 		self.statusReportCB = {}
 		
 		self.bStlView = wx.BitmapButton(self, wx.ID_ANY, self.images.pngStlview, size=BUTTONDIM)
-		self.bStlView.SetToolTipString("View an STL file")
+		self.bStlView.SetToolTip("View an STL file")
 		self.Bind(wx.EVT_BUTTON, self.doViewStl, self.bStlView)
 		
 		self.bPlater = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPlater, size=BUTTONDIM)
-		self.bPlater.SetToolTipString("Arrange STL objects on a plate")
+		self.bPlater.SetToolTip("Arrange STL objects on a plate")
 		self.Bind(wx.EVT_BUTTON, self.doPlater, self.bPlater)
 		
 		self.bSlic3r = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlic3r, size=BUTTONDIM)
-		self.bSlic3r.SetToolTipString("Invoke slic3r to slice a G Code file")
+		self.bSlic3r.SetToolTip("Invoke slic3r to slice a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doSlic3r, self.bSlic3r)
 		
 		self.bCuraEngine = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCura, size=BUTTONDIM)
-		self.bCuraEngine.SetToolTipString("Invoke Cura Engine to slice a G Code file")
+		self.bCuraEngine.SetToolTip("Invoke Cura Engine to slice a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doCuraEngine, self.bCuraEngine)
 		
 		self.bGEdit = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGedit, size=BUTTONDIM)
-		self.bGEdit.SetToolTipString("Analyze/edit a G Code file")
+		self.bGEdit.SetToolTip("Analyze/edit a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.doGEdit, self.bGEdit)
 
 		self.bLogHideShow = wx.BitmapButton(self, wx.ID_ANY, self.images.pngLoghideshow, size=BUTTONDIM)
-		self.bLogHideShow.SetToolTipString("Toggle the log window off and on")
+		self.bLogHideShow.SetToolTip("Toggle the log window off and on")
 		self.Bind(wx.EVT_BUTTON, self.onLogHideShow, self.bLogHideShow)
 
 		self.bLogClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
-		self.bLogClear.SetToolTipString("Erase the log contents")
+		self.bLogClear.SetToolTip("Erase the log contents")
 		self.Bind(wx.EVT_BUTTON, self.onLogClear, self.bLogClear)
 
 		self.bLogSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSavelog, size=BUTTONDIM)
-		self.bLogSave.SetToolTipString("Save log contents to a file")
+		self.bLogSave.SetToolTip("Save log contents to a file")
 		self.Bind(wx.EVT_BUTTON, self.onLogSave, self.bLogSave)
 
 		self.bStlQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngStlqueue, size=BUTTONDIMWIDE)
@@ -139,12 +139,12 @@ class MyFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onStlNext, self.bStlNext)
 		
 		self.bStlToQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
-		self.bStlToQueue.SetToolTipString("Add the current STL file to the slice queue")
+		self.bStlToQueue.SetToolTip("Add the current STL file to the slice queue")
 		self.Bind(wx.EVT_BUTTON, self.onStlToQueue, self.bStlToQueue)
 		self.bStlToQueue.Enable(False)
 
 		self.bStlClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
-		self.bStlClear.SetToolTipString("Clear the current STL file name")
+		self.bStlClear.SetToolTip("Clear the current STL file name")
 		self.Bind(wx.EVT_BUTTON, self.onStlClear, self.bStlClear)
 
 		self.bGCodeQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGcodequeue, size=BUTTONDIMWIDE)
@@ -154,16 +154,16 @@ class MyFrame(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onGCodeNext, self.bGCodeNext)
 		
 		self.bGcToQueue = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAddqueue, size=BUTTONDIM)
-		self.bGcToQueue.SetToolTipString("Add the current G Code file to the print queue")
+		self.bGcToQueue.SetToolTip("Add the current G Code file to the print queue")
 		self.Bind(wx.EVT_BUTTON, self.onGcToQueue, self.bGcToQueue)
 		self.bGcToQueue.Enable(False)
 
 		self.bGcClear = wx.BitmapButton(self, wx.ID_ANY, self.images.pngClearlog, size=BUTTONDIM)
-		self.bGcClear.SetToolTipString("Clear the current G Code file name")
+		self.bGcClear.SetToolTip("Clear the current G Code file name")
 		self.Bind(wx.EVT_BUTTON, self.onGcClear, self.bGcClear)
 
 		self.bHistory = wx.BitmapButton(self, wx.ID_ANY, self.images.pngHistory, size=BUTTONDIM)
-		self.bHistory.SetToolTipString("Show the history dialog box")
+		self.bHistory.SetToolTip("Show the history dialog box")
 		self.Bind(wx.EVT_BUTTON, self.onHistory, self.bHistory)
 
 		self.designButtons = self.createSectionButtons("design", self.doDesignButton)
@@ -173,155 +173,155 @@ class MyFrame(wx.Frame):
 		
 		szHFrame = wx.BoxSizer(wx.HORIZONTAL)
 		szVFrame = wx.BoxSizer(wx.VERTICAL)
-		szVFrame.AddSpacer((20, 20))
+		szVFrame.AddSpacer(20)
 		
 		szButtonRow = wx.BoxSizer(wx.HORIZONTAL)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " Design Tools ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		for b in self.designButtons:
 			bhsizer.Add(b.getButton())
-			bhsizer.AddSpacer((10, 10))
+			bhsizer.AddSpacer(10)
 		
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		bvsizer.Add(bhsizer)
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		szButtonRow.Add(bvsizer)
-		szButtonRow.AddSpacer((20, 20))
+		szButtonRow.AddSpacer(20)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " STL/Mesh Tools ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bStlView)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bPlater)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		for b in self.meshButtons:
 			bhsizer.Add(b.getButton())
-			bhsizer.AddSpacer((10, 10))
+			bhsizer.AddSpacer(10)
 			
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		bvsizer.Add(bhsizer)
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		szButtonRow.Add(bvsizer)
 		
 		szVFrame.Add(szButtonRow)
-		szVFrame.AddSpacer((20, 20))
+		szVFrame.AddSpacer(20)
 		
 		szButtonRow = wx.BoxSizer(wx.HORIZONTAL)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " Slicing Tools ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bSlic3r)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bCuraEngine)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		for b in self.sliceButtons:
 			bhsizer.Add(b.getButton())
-			bhsizer.AddSpacer((10, 10))
+			bhsizer.AddSpacer(10)
 		
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		bvsizer.Add(bhsizer)
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		szButtonRow.Add(bvsizer)
-		szButtonRow.AddSpacer((20, 20))
+		szButtonRow.AddSpacer(20)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " G Code Tools ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bGEdit)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		for b in self.gCodeButtons:
 			bhsizer.Add(b.getButton())
-			bhsizer.AddSpacer((10, 10))
+			bhsizer.AddSpacer(10)
 
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		bvsizer.Add(bhsizer)
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		szButtonRow.Add(bvsizer)
-		szButtonRow.AddSpacer((20, 20))
+		szButtonRow.AddSpacer(20)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " Log ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bLogHideShow)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bLogClear)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bLogSave)
-		bhsizer.AddSpacer((10, 10))
-		bvsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
+		bvsizer.AddSpacer(10)
 		bvsizer.Add(bhsizer)
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		szButtonRow.Add(bvsizer)
 		
 		szVFrame.Add(szButtonRow)
-		szVFrame.AddSpacer((20, 20))
+		szVFrame.AddSpacer(20)
 		
 		szButtonRow = wx.BoxSizer(wx.HORIZONTAL)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " Queue Management ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bStlQueue)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bStlNext)
-		bhsizer.AddSpacer((20, 20))
+		bhsizer.AddSpacer(20)
 		bhsizer.Add(self.bGCodeQueue)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		bhsizer.Add(self.bGCodeNext)
-		bhsizer.AddSpacer((30, 10))
+		bhsizer.AddSpacer(30)
 		bhsizer.Add(self.bHistory)
-		bhsizer.AddSpacer((10, 10))
-		bvsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
+		bvsizer.AddSpacer(10)
 		bvsizer.Add(bhsizer)
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		szButtonRow.Add(bvsizer)
 		
 		szVFrame.Add(szButtonRow)
-		szVFrame.AddSpacer((20, 20))
+		szVFrame.AddSpacer(20)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " STL File ")
 		bstlvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bstlsizer = wx.BoxSizer(wx.HORIZONTAL)
 		self.tcStlFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1), style=wx.TE_READONLY)
-		bstlsizer.AddSpacer((20, 20))
+		bstlsizer.AddSpacer(20)
 		bstlsizer.Add(self.tcStlFile, 1, wx.TOP, 12)
-		bstlsizer.AddSpacer((10, 10))
+		bstlsizer.AddSpacer(10)
 		bstlsizer.Add(self.bStlToQueue)
-		bstlsizer.AddSpacer((10, 10))
+		bstlsizer.AddSpacer(10)
 		bstlsizer.Add(self.bStlClear)
-		bstlsizer.AddSpacer((20, 20))
-		bstlvsizer.AddSpacer((20, 20))
+		bstlsizer.AddSpacer(20)
+		bstlvsizer.AddSpacer(20)
 		bstlvsizer.Add(bstlsizer)
-		bstlvsizer.AddSpacer((20, 20))
+		bstlvsizer.AddSpacer(20)
 		szVFrame.Add(bstlvsizer)
-		szVFrame.AddSpacer((20, 20))
+		szVFrame.AddSpacer(20)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, " G Code File ")
 		bgcvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bgcsizer = wx.BoxSizer(wx.HORIZONTAL)
 		self.tcGcFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(400, -1), style=wx.TE_READONLY)
-		bgcsizer.AddSpacer((20, 20))
+		bgcsizer.AddSpacer(20)
 		bgcsizer.Add(self.tcGcFile, 1, wx.TOP, 12)
-		bgcsizer.AddSpacer((10, 10))
+		bgcsizer.AddSpacer(10)
 		bgcsizer.Add(self.bGcToQueue)
-		bgcsizer.AddSpacer((10, 10))
+		bgcsizer.AddSpacer(10)
 		bgcsizer.Add(self.bGcClear)
-		bgcsizer.AddSpacer((20, 20))
-		bgcvsizer.AddSpacer((20, 20))
+		bgcsizer.AddSpacer(20)
+		bgcvsizer.AddSpacer(20)
 		bgcvsizer.Add(bgcsizer)
-		bgcvsizer.AddSpacer((20, 20))
+		bgcvsizer.AddSpacer(20)
 		szVFrame.Add(bgcvsizer)
-		szVFrame.AddSpacer((20, 20))
+		szVFrame.AddSpacer(20)
 
 		
 		self.reprap = {}
@@ -345,7 +345,7 @@ class MyFrame(wx.Frame):
 			b.SetForegroundColour(grey)
 
 			self.bId[p] = b.GetId()
-			b.SetToolTipString("control panel for %s printer" % p)
+			b.SetToolTip("control panel for %s printer" % p)
 			self.Bind(wx.EVT_BUTTON, self.doPrinter, b)
 			b.Enable(False)
 			self.bPrinter[p] = b
@@ -357,29 +357,29 @@ class MyFrame(wx.Frame):
 		box = wx.StaticBox(self, wx.ID_ANY, " Printers ")
 		bvsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
 		bhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bhsizer.AddSpacer((10, 10))
+		bhsizer.AddSpacer(10)
 		
 		for p in sorted(self.settings.printers):
 			bhsizer.Add(self.bPrinter[p])
-			bhsizer.AddSpacer((10, 10))
+			bhsizer.AddSpacer(10)
 			
 		bmphsizer = wx.BoxSizer(wx.HORIZONTAL)
-		bmphsizer.AddSpacer((66, 10))
+		bmphsizer.AddSpacer(66)
 		
 		for p in sorted(self.settings.printers):
 			bmphsizer.Add(self.wPendant[p])
-			bmphsizer.AddSpacer((122, 10))
+			bmphsizer.AddSpacer(122)
 		
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		bvsizer.Add(bhsizer)
 		bvsizer.Add(bmphsizer)
-		bvsizer.AddSpacer((10, 10))
+		bvsizer.AddSpacer(10)
 		szVFrame.Add(bvsizer)
-		szVFrame.AddSpacer((20, 20))
+		szVFrame.AddSpacer(20)
 		
-		szHFrame.AddSpacer((20, 20))
+		szHFrame.AddSpacer(20)
 		szHFrame.Add(szVFrame)
-		szHFrame.AddSpacer((20, 20))
+		szHFrame.AddSpacer(20)
 
 		self.SetSizer(szHFrame)
 		self.Layout()
@@ -433,7 +433,7 @@ class MyFrame(wx.Frame):
 					
 				if cmd is not None:
 					b = wx.BitmapButton(self, wx.ID_ANY, self.images.getByName(n), size=BUTTONDIM)
-					b.SetToolTipString(helptext)
+					b.SetToolTip(helptext)
 					bid = b.GetId()
 					self.Bind(wx.EVT_BUTTON, handler, b)
 					buttons.append(ToolButton(b, bid, cmd, shell))
@@ -846,14 +846,14 @@ class MyFrame(wx.Frame):
 	def setSliceQLen(self):
 		n = len(self.sliceQueue)
 		text = "Manage the Slicing queue - %d files in queue" % n
-		self.bStlQueue.SetToolTipString(text)
+		self.bStlQueue.SetToolTip(text)
 		
 		if n > 0:
 			nfn = os.path.basename(self.sliceQueue.peek().getFn())
-			self.bStlNext.SetToolTipString("Remove the first file (%s) from the queue and make it current" % nfn)
+			self.bStlNext.SetToolTip("Remove the first file (%s) from the queue and make it current" % nfn)
 			slMsg = "Import first file (%s) from Slice queue" % nfn
 		else:
-			self.bStlNext.SetToolTipString("")
+			self.bStlNext.SetToolTip("")
 			slMsg = None
 			
 		for s in [self.dlgCuraEngine, self.dlgSlic3r]:
@@ -900,14 +900,14 @@ class MyFrame(wx.Frame):
 	def setGCodeQLen(self):
 		n = len(self.gcodeQueue)
 		text = "Manage the G Code queue - %d files in queue" % n
-		self.bGCodeQueue.SetToolTipString(text)
+		self.bGCodeQueue.SetToolTip(text)
 		
 		if n > 0:
 			nfn = os.path.basename(self.gcodeQueue.peek().getFn())
-			self.bGCodeNext.SetToolTipString("Remove the first file (%s) from the queue and make it current" % nfn)
+			self.bGCodeNext.SetToolTip("Remove the first file (%s) from the queue and make it current" % nfn)
 			pmMsg = "Import first file (%s) from G Code queue" % nfn
 		else:
-			self.bGCodeNext.SetToolTipString("")
+			self.bGCodeNext.SetToolTip("")
 			pmMsg = None
 			
 		for pn in self.wPrinter.keys():

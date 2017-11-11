@@ -13,45 +13,45 @@ class TranslateDlg(wx.Dialog):
 		t = wx.StaticText(self, wx.ID_ANY, "X")
 		t.SetFont(f)
 		
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		sizer.Add(t, 1, wx.TOP, 14)
 		
 		
 		self.scXDist = wx.SpinCtrl(self, wx.ID_ANY, "Millimeters", size=(60, -1))
 		self.scXDist.SetRange(-200, 200)
 		self.scXDist.SetValue(0)
-		self.scXDist.SetToolTipString("Distance to move along the X axis")
+		self.scXDist.SetToolTip("Distance to move along the X axis")
 		sizer.Add(self.scXDist, 5, wx.TOP, 12)
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		
 		t = wx.StaticText(self, wx.ID_ANY, "Y")
 		t.SetFont(f)
 		
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		sizer.Add(t, 1, wx.TOP, 14)
 		
 		self.scYDist = wx.SpinCtrl(self, wx.ID_ANY, "Millimeters", size=(60, -1))
 		self.scYDist.SetRange(-200, 200)
 		self.scYDist.SetValue(0)
-		self.scYDist.SetToolTipString("Distance to move along the Y axis")
+		self.scYDist.SetToolTip("Distance to move along the Y axis")
 		sizer.Add(self.scYDist, 5, wx.TOP, 12)
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		
 		bMovexy = wx.BitmapButton(self, wx.ID_ANY, images.pngTranslate, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbMoveXY, bMovexy)
-		bMovexy.SetToolTipString("move the specified number of millimeters along the X and Y axes")
+		bMovexy.SetToolTip("move the specified number of millimeters along the X and Y axes")
 		sizer.Add(bMovexy)
 		
 		bView = wx.BitmapButton(self, wx.ID_ANY, images.pngView, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbView, bView)
-		bView.SetToolTipString("3D view of the object")
-		sizer.AddSpacer((20, 20))
+		bView.SetToolTip("3D view of the object")
+		sizer.AddSpacer(20)
 		sizer.Add(bView)
 		
 		bExit = wx.BitmapButton(self, wx.ID_ANY, images.pngExit, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onbExit, bExit)
-		bExit.SetToolTipString("Exit Dialog Box")
-		sizer.AddSpacer((20, 20))
+		bExit.SetToolTip("Exit Dialog Box")
+		sizer.AddSpacer(20)
 		sizer.Add(bExit)
 		
 		self.SetSizer(sizer)

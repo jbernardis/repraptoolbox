@@ -34,11 +34,11 @@ class PrintButton(wx.BitmapButton):
 		
 	def setPrint(self):
 		self.SetBitmap(self.imgPrint)
-		self.SetToolTipString("Start printing")
+		self.SetToolTip("Start printing")
 		
 	def setRestart(self):
 		self.SetBitmap(self.imgRestart)
-		self.SetToolTipString("Restart print from the beginning")
+		self.SetToolTip("Restart print from the beginning")
 
 class PauseButton(wx.BitmapButton):
 	def __init__(self, parent, images):
@@ -46,10 +46,10 @@ class PauseButton(wx.BitmapButton):
 		self.setPause()
 		
 	def setPause(self):
-		self.SetToolTipString("Pause printing")
+		self.SetToolTip("Pause printing")
 		
 	def setResume(self):
-		self.SetToolTipString("Resume print from the paused point")
+		self.SetToolTip("Resume print from the paused point")
 
 class PrintMonitorDlg(wx.Frame):
 	def __init__(self, parent, wparent, reprap, prtName):
@@ -122,14 +122,14 @@ class PrintMonitorDlg(wx.Frame):
 		self.Bind(wx.EVT_CHECKBOX, self.onSyncPrint, self.cbSyncPrint)
 		
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
-		self.bImport.SetToolTipString("Import G Code file from toolbox")
+		self.bImport.SetToolTip("Import G Code file from toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onImport, self.bImport)
 		
 		self.bImportQ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onImportFromQueue, self.bImportQ)
 		
 		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
-		self.bOpen.SetToolTipString("Open a G Code file")
+		self.bOpen.SetToolTip("Open a G Code file")
 		self.Bind(wx.EVT_BUTTON, self.onOpenFile, self.bOpen)
 		
 		self.Bind(wx.EVT_CLOSE, self.onClose)
@@ -155,71 +155,71 @@ class PrintMonitorDlg(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.onSdDelete, self.bSdDelete)
 		
 		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp, size=BUTTONDIM)
-		self.bUp.SetToolTipString("Move up one layer")
+		self.bUp.SetToolTip("Move up one layer")
 		self.Bind(wx.EVT_BUTTON, self.onUp, self.bUp)
 		self.bUp.Enable(False)
 		
 		self.bDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDown, size=BUTTONDIM)
-		self.bDown.SetToolTipString("Move down one layer")
+		self.bDown.SetToolTip("Move down one layer")
 		self.Bind(wx.EVT_BUTTON, self.onDown, self.bDown)
 		self.bDown.Enable(False)
 		
 		szGcf = wx.BoxSizer(wx.HORIZONTAL)
-		szGcf.AddSpacer((10, 10))
+		szGcf.AddSpacer(10)
 		szGcf.Add(self.gcf)
 		szGcf.Add(self.stLayerText, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		szGcf.AddSpacer((10, 10))
+		szGcf.AddSpacer(10)
 
 		szNav = wx.BoxSizer(wx.VERTICAL)
 		szNav.Add(self.bUp, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		szNav.AddSpacer((10, 10))
+		szNav.AddSpacer(10)
 		szNav.Add(self.slLayers)
-		szNav.AddSpacer((10, 10))
+		szNav.AddSpacer(10)
 		szNav.Add(self.bDown, 1, wx.ALIGN_CENTER_HORIZONTAL, 1)
 
 		szGcf.Add(szNav)
-		szGcf.AddSpacer((10, 10))
+		szGcf.AddSpacer(10)
 		
 		szOpts = wx.BoxSizer(wx.HORIZONTAL)
-		szOpts.AddSpacer((10, 10))
+		szOpts.AddSpacer(10)
 		szOpts.Add(self.cbShowMoves)
-		szOpts.AddSpacer((10, 10))
+		szOpts.AddSpacer(10)
 		szOpts.Add(self.cbShowPrevious)
-		szOpts.AddSpacer((10, 10))
+		szOpts.AddSpacer(10)
 		szOpts.Add(self.cbToolPathOnly)
-		szOpts.AddSpacer((10, 10))
+		szOpts.AddSpacer(10)
 		szOpts.Add(self.cbSyncPrint)
-		szOpts.AddSpacer((10, 10))
+		szOpts.AddSpacer(10)
 		
 		szBtn = wx.BoxSizer(wx.HORIZONTAL)
-		szBtn.AddSpacer((10, 10))
+		szBtn.AddSpacer(10)
 		szBtn.Add(self.bImport)
-		szBtn.AddSpacer((10, 10))
+		szBtn.AddSpacer(10)
 		szBtn.Add(self.bImportQ)
-		szBtn.AddSpacer((10, 10))
+		szBtn.AddSpacer(10)
 		szBtn.Add(self.bOpen)
-		szBtn.AddSpacer((20, 20))
+		szBtn.AddSpacer(20)
 		szBtn.Add(self.bPrint)
-		szBtn.AddSpacer((10, 10))
+		szBtn.AddSpacer(10)
 		szBtn.Add(self.bPause)
 		if self.sdcard:
-			szBtn.AddSpacer((20, 10))
+			szBtn.AddSpacer(20)
 			szBtn.Add(self.bSdPrintTo)
-			szBtn.AddSpacer((10, 10))
+			szBtn.AddSpacer(10)
 			szBtn.Add(self.bSdPrintFrom)
-			szBtn.AddSpacer((10, 10))
+			szBtn.AddSpacer(10)
 			szBtn.Add(self.bSdDelete)
 			
-		szBtn.AddSpacer((10, 10))
+		szBtn.AddSpacer(10)
 		
 		szDlg = wx.BoxSizer(wx.VERTICAL)
-		szDlg.AddSpacer((10, 10))
+		szDlg.AddSpacer(10)
 		szDlg.Add(szGcf)
-		szDlg.AddSpacer((10, 10))
+		szDlg.AddSpacer(10)
 		szDlg.Add(szOpts)
-		szDlg.AddSpacer((10, 10))
+		szDlg.AddSpacer(10)
 		szDlg.Add(szBtn)
-		szDlg.AddSpacer((10, 10))
+		szDlg.AddSpacer(10)
 		
 		self.SetSizer(szDlg)
 		self.Fit()
@@ -348,21 +348,21 @@ class PrintMonitorDlg(wx.Frame):
 	def setImportButton(self, msg):
 		if msg is None:
 			self.okToImport = False
-			self.bImportQ.SetToolTipString("")
+			self.bImportQ.SetToolTip("")
 			self.bImportQ.Enable(False)
 		else:
 			self.okToImport = True
-			self.bImportQ.SetToolTipString(msg)
+			self.bImportQ.SetToolTip(msg)
 			self.bImportQ.Enable(self.bOpen.IsEnabled())
 		
 	def setImportFile(self, fn):
 		self.importFile = fn
 		if fn is None:
 			self.bImport.Enable(False)
-			self.bImport.SetToolTipString("")
+			self.bImport.SetToolTip("")
 		else:
 			self.bImport.Enable(self.bOpen.IsEnabled())
-			self.bImport.SetToolTipString("Import G Code file (%s)" % fn)
+			self.bImport.SetToolTip("Import G Code file (%s)" % fn)
 		
 	def onOpenFile(self, evt):
 		wildcard = "GCode (*.gcode)|*.gcode;*.GCODE|"	 \
@@ -373,7 +373,7 @@ class PrintMonitorDlg(wx.Frame):
 			defaultDir=self.settings.lastdirectory, 
 			defaultFile="",
 			wildcard=wildcard,
-			style=wx.OPEN)
+			style=wx.FD_OPEN)
 
 		rc = dlg.ShowModal()
 		if rc == wx.ID_OK:

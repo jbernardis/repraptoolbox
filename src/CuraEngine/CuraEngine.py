@@ -167,40 +167,40 @@ class CuraEngineDlg(wx.Frame):
 		self.tcStl = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.bOpen = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFileopen, size=BUTTONDIM)
-		self.bOpen.SetToolTipString("Select an STL file for slicing")
+		self.bOpen.SetToolTip("Select an STL file for slicing")
 		self.Bind(wx.EVT_BUTTON, self.onBOpen, self.bOpen)
 		
 		self.bImport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngImport, size=BUTTONDIM)
-		self.bImport.SetToolTipString("Import a model file from toolbox")
+		self.bImport.SetToolTip("Import a model file from toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onBImport, self.bImport)
 		
 		self.bImportQ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNext, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onBImportFromQueue, self.bImportQ)
 		
 		self.cbGcDir = wx.CheckBox(self, wx.ID_ANY, "Use STL directory for G Code file")
-		self.cbGcDir.SetToolTipString("Use the directory from the STL file for the resulting G Code file")
+		self.cbGcDir.SetToolTip("Use the directory from the STL file for the resulting G Code file")
 		self.cbGcDir.SetValue(self.settings.usestldir)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbGcDir, self.cbGcDir)
 
 		self.tcGcDir = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		self.bGcDir = wx.Button(self, wx.ID_ANY, "...", size=(30, 22))
 		self.bGcDir.Enable(not self.settings.usestldir)
-		self.bGcDir.SetToolTipString("Choose G Code directory")
+		self.bGcDir.SetToolTip("Choose G Code directory")
 		self.Bind(wx.EVT_BUTTON, self.onBGcDir, self.bGcDir)
 		
 		self.tcGc = wx.TextCtrl(self, wx.ID_ANY, "", size=(450, -1), style=wx.TE_READONLY)
 		
 		self.bExport = wx.BitmapButton(self, wx.ID_ANY, self.images.pngExport, size=BUTTONDIM)
-		self.bExport.SetToolTipString("Export G Code file to toolbox")
+		self.bExport.SetToolTip("Export G Code file to toolbox")
 		self.Bind(wx.EVT_BUTTON, self.onBExport, self.bExport)
 		
 		self.cbAutoExport = wx.CheckBox(self, wx.ID_ANY, "Auto-export")
-		self.cbAutoExport.SetToolTipString("Automatically export the G code file when finished")
+		self.cbAutoExport.SetToolTip("Automatically export the G code file when finished")
 		self.Bind(wx.EVT_CHECKBOX, self.onAutoExport, self.cbAutoExport)
 		self.cbAutoExport.SetValue(self.settings.autoexport)
 		
 		self.cbAutoEnqueue = wx.CheckBox(self, wx.ID_ANY, "Auto-enqueue")
-		self.cbAutoEnqueue.SetToolTipString("Automatically enqueue the G code file when exporting")
+		self.cbAutoEnqueue.SetToolTip("Automatically enqueue the G code file when exporting")
 		self.Bind(wx.EVT_CHECKBOX, self.onAutoEnqueue, self.cbAutoEnqueue)
 		self.cbAutoEnqueue.SetValue(self.settings.autoenqueue)
 		
@@ -259,51 +259,51 @@ class CuraEngineDlg(wx.Frame):
 		szStl = wx.BoxSizer(wx.VERTICAL)
 		szStl.AddSpacer((5, 5))
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		hsz.AddSpacer((10, 10))
+		hsz.AddSpacer(10)
 		hsz.Add(self.tcStl)
-		hsz.AddSpacer((10, 10))
+		hsz.AddSpacer(10)
 		szStl.Add(hsz)
-		szStl.AddSpacer((10, 10))
+		szStl.AddSpacer(10)
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
-		hsz.AddSpacer((10, 10))
+		hsz.AddSpacer(10)
 		hsz.Add(self.bOpen)
-		hsz.AddSpacer((5, 5))
+		hsz.AddSpacer(5)
 		hsz.Add(self.bImport)
-		hsz.AddSpacer((5, 5))
+		hsz.AddSpacer(5)
 		hsz.Add(self.bImportQ)
 		szStl.Add(hsz)
-		szStl.AddSpacer((5, 5))
+		szStl.AddSpacer(5)
 
 		szUseStl = wx.BoxSizer(wx.HORIZONTAL)
-		szUseStl.AddSpacer((20, 10))
+		szUseStl.AddSpacer(20)
 		szUseStl.Add(self.cbGcDir)
 		
 		szGcDir = wx.BoxSizer(wx.HORIZONTAL)
-		szGcDir.AddSpacer((10, 10))
+		szGcDir.AddSpacer(10)
 		szGcDir.Add(self.tcGcDir)
-		szGcDir.AddSpacer((10, 10))
+		szGcDir.AddSpacer(10)
 		szGcDir.Add(self.bGcDir)
-		szGcDir.AddSpacer((10, 10))
+		szGcDir.AddSpacer(10)
 
 		szGc = wx.BoxSizer(wx.VERTICAL)
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGcH.Add(self.tcGc, 1, wx.TOP, 8)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGcH.Add(self.bExport)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGc.Add(szGcH)
 		
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((50, 10))
+		szGcH.AddSpacer(50)
 		szGcH.Add(self.cbAutoExport)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGc.Add(szGcH)
 		
 		szGcH = wx.BoxSizer(wx.HORIZONTAL)
-		szGcH.AddSpacer((50, 10))
+		szGcH.AddSpacer(50)
 		szGcH.Add(self.cbAutoEnqueue)
-		szGcH.AddSpacer((10, 10))
+		szGcH.AddSpacer(10)
 		szGc.Add(szGcH)
 				
 		szCfgL = wx.BoxSizer(wx.VERTICAL)
@@ -312,7 +312,7 @@ class CuraEngineDlg(wx.Frame):
 		szCfgL.Add(wx.StaticText(self, wx.ID_ANY, "Profile:"))
 		szCfgL.Add(self.chProfile)
 		
-		szCfgL.AddSpacer((20, 20))
+		szCfgL.AddSpacer(10)
 		szCfgL.Add(wx.StaticText(self, wx.ID_ANY, "Printer:"))
 		szCfgL.Add(self.chPrinter)
 
@@ -322,7 +322,7 @@ class CuraEngineDlg(wx.Frame):
 			
 		szCfg = wx.BoxSizer(wx.HORIZONTAL)
 		szCfg.Add(szCfgL)
-		szCfg.AddSpacer((50, 20))
+		szCfg.AddSpacer(50)
 		szCfg.Add(szCfgR)
 		
 		szOpts = wx.BoxSizer(wx.VERTICAL)
@@ -330,25 +330,25 @@ class CuraEngineDlg(wx.Frame):
 		szOpts.Add(self.cbCenter)
 		self.cbCenter.SetValue(self.settings.centerobject)
 		self.Bind(wx.EVT_CHECKBOX, self.onCbCenter, self.cbCenter)
-		szOpts.AddSpacer((5, 5))
+		szOpts.AddSpacer(5)
 
 		lbl = wx.StaticText(self, wx.ID_ANY, "X Offset")
 		self.tcOffsetX = wx.TextCtrl(self, wx.ID_ANY, "0", size=(80, -1), style=wx.TE_RIGHT)
-		self.tcOffsetX.SetToolTipString("Offset in the X direction")
+		self.tcOffsetX.SetToolTip("Offset in the X direction")
 		sz = wx.BoxSizer(wx.HORIZONTAL)
 		sz.Add(lbl)
-		sz.AddSpacer((5,5))
+		sz.AddSpacer(5)
 		sz.Add(self.tcOffsetX)
 		szOpts.Add(sz)
 		self.tcOffsetX.Bind(wx.EVT_KILL_FOCUS, self.evtOffsetXKillFocus, self.tcOffsetX)
-		szOpts.AddSpacer((5, 5))
+		szOpts.AddSpacer(5)
 
 		lbl = wx.StaticText(self, wx.ID_ANY, "Y Offset")
 		self.tcOffsetY = wx.TextCtrl(self, wx.ID_ANY, "0", size=(80, -1), style=wx.TE_RIGHT)
-		self.tcOffsetY.SetToolTipString("Offset in the Y direction")
+		self.tcOffsetY.SetToolTip("Offset in the Y direction")
 		sz = wx.BoxSizer(wx.HORIZONTAL)
 		sz.Add(lbl)
-		sz.AddSpacer((5,5))
+		sz.AddSpacer(5)
 		sz.Add(self.tcOffsetY)
 		szOpts.Add(sz)
 		self.tcOffsetY.Bind(wx.EVT_KILL_FOCUS, self.evtOffsetYKillFocus, self.tcOffsetY)
@@ -363,82 +363,82 @@ class CuraEngineDlg(wx.Frame):
 		szButton = wx.BoxSizer(wx.HORIZONTAL)
 		
 		self.bSlice = wx.BitmapButton(self, wx.ID_ANY, self.images.pngSlice, size=BUTTONDIM)
-		self.bSlice.SetToolTipString("Slice the file using Cura Engine")
+		self.bSlice.SetToolTip("Slice the file using Cura Engine")
 		self.Bind(wx.EVT_BUTTON, self.onBSlice, self.bSlice)
 		szButton.Add(self.bSlice)
 		
-		szButton.AddSpacer((20, 20))
+		szButton.AddSpacer(20)
 		
 		self.bConfig = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCuracfg, size=BUTTONDIM)
-		self.bConfig.SetToolTipString("Load cura engine onfigurator")
+		self.bConfig.SetToolTip("Load cura engine onfigurator")
 		self.Bind(wx.EVT_BUTTON, self.onConfig, self.bConfig)
 		szButton.Add(self.bConfig)
 		
-		szButton.AddSpacer((20, 20))
+		szButton.AddSpacer(20)
 		
 		self.bCuraUI = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCura, size=BUTTONDIM)
-		self.bCuraUI.SetToolTipString("Load cura user interface")
+		self.bCuraUI.SetToolTip("Load cura user interface")
 		self.Bind(wx.EVT_BUTTON, self.onCuraUI, self.bCuraUI)
 		szButton.Add(self.bCuraUI)
 		
-		szButton.AddSpacer((20, 20))
+		szButton.AddSpacer(20)
 		
 		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRefresh, size=BUTTONDIM)
-		self.bRefresh.SetToolTipString("Refresh dialog box from cura configuration files")
+		self.bRefresh.SetToolTip("Refresh dialog box from cura configuration files")
 		self.Bind(wx.EVT_BUTTON, self.onRefresh, self.bRefresh)
 		szButton.Add(self.bRefresh)
 		
 		self.enableButtons()
 		
 		sizerl = wx.BoxSizer(wx.VERTICAL)
-		sizerl.AddSpacer((5, 5))
+		sizerl.AddSpacer(5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "STL File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		bsizer.Add(szStl)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		sizerl.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizerl.AddSpacer((5, 5))
+		sizerl.AddSpacer(5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code Directory")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		bsizer.Add(szUseStl)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		bsizer.Add(szGcDir)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		sizerl.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizerl.AddSpacer((5, 5))
+		sizerl.AddSpacer(5)
 		
 		box = wx.StaticBox(self, wx.ID_ANY, "G Code File")
 		bsizer = wx.StaticBoxSizer(box, wx.VERTICAL)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		bsizer.Add(szGc)
-		bsizer.AddSpacer((10, 10))
+		bsizer.AddSpacer(10)
 		sizerl.Add(bsizer, flag = wx.EXPAND | wx.ALL, border = 10)
-		sizerl.AddSpacer((5, 5))
+		sizerl.AddSpacer(5)
 		
 		sizerr = wx.BoxSizer(wx.VERTICAL)
-		sizerr.AddSpacer((5, 5))
+		sizerr.AddSpacer(5)
 		sizerr.Add(szCfg, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizerr.AddSpacer((10, 10))
+		sizerr.AddSpacer(10)
 		sizerr.Add(szOpts, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizerr.AddSpacer((5, 5))
+		sizerr.AddSpacer(5)
 		sizerr.Add(self.tcLog, flag=wx.EXPAND | wx.ALL, border=10)
-		sizerr.AddSpacer((5, 5))
+		sizerr.AddSpacer(5)
 		
 		sizerlr = wx.BoxSizer(wx.HORIZONTAL)
-		sizerlr.AddSpacer((5, 5))
+		sizerlr.AddSpacer(5)
 		sizerlr.Add(sizerl)
-		sizerlr.AddSpacer((10, 10))
+		sizerlr.AddSpacer(10)
 		sizerlr.Add(sizerr)
-		sizerlr.AddSpacer((5, 5))
+		sizerlr.AddSpacer(5)
 		
 		sizer = wx.BoxSizer(wx.VERTICAL)
 		sizer.Add(sizerlr, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		sizer.Add(szButton, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		sizer.AddSpacer((10, 10))
+		sizer.AddSpacer(10)
 		
 		self.SetSizer(sizer)
 		self.Fit()
@@ -447,18 +447,18 @@ class CuraEngineDlg(wx.Frame):
 			
 	def setImportButton(self, msg):
 		if msg is None:
-			self.bImportQ.SetToolTipString("")
+			self.bImportQ.SetToolTip("")
 			self.bImportQ.Enable(False)
 		else:
-			self.bImportQ.SetToolTipString(msg)
+			self.bImportQ.SetToolTip(msg)
 			self.bImportQ.Enable(True)			
 			
 	def setImportFile(self, fn):
 		if fn is None:
-			self.bImport.SetToolTipString("")
+			self.bImport.SetToolTip("")
 			self.bImport.Enable(False)
 		else:
-			self.bImport.SetToolTipString("Import model file (%s)" % fn)
+			self.bImport.SetToolTip("Import model file (%s)" % fn)
 			self.bImport.Enable(True)
 		
 	def getExtruderCount(self, cfgfn):
@@ -828,7 +828,7 @@ class CuraEngineDlg(wx.Frame):
 			defaultDir=self.settings.laststldirectory, 
 			defaultFile="",
 			wildcard=wildcard,
-			style=wx.OPEN)
+			style=wx.FD_OPEN)
 
 		rc = dlg.ShowModal()
 		if rc == wx.ID_OK:

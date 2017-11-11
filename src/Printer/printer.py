@@ -39,16 +39,16 @@ class EngageZDlg(wx.Dialog):
 		hsz = wx.BoxSizer(wx.HORIZONTAL)
 		
 		b = wx.BitmapButton(self, wx.ID_ANY, images.pngDisengagez, size=BUTTONDIM)
-		b.SetToolTipString("Disengage Z axis and Exit")
+		b.SetToolTip("Disengage Z axis and Exit")
 		b.Bind(wx.EVT_BUTTON, self.onExit, b)
 		
-		hsz.AddSpacer((MARGIN, 20))
+		hsz.AddSpacer(MARGIN)
 		hsz.Add(b)
-		hsz.AddSpacer((MARGIN, 20))
+		hsz.AddSpacer(MARGIN)
 		
-		vsz.AddSpacer((20, MARGIN))
+		vsz.AddSpacer(MARGIN)
 		vsz.Add(hsz)
-		vsz.AddSpacer((20, MARGIN))
+		vsz.AddSpacer(MARGIN)
 		
 		self.SetSizer(vsz)
 		self.Fit()
@@ -118,69 +118,69 @@ class PrinterDlg(wx.Frame):
 		szHeaters = wx.BoxSizer(wx.VERTICAL)
 		self.heaters = Heaters(self, self.reprap, printerName)
 		szHeaters.Add(self.heaters)
-		szWindow.AddSpacer((10, 10))
+		szWindow.AddSpacer(10)
 		
 		szWindow.Add(szHeaters, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		szWindow.AddSpacer((20, 20))
+		szWindow.AddSpacer(20)
 		
 		szWindow.Add(GCodeEntry(self), 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
-		szWindow.AddSpacer((20, 20))
+		szWindow.AddSpacer(20)
 
 		btnhsizer = wx.BoxSizer(wx.HORIZONTAL)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer(10)
 		
 		self.bGraph = wx.BitmapButton(self, wx.ID_ANY, self.images.pngGraph, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onGraph, self.bGraph)
-		self.bGraph.SetToolTipString("Temperature graph dialog box")
+		self.bGraph.SetToolTip("Temperature graph dialog box")
 		btnhsizer.Add(self.bGraph)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer(10)
 		
 		self.bPrintMon = wx.BitmapButton(self, wx.ID_ANY, self.images.pngPrintmon, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onPrintMon, self.bPrintMon)
-		self.bPrintMon.SetToolTipString("Print monitoring dialog box")
+		self.bPrintMon.SetToolTip("Print monitoring dialog box")
 		btnhsizer.Add(self.bPrintMon)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer(10)
 		
 		self.bEngageZ = wx.BitmapButton(self, wx.ID_ANY, self.images.pngEngagez, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onEngageZ, self.bEngageZ)
-		self.bEngageZ.SetToolTipString("Lock the Z axis")
+		self.bEngageZ.SetToolTip("Lock the Z axis")
 		btnhsizer.Add(self.bEngageZ)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer(10)
 		
 		self.bFirmware = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFirmware, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onFirmware, self.bFirmware)
-		self.bFirmware.SetToolTipString("Firmware settings")
+		self.bFirmware.SetToolTip("Firmware settings")
 		btnhsizer.Add(self.bFirmware)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer(10)
 		
 		self.bMacros = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRunmacro, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onRunMacro, self.bMacros)
-		self.bMacros.SetToolTipString("Run macros")
+		self.bMacros.SetToolTip("Run macros")
 		btnhsizer.Add(self.bMacros)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer(10)
 		
 		self.bPendant = wx.BitmapButton(self, wx.ID_ANY, self.parentImages.pngPendantclear, size=BUTTONDIM, style = wx.NO_BORDER)
-		self.bPendant.SetToolTipString("")
+		self.bPendant.SetToolTip("")
 		self.bPendant.Enable(False)
 		self.Bind(wx.EVT_BUTTON, self.onBPendant, self.bPendant)
 		btnhsizer.Add(self.bPendant)
-		btnhsizer.AddSpacer((50, 10))
+		btnhsizer.AddSpacer(50)
 		self.pendantAssigned = False
 
 		self.bReset = wx.BitmapButton(self, wx.ID_ANY, self.images.pngReset, size=BUTTONDIM)
-		self.bReset.SetToolTipString("Hard reset the printer port")
+		self.bReset.SetToolTip("Hard reset the printer port")
 		self.Bind(wx.EVT_BUTTON, self.onBReset, self.bReset)
 		btnhsizer.Add(self.bReset)
-		btnhsizer.AddSpacer((90, 10))
+		btnhsizer.AddSpacer(90)
 
 		self.bRemember = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRemember, size=BUTTONDIM)
 		self.Bind(wx.EVT_BUTTON, self.onRemember, self.bRemember)
-		self.bRemember.SetToolTipString("Remember %s window positions" % self.printerName)
+		self.bRemember.SetToolTip("Remember %s window positions" % self.printerName)
 		btnhsizer.Add(self.bRemember)
-		btnhsizer.AddSpacer((10, 10))
+		btnhsizer.AddSpacer(10)
 
 		szWindow.Add(btnhsizer)
-		szWindow.AddSpacer((10, 10))
+		szWindow.AddSpacer(10)
 		
 		self.SetSizer(szWindow)
 		
@@ -350,18 +350,18 @@ class PrinterDlg(wx.Frame):
 		if self.pendantAssigned:
 			self.bPendant.SetBitmap(self.parentImages.pngPendanton)
 			self.bPendant.SetBitmapDisabled(self.parentImages.pngPendanton)
-			self.bPendant.SetToolTipString("%s has control of the pendant" % self.printerName)
+			self.bPendant.SetToolTip("%s has control of the pendant" % self.printerName)
 			self.bPendant.Enable(False)
 
 		elif connected:
 			self.bPendant.SetBitmap(self.parentImages.pngPendantoff)
-			self.bPendant.SetToolTipString("Seize control of the pendant")
+			self.bPendant.SetToolTip("Seize control of the pendant")
 			self.bPendant.Enable(True)
 
 		else:
 			self.bPendant.SetBitmap(self.parentImages.pngPendantclear)
 			self.bPendant.SetBitmapDisabled(self.parentImages.pngPendantclear)
-			self.bPendant.SetToolTipString("")
+			self.bPendant.SetToolTip("")
 			self.bPendant.Enable(False)
 		
 	def doPendantCommand(self, cmd):

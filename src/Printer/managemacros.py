@@ -21,95 +21,95 @@ class ManageMacros(wx.Dialog):
 		self.SetBackgroundColour("white")
 		
 		dsizer = wx.BoxSizer(wx.HORIZONTAL)
-		dsizer.AddSpacer((10, 10))
+		dsizer.AddSpacer(10)
 		
 		self.editDlg = None
 		self.images = images
 
 		leftsizer = wx.BoxSizer(wx.VERTICAL)
-		leftsizer.AddSpacer((10, 10))
+		leftsizer.AddSpacer(10)
 		
 		self.lbQueue = MacroListCtrl(self, macroOrder, macroFiles, self.images)
 		leftsizer.Add(self.lbQueue);
-		leftsizer.AddSpacer((10, 10))
+		leftsizer.AddSpacer(10)
 		
 		lbbtns = wx.BoxSizer(wx.VERTICAL)
-		lbbtns.AddSpacer((10, 10))
+		lbbtns.AddSpacer(10)
 		self.bAdd = wx.BitmapButton(self, wx.ID_ANY, self.images.pngAdd, size=BUTTONDIM)
-		self.bAdd.SetToolTipString("Add new macros")
+		self.bAdd.SetToolTip("Add new macros")
 		self.Bind(wx.EVT_BUTTON, self.doAdd, self.bAdd)
 		lbbtns.Add(self.bAdd)
 		
 		self.bDel = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDel, size=BUTTONDIM)
-		self.bDel.SetToolTipString("Delete a macro")
+		self.bDel.SetToolTip("Delete a macro")
 		lbbtns.Add(self.bDel)
 		self.Bind(wx.EVT_BUTTON, self.doDel, self.bDel)
 		self.bDel.Enable(False)
 		
-		lbbtns.AddSpacer((20, 20))
+		lbbtns.AddSpacer(20)
 		
 		self.bUp = wx.BitmapButton(self, wx.ID_ANY, self.images.pngUp, size=BUTTONDIM)
-		self.bUp.SetToolTipString("Move selected macro up in list")
+		self.bUp.SetToolTip("Move selected macro up in list")
 		lbbtns.Add(self.bUp)
 		self.Bind(wx.EVT_BUTTON, self.doUp, self.bUp)
 		self.bUp.Enable(False)
 		
 		self.bDown = wx.BitmapButton(self, wx.ID_ANY, self.images.pngDown, size=BUTTONDIM)
-		self.bDown.SetToolTipString("Move selected macro down in list")
+		self.bDown.SetToolTip("Move selected macro down in list")
 		lbbtns.Add(self.bDown)
 		self.Bind(wx.EVT_BUTTON, self.doDown, self.bDown)
 		self.bDown.Enable(False)
 		
-		lbbtns.AddSpacer((20, 20))
+		lbbtns.AddSpacer(20)
 		
 		self.bRename = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRename, size=BUTTONDIM)
-		self.bRename.SetToolTipString("Rename the selected macro")
+		self.bRename.SetToolTip("Rename the selected macro")
 		lbbtns.Add(self.bRename)
 		self.Bind(wx.EVT_BUTTON, self.doRename, self.bRename)
 		self.bRename.Enable(False)
 		
 		self.bChgFile = wx.BitmapButton(self, wx.ID_ANY, self.images.pngChangefile, size=BUTTONDIM)
-		self.bChgFile.SetToolTipString("Change the selected macro file")
+		self.bChgFile.SetToolTip("Change the selected macro file")
 		lbbtns.Add(self.bChgFile)
 		self.Bind(wx.EVT_BUTTON, self.doChangeFile, self.bChgFile)
 		self.bChgFile.Enable(False)
 		
-		lbbtns.AddSpacer((20, 20))
+		lbbtns.AddSpacer(20)
 		
 		self.bEditSel = wx.BitmapButton(self, wx.ID_ANY, self.images.pngEdit, size=BUTTONDIM)
-		self.bEditSel.SetToolTipString("Edit the selected macro file")
+		self.bEditSel.SetToolTip("Edit the selected macro file")
 		lbbtns.Add(self.bEditSel)
 		self.Bind(wx.EVT_BUTTON, self.doEditSelected, self.bEditSel)
 		self.bEditSel.Enable(False)
 		
 		self.bNewFile = wx.BitmapButton(self, wx.ID_ANY, self.images.pngNewfile, size=BUTTONDIM)
-		self.bNewFile.SetToolTipString("New G Code file")
+		self.bNewFile.SetToolTip("New G Code file")
 		lbbtns.Add(self.bNewFile)
 		self.Bind(wx.EVT_BUTTON, self.doNewFile, self.bNewFile)
 		
-		lbbtns.AddSpacer((10, 10))
+		lbbtns.AddSpacer(10)
 		
 		btnsizer = wx.BoxSizer(wx.HORIZONTAL)
 		
 		self.bSave = wx.BitmapButton(self, wx.ID_ANY, self.images.pngOk, size=BUTTONDIM)
-		self.bSave.SetToolTipString("Save Changes")
+		self.bSave.SetToolTip("Save Changes")
 		btnsizer.Add(self.bSave)
 		self.Bind(wx.EVT_BUTTON, self.doSave, self.bSave)
 		self.bSave.Enable(False)
 		
-		btnsizer.AddSpacer((5,5))
+		btnsizer.AddSpacer(5)
 
 		self.bCancel = wx.BitmapButton(self, wx.ID_ANY, self.images.pngCancel, size=BUTTONDIM)
-		self.bCancel.SetToolTipString("Exit without saving")
+		self.bCancel.SetToolTip("Exit without saving")
 		btnsizer.Add(self.bCancel)
 		self.Bind(wx.EVT_BUTTON, self.doCancel, self.bCancel)
 
 		leftsizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_CENTER_HORIZONTAL|wx.ALL, 5)
 		dsizer.Add(leftsizer)
-		dsizer.AddSpacer((10,10))
+		dsizer.AddSpacer(10)
 
 		dsizer.Add(lbbtns)
-		dsizer.AddSpacer((10,10))
+		dsizer.AddSpacer(10)
 
 		self.SetSizer(dsizer)  
 		dsizer.Fit(self)
@@ -138,7 +138,7 @@ class ManageMacros(wx.Dialog):
 			defaultDir=self.settings.lastmacrodirectory, 
 			defaultFile="",
 			wildcard=wildcard,
-			style=wx.OPEN | wx.CHANGE_DIR)
+			style=wx.FD_OPEN | wx.FD_CHANGE_DIR)
 
 		if dlg.ShowModal() == wx.ID_OK:
 			paths = dlg.GetPaths()
@@ -199,7 +199,7 @@ class ManageMacros(wx.Dialog):
 			defaultDir=directory, 
 			defaultFile=filename,
 			wildcard=wildcard,
-			style=wx.OPEN | wx.CHANGE_DIR)
+			style=wx.FD_OPEN | wx.FD_CHANGE_DIR)
 
 		if dlg.ShowModal() == wx.ID_OK:
 			paths = dlg.GetPaths()
@@ -382,7 +382,7 @@ class MacroListCtrl(wx.ListCtrl):
 		
 	def doQueueSelect(self, evt):
 		x = self.selectedItem
-		self.selectedItem = evt.m_itemIndex
+		self.selectedItem = evt.GetIndex()
 		if x is not None:
 			self.RefreshItem(x)
 		self.updateParent()

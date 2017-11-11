@@ -41,29 +41,29 @@ class HistoryDlg(wx.Frame):
 		self.bReslice.Enable(False)
 		
 		self.bRefresh = wx.BitmapButton(self, wx.ID_ANY, self.images.pngRefresh, size=BUTTONDIM)
-		self.bRefresh.SetToolTipString("Refresh the printing history")
+		self.bRefresh.SetToolTip("Refresh the printing history")
 		self.Bind(wx.EVT_BUTTON, self.onRefresh, self.bRefresh)
 		self.bRefresh.Enable(True)
 		
 		self.bFilter = wx.BitmapButton(self, wx.ID_ANY, self.images.pngFilter, size=BUTTONDIM)
-		self.bFilter.SetToolTipString("Filter the output to show a single file")
+		self.bFilter.SetToolTip("Filter the output to show a single file")
 		self.Bind(wx.EVT_BUTTON, self.onFilter, self.bFilter)
 		self.bFilter.Enable(False)
 		
 		self.tcFilterFile = wx.TextCtrl(self, wx.ID_ANY, "", size=(200, -1), style=wx.TE_READONLY)
 		
 		self.cbBasename = wx.CheckBox(self, wx.ID_ANY, "Show basename only")
-		self.cbBasename.SetToolTipString("Show only the basename of G Code files")
+		self.cbBasename.SetToolTip("Show only the basename of G Code files")
 		self.Bind(wx.EVT_CHECKBOX, self.checkBasename, self.cbBasename)
 		self.cbBasename.SetValue(self.settings.basenameonly)
 		
 		self.cbEnqueueGC = wx.CheckBox(self, wx.ID_ANY, "Enqueue G Code file")
-		self.cbEnqueueGC.SetToolTipString("Add the G Code file to the print queue when exporting")
+		self.cbEnqueueGC.SetToolTip("Add the G Code file to the print queue when exporting")
 		self.Bind(wx.EVT_CHECKBOX, self.checkEnqueueGC, self.cbEnqueueGC)
 		self.cbEnqueueGC.SetValue(self.settings.enqueuegc)
 		
 		self.cbEnqueueStl = wx.CheckBox(self, wx.ID_ANY, "Enqueue STL file")
-		self.cbEnqueueStl.SetToolTipString("Add the STL file to the slice queue when exporting")
+		self.cbEnqueueStl.SetToolTip("Add the STL file to the slice queue when exporting")
 		self.Bind(wx.EVT_CHECKBOX, self.checkEnqueueStl, self.cbEnqueueStl)
 		self.cbEnqueueStl.SetValue(self.settings.enqueuestl)
 		
@@ -71,37 +71,37 @@ class HistoryDlg(wx.Frame):
 		self.updateStlHelpText()
 		
 		sz = wx.BoxSizer(wx.VERTICAL)
-		sz.AddSpacer((10, 10))
+		sz.AddSpacer(10)
 		
 		szh = wx.BoxSizer(wx.HORIZONTAL)
-		szh.AddSpacer((10, 10))
+		szh.AddSpacer(10)
 		szh.Add(self.hcHistory)
-		szh.AddSpacer((10, 10))
+		szh.AddSpacer(10)
 		sz.Add(szh)
 		
-		sz.AddSpacer((10, 10))
+		sz.AddSpacer(10)
 		
 		sz.Add(self.cbBasename, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		
-		sz.AddSpacer((10, 10))
+		sz.AddSpacer(10)
 		
 		szh = wx.BoxSizer(wx.HORIZONTAL)
 		szh.Add(self.bReslice)
-		szh.AddSpacer((5, 5))
+		szh.AddSpacer(5)
 		szh.Add(self.cbEnqueueStl, 1, wx.TOP, 12)
-		szh.AddSpacer((30, 10))
+		szh.AddSpacer(30)
 		szh.Add(self.bReprint)
-		szh.AddSpacer((5, 5))
+		szh.AddSpacer(5)
 		szh.Add(self.cbEnqueueGC, 1, wx.TOP, 12)
-		szh.AddSpacer((30, 10))
+		szh.AddSpacer(30)
 		szh.Add(self.bRefresh)
-		szh.AddSpacer((30, 10))
+		szh.AddSpacer(30)
 		szh.Add(self.bFilter)
-		szh.AddSpacer((5, 5))
+		szh.AddSpacer(5)
 		szh.Add(self.tcFilterFile, 1, wx.TOP, 12)
 		sz.Add(szh, 0, wx.ALIGN_CENTER_HORIZONTAL, 1)
 		
-		sz.AddSpacer((10, 10))
+		sz.AddSpacer(10)
 		
 		self.SetSizer(sz)
 		self.Fit()
@@ -157,9 +157,9 @@ class HistoryDlg(wx.Frame):
 			if self.settings.enqueuegc:
 				ht += "(and enqueue) "
 			ht += "G Code file (%s)" % self.gcFn
-			self.bReprint.SetToolTipString(ht)
+			self.bReprint.SetToolTip(ht)
 		else:
-			self.bReprint.SetToolTipString("")
+			self.bReprint.SetToolTip("")
 		
 	def updateStlHelpText(self):
 		if self.bReslice.IsEnabled():
@@ -167,9 +167,9 @@ class HistoryDlg(wx.Frame):
 			if self.settings.enqueuestl:
 				ht += "(and enqueue) "
 			ht += "STL file (%s)" % self.stlFn
-			self.bReslice.SetToolTipString(ht)
+			self.bReslice.SetToolTip(ht)
 		else:
-			self.bReslice.SetToolTipString("")
+			self.bReslice.SetToolTip("")
 			
 	def onFilter(self, evt):
 		if self.filterEvent is None:
@@ -289,7 +289,7 @@ class HistoryCtrl(wx.ListCtrl):
 		
 	def doListSelect(self, evt):
 		x = self.selectedItem
-		self.selectedItem = evt.m_itemIndex
+		self.selectedItem = evt.GetIndex()
 		if x is not None:
 			self.RefreshItem(x)
 			
