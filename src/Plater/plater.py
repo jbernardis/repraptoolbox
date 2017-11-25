@@ -12,7 +12,7 @@ from userdata import UserData
 from stltool import stl, emitstl
 from stlframe import StlFrame
 from settings import Settings
-from stlview import StlViewer, VIEW_MODE_LOAD, VIEW_MODE_LOOK_HERE
+from stlview import StlViewer
 from mirrordlg import MirrorDlg
 from rotatedlg import RotateDlg
 from translatedlg import TranslateDlg
@@ -351,37 +351,36 @@ class PlaterDlg(wx.Frame):
 		wildcard = "STL (*.stl)|*.stl;*.STL|"	 \
 			"All files (*.*)|*.*"
 			
-		while True:
-			dlg = wx.FileDialog(
-				self, message="Choose an STL file",
-				defaultDir=self.settings.lastdirectory, 
-				defaultFile="",
-				wildcard=wildcard,
-				style=wx.FD_OPEN)
-	
+		dlg = wx.FileDialog(
+			self, message="Choose an STL file",
+			defaultDir=self.settings.lastdirectory, 
+			defaultFile="",
+			wildcard=wildcard,
+			style=wx.FD_OPEN)
+
+		rc = dlg.ShowModal()
+		if rc == wx.ID_OK:
+			path = dlg.GetPath().encode('ascii','ignore')
+		dlg.Destroy()
+		if rc != wx.ID_OK:
+			return
+		
+		self.settings.lastdirectory = os.path.dirname(path)
+		
+		if self.settings.preview:
+			stlObj = stl(filename = path)
+			dlg = StlViewer(self, stlObj, path, True, self.images, self.settings)
 			rc = dlg.ShowModal()
-			if rc == wx.ID_OK:
-				path = dlg.GetPath().encode('ascii','ignore')
 			dlg.Destroy()
-			if rc != wx.ID_OK:
-				return
-			
-			self.settings.lastdirectory = os.path.dirname(path)
-			
-			if self.settings.preview:
-				dlg = StlViewer(self, path, path, VIEW_MODE_LOAD, self.images, self.settings)
-				rc = dlg.ShowModal()
-				dlg.Destroy()
-			
-			if not self.settings.preview or rc == wx.ID_OK:
-				stlFile = stl(filename = path)
-				ud = UserData(path, stlFile, self.seq)
-				self.files.addFile(ud)
-				self.stlCanvas.addHull(stlFile, self.seq)
-				self.seq += 1
-				self.modified = True
-				self.enableButtons()
-				return
+			dlg = None
+		
+		if not self.settings.preview or rc == wx.ID_OK:
+			ud = UserData(path, stlObj, self.seq)
+			self.files.addFile(ud)
+			self.stlCanvas.addHull(stlObj, self.seq)
+			self.seq += 1
+			self.modified = True
+			self.enableButtons()
 			
 	def setFilesSelection(self, seq):
 		self.files.setSelection(seq)
@@ -608,7 +607,7 @@ class PlaterDlg(wx.Frame):
 	def viewObject(self):
 		self.stlCanvas.commitDeltas(None)
 		ud = self.files.getSelection()
-		dlg = StlViewer(self, ud.getStlObj(), ud.getName(), VIEW_MODE_LOOK_HERE, self.images, self.settings)
+		dlg = StlViewer(self, ud.getStlObj(), ud.getName(), False, self.images, self.settings)
 		dlg.ShowModal()
 		dlg.Destroy()
 		
@@ -620,7 +619,7 @@ class PlaterDlg(wx.Frame):
 		plateStl.facets = []
 		for o in objs:
 			plateStl.facets.extend(o.facets)
-		dlg = StlViewer(self, plateStl, "Plate", VIEW_MODE_LOOK_HERE, self.images, self.settings)
+		dlg = StlViewer(self, plateStl, "Plate", False, self.images, self.settings)
 		dlg.ShowModal()
 		dlg.Destroy()
 

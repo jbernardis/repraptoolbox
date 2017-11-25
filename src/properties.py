@@ -122,7 +122,7 @@ class PropertiesDlg(wx.Frame):
 	def setProperty(self, pid, value):
 		if pid == PropertyEnum.filamentUsed and self.nextruders > 1:
 			for tx in range(self.nextruders):
-				self.properties[toolMap[tx]].SetValue(value[tx])
+				self.pg.SetPropertyValueString(self.properties[toolMap[tx]], str(value[tx]))
 			
 			return
 
@@ -135,7 +135,7 @@ class PropertiesDlg(wx.Frame):
 			self.setTitle()
 			self.updateFileName()
 		else:
-			self.properties[pid].SetValue(value)
+			self.pg.SetPropertyValueString(self.properties[pid], str(value))
 			
 	def setSDTargetFile(self, tfn):
 		self.sdTargetfn = tfn
@@ -162,4 +162,4 @@ class PropertiesDlg(wx.Frame):
 		self.sdTargetfn = None
 		for cat in propertyMap.keys():
 			for prop in propertyMap[cat]:
-				self.properties[prop].SetValue("")
+				self.pg.SetPropertyValueString(self.properties[prop], "")
